@@ -45,6 +45,8 @@ body {
     display: none;
 }
 
+/* pointers */
+
 #btn-done {
     background: limegreen;
     cursor: pointer;
