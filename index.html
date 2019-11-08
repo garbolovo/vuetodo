@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Todo App</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+  <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+  <div id="header">
+    <h3>Todo App</h3>
+
+  </div>
+  <div id="app">
+
+    <div id="enter-todo">
+      <label for="todo">Enter Task </label><input id="todo" type="text">
+      <button id="todo-btn" @click="enterTodo">Add Todo</button>
+    </div>
+
+    <div class="todo-element" v-for="todo in todosList">
+      <p class="todo-item" >{{ todo }}</p>
+      <button id="btn-done" @click="doneTodo">Done</button>
+      <button id="btn-delete-todo-elem" @click="deleteTodo">Delete</button>
+    </div>
+
+  </div>
+
+<script src="app.js"></script>
+</body>
+</html>
+
