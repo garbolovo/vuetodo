@@ -1,0 +1,59 @@
+body {
+    font-family: tahoma;
+    color: #282828;
+    margin: 0px;
+}
+
+#header {
+    text-align: center;
+
+}
+
+#app #enter-todo {
+    margin: 10px;
+}
+#app #enter-todo input {
+    padding: 5px 10px;
+    width: 300px;
+    border-radius: 5px;
+
+}
+
+#app #enter-todo #todo-btn{
+    padding: 3px;
+    border-radius: 5px;
+    font-size: small;
+    background: silver;
+}
+
+#app .todo-element .todo-item{
+    display: inline-block;
+    width: 300px;
+    margin: 1px 1px 1px 5.5rem;
+    border: solid #c4c4c4 0.5px;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+.done {
+    color: #c4c4c4;
+    text-decoration-line: line-through;
+    /* background: olivedrab; */
+}
+
+.deleted {
+    display: none;
+}
+
+#btn-done {
+    background: limegreen;
+    cursor: pointer;
+}
+
+
+#btn-delete-todo-elem {
+    background: rgb(238, 180, 165);
+    cursor: pointer;
+
+}
+
