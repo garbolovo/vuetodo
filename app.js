@@ -9,13 +9,11 @@ new Vue ({
 
     },
     methods: {
-        
 
         doneTodo(e) {
             console.dir(e.target.parentElement.children[0]);
             e.target.parentElement.children[0].classList.toggle('done');
             e.target.parentElement.children[1].classList.toggle('deleted');
-            
         },
 
         deleteTodo(e) {
@@ -29,11 +27,8 @@ new Vue ({
             console.log(todoIndex)
             console.log(this.todoList)
         },
-
         
         regTodo(e) {
-            
-            
             let todoItem = {};
             const id = uuidv4();
             let item = e.target.parentElement.children[1].value;
@@ -45,11 +40,16 @@ new Vue ({
 
             // console.log(item);
             // console.log(body);
-            todoItem.id = id;
-            todoItem.title = item;
-            todoItem.body = body;
-            this.todoList.push(todoItem);
-            // console.log(this.todoList);
+            if(item) {
+                todoItem.id = id;
+                todoItem.title = item;
+                todoItem.body = body;
+                this.todoList.push(todoItem);
+                // console.log(this.todoList);
+            } else {
+                alert('Todo title is empty')
+            }
+            
 
         },
 
