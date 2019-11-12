@@ -1,39 +1,4 @@
-body {
-    font-family: tahoma;
-    color: #282828;
-    margin: 0px;
-}
-
-#header {
-    text-align: center;
-
-}
-
-#app #enter-todo {
-    margin: 10px;
-}
-#app #enter-todo input {
-    padding: 5px 10px;
-    width: 300px;
-    border-radius: 5px;
-
-}
-
-#app #enter-todo #todo-btn{
-    padding: 3px;
-    border-radius: 5px;
-    font-size: small;
-    background: silver;
-}
-
-#app .todo-element .todo-item{
-    display: inline-block;
-    width: 300px;
-    margin: 1px 1px 1px 5.5rem;
-    border: solid #c4c4c4 0.5px;
-    border-radius: 5px;
-    padding: 5px;
-}
+/* Utility */
 
 .done {
     color: #c4c4c4;
@@ -45,8 +10,55 @@ body {
     display: none;
 }
 
-/* pointers */
+/* End Utility */
 
+body {
+    font-family: tahoma;
+    color: #282828;
+    margin: 0px;
+}
+
+#header {
+    text-align: center;
+
+}
+
+#search-todo {
+    margin-left: 30px;
+}
+
+/* enter-todo */
+
+#app #enter-todo {
+    height: 300px;
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    margin: 30px;
+}
+#app #enter-todo #todo, #app #enter-todo #todo-body, #app #enter-todo #todo-btn {
+    width: 80%;
+    padding: 5px 10px;
+    border-radius: 5px;
+
+}
+
+/* todo-element */
+#app .todo-element {
+    width: 400px;
+    margin: 30px;
+    /* border-bottom: grey solid 1px; */
+}
+
+#app .todo-element .todo-body {
+    padding: 1rem;
+    font-size: smaller;
+    cursor: pointer;
+    border: solid lightgrey 0.01rem;
+}
+
+/* buttons */
 #btn-done {
     background: limegreen;
     cursor: pointer;
@@ -58,4 +70,3 @@ body {
     cursor: pointer;
 
 }
-

@@ -13,16 +13,26 @@
 
   </div>
   <div id="app">
+    
+    <input type="text" id="search-todo" @keyup="filterTodo" placeholder="Search">
 
     <div id="enter-todo">
-      <label for="todo">Enter Task </label><input id="todo" type="text">
-      <button id="todo-btn" @click="enterTodo">Add Todo</button>
+      <label for="todo">Task Title </label><input id="todo" type="text">
+      <label for="todo-body">Task Body </label><textarea id="todo-body" type="text" rows="8"></textarea>
+      <button id="todo-btn" @click="regTodo">Add Todo</button>
     </div>
 
-    <div class="todo-element" v-for="todo in todosList">
-      <p class="todo-item" >{{ todo }}</p>
+    <div class="todo-element" v-for="todo in todoList">
+      <h4 class="todo-title" v-bind:data-id=todo.title  @click="editTitle" >{{ todo.title }}</h4>
+      <p class="todo-body" @click="editBody" >{{ todo.body }}</p>
+
       <button id="btn-done" @click="doneTodo">Done</button>
       <button id="btn-delete-todo-elem" @click="deleteTodo">Delete</button>
+      <hr>
+    </div>
+
+    <div id="search">
+
     </div>
 
   </div>
@@ -31,3 +41,4 @@
 </body>
 </html>
 
+<!-- Lorem ipsum dolor sit, amet consectetur adipisicing elit. Aliquam odio, recusandae voluptates nam in soluta totam illum porro suscipit libero. -->
