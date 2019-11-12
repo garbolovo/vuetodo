@@ -52,10 +52,10 @@ body {
 }
 
 #app .todo-element .todo-body {
-    padding: 1rem;
+    padding: 0.5rem;
     font-size: smaller;
     cursor: pointer;
-    border: solid lightgrey 0.01rem;
+    border-left: solid lightgrey 0.01rem;
 }
 
 /* buttons */
