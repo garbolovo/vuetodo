@@ -19,10 +19,15 @@ new Vue ({
         },
 
         deleteTodo(e) {
-            if(confirm('Are are sure ?')){
-                // e.target.parentElement.classList.add('deleted')
-                e.target.parentElement.remove();
-            }
+            console.dir(e.target)
+            // if(confirm('Are are sure ?')){
+            //     // e.target.parentElement.classList.add('deleted')
+            //     e.target.parentElement.remove();
+            // }
+            const todoIndex = this.todoList.findIndex( item => item.id === e.target.attributes[1].nodeValue);
+            this.todoList.splice(todoIndex, 1)
+            console.log(todoIndex)
+            console.log(this.todoList)
         },
 
         

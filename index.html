@@ -27,7 +27,7 @@
       <p class="todo-body" v-bind:data-id=todo.id @click="editBody" >{{ todo.body }}</p>
 
       <button id="btn-done" @click="doneTodo">Done</button>
-      <button id="btn-delete-todo-elem" @click="deleteTodo">Delete</button>
+      <button id="btn-delete-todo-elem" v-bind:data-id=todo.id @click="deleteTodo">Delete</button>
       <hr>
     </div>
 
