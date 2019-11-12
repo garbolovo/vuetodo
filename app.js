@@ -1,3 +1,5 @@
+// console.log(uuidv4());
+
 new Vue ({
     el: "#app",
     data: {
@@ -28,13 +30,17 @@ new Vue ({
             
             
             let todoItem = {};
+            const id = uuidv4();
             let item = e.target.parentElement.children[1].value;
             let body = e.target.parentElement.children[3].value;
             e.target.parentElement.children[1].value = '';
             e.target.parentElement.children[3].value = '';
 
+            
+
             // console.log(item);
             // console.log(body);
+            todoItem.id = id;
             todoItem.title = item;
             todoItem.body = body;
             this.todoList.push(todoItem);
@@ -43,7 +49,9 @@ new Vue ({
         },
 
         editTitle(e) {
-            console.dir(e.target)
+            // console.dir(e.target)
+            // console.log(e.target.attributes[0].nodeValue);
+            
             
            //1
 
@@ -54,8 +62,8 @@ new Vue ({
             //2
             let newItem = prompt('Enter New Content', e.target.textContent);
             if(newItem) {
-                this.todoList.forEach( item => {
-                    if(item.title === e.target.textContent) {
+                this.todoList.forEach( (item, index) => {
+                    if(item.id === e.target.attributes[0].nodeValue) {
                         // e.target.textContent = newItem;
                         item.title = newItem;
                         console.log(item.title)
@@ -68,10 +76,11 @@ new Vue ({
         },
 
         editBody(e) {
+            console.dir(e.target)
             let newItem = prompt('Enter New Content', e.target.textContent);
             if(newItem) {
                 this.todoList.forEach( item => {
-                    if(item.body === e.target.textContent) {
+                    if(item.id === e.target.attributes[0].nodeValue) {
                         // e.target.textContent = newItem;
                         item.body = newItem;
                         console.log(item.body)
@@ -98,4 +107,4 @@ new Vue ({
         }
     }
 })
-        
+
