@@ -6,6 +6,9 @@ new Vue ({
         
         name: "John Doe",
         todoList: [ ],
+        filteredTodoList: [],
+        filteredOff: true,
+        filteredOn: false,
 
     },
     methods: {
@@ -28,7 +31,7 @@ new Vue ({
             console.log(this.todoList)
         },
         
-        regTodo(e) {
+        regTodo(e, arr) {
             let todoItem = {};
             const id = uuidv4();
             let item = e.target.parentElement.children[1].value;
@@ -99,15 +102,34 @@ new Vue ({
 
         filterTodo(e) {
             let snippet = e.target.value;
+            
+
             if(snippet) {
-                this.todoList.forEach( item => {
-                   console.log(snippet)
-                   console.log(item.title)
-                   if(item.title.includes(snippet)) {
-                       console.log('contains');
+
+                    // 1
+            //     this.todoList.forEach( (item, index) => {
+            //        console.log(snippet)
+            //        console.log(item.title)
+            //        if (item.title.includes(snippet)) {
+            //            this.showMe = true
                        
-                   }
-                })
+            //        } else  {
+            //            this.showMe = false
+            //        } 
+            //     })
+            // } else {
+            //     this.showMe = true;
+
+                //2
+            this.filteredOff = false;
+            this.filteredOn = true;
+            this.filteredTodoList  = this.todoList.filter( todo => todo.title.includes(snippet))
+            console.log(this.filteredTodoList);
+
+
+            } if(!snippet) {
+                this.filteredOff = true;
+                this.filteredOn = false;
             }
         }
     }

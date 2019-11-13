@@ -25,6 +25,8 @@ body {
 
 #search-todo {
     margin-left: 30px;
+    padding: 5px;
+    border-radius: 5px;
 }
 
 /* enter-todo */

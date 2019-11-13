@@ -22,7 +22,8 @@
       <button id="todo-btn" @click="regTodo">Add Todo</button>
     </div>
 
-    <div class="todo-element" v-for="todo in todoList">
+    <!-- Off -->
+    <div class="todo-element" v-for="todo in todoList" v-if="filteredOff">
       <h4 class="todo-title" v-bind:data-id=todo.id @click="editTitle" >{{ todo.title }}</h4>
       <p class="todo-body" v-bind:data-id=todo.id @click="editBody" >{{ todo.body }}</p>
 
@@ -30,9 +31,14 @@
       <button id="btn-delete-todo-elem" v-bind:data-id=todo.id @click="deleteTodo">Delete</button>
       <hr>
     </div>
+    <!-- Off -->
+    <div class="todo-element" v-for="todo in filteredTodoList" v-if="filteredOn">
+      <h4 class="todo-title" v-bind:data-id=todo.id @click="editTitle" >{{ todo.title }}</h4>
+      <p class="todo-body" v-bind:data-id=todo.id @click="editBody" >{{ todo.body }}</p>
 
-    <div id="search">
-
+      <button id="btn-done" @click="doneTodo">Done</button>
+      <button id="btn-delete-todo-elem" v-bind:data-id=todo.id @click="deleteTodo">Delete</button>
+      <hr>
     </div>
 
   </div>
