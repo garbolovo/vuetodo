@@ -23,7 +23,7 @@
     </div>
 
     <!-- Off -->
-    <div class="todo-element" v-for="todo in todoList" v-if="filteredOff">
+    <div class="todo-element" v-for="todo in todoList" v-show="filteredOff">
       <h4 class="todo-title" v-bind:data-id=todo.id @click="editTitle" >{{ todo.title }}</h4>
       <p class="todo-body" v-bind:data-id=todo.id @click="editBody" >{{ todo.body }}</p>
 
@@ -32,7 +32,7 @@
       <hr>
     </div>
     <!-- Off -->
-    <div class="todo-element" v-for="todo in filteredTodoList" v-if="filteredOn">
+    <div class="todo-element" v-for="todo in filteredTodoList" v-show="filteredOn">
       <h4 class="todo-title" v-bind:data-id=todo.id @click="editTitle" >{{ todo.title }}</h4>
       <p class="todo-body" v-bind:data-id=todo.id @click="editBody" >{{ todo.body }}</p>
 
