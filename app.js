@@ -1,10 +1,15 @@
 // console.log(uuidv4());
 //DOM Load event
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM is ready');
-    let todoList = JSON.parse(localStorage.getItem('todoList'));
-    app.__vue__.todoList = JSON.parse(localStorage.getItem('todoList'));
-    console.log(todoList)
+    // console.log('DOM is ready');
+    if(localStorage.getItem('todoList') === null) {
+        app.__vue__.todoList = [];
+    } else {
+        let todoList = JSON.parse(localStorage.getItem('todoList'));
+        app.__vue__.todoList = JSON.parse(localStorage.getItem('todoList'));
+        console.log(todoList)
+    }
+
 });
 new Vue ({
     el: "#app",
