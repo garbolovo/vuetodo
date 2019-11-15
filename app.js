@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         let todoList = JSON.parse(localStorage.getItem('todoList'));
         app.__vue__.todoList = JSON.parse(localStorage.getItem('todoList'));
+        app.__vue__.num = todoList.length;
         console.log(todoList)
     }
 
@@ -16,8 +17,10 @@ new Vue ({
     data: {
         
         name: "John Doe",
+
         nameClicked: false,
         todoList: [ ],
+        num: 0,
         filteredTodoList: [],
         filteredOff: true,
         filteredOn: false,
@@ -59,6 +62,7 @@ new Vue ({
                 console.log(todoIndex);
                 console.log(this.todoList);
                 localStorage.setItem('todoList', JSON.stringify(this.todoList));
+                this.num = this.todoList.length;
 
             }
 
@@ -77,6 +81,7 @@ new Vue ({
                 todoItem.body = body;
                 this.todoList.push(todoItem);
                 localStorage.setItem('todoList', JSON.stringify(this.todoList));
+                this.num = this.todoList.length;
                 // console.log(this.todoList);
             } else {
                 alert('Todo title is empty')
@@ -137,11 +142,13 @@ new Vue ({
             this.filteredOn = true;
             this.filteredTodoList  = this.todoList.filter( todo => todo.title.includes(snippet))
             console.log(this.filteredTodoList);
+            this.num = this.filteredTodoList.length
 
 
             } if(!snippet) {
                 this.filteredOff = true;
                 this.filteredOn = false;
+                this.num = this.todoList.length;
             }
         },
     }
