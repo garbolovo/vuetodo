@@ -49,9 +49,9 @@ new Vue ({
 
 
         doneTodo(e) {
-            console.dir(e.target.parentElement.children[0]);
-            e.target.parentElement.children[0].classList.toggle('done');
+            const isDone = e.target.parentElement.children[0].classList.toggle('done');
             e.target.parentElement.children[1].classList.toggle('deleted');
+            e.target.textContent = isDone ? 'Undone' : 'Done';
         },
 
         deleteTodo(e) {
