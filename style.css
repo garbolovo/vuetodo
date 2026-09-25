@@ -1,9 +1,8 @@
 /* Utility */
 
 .done {
-    color: #c4c4c4;
+    color: #b0b0b0;
     text-decoration-line: line-through;
-    /* background: olivedrab; */
 }
 
 .deleted {
@@ -12,64 +11,191 @@
 
 /* End Utility */
 
+* {
+    box-sizing: border-box;
+}
+
 body {
-    font-family: tahoma;
+    font-family: "Segoe UI", tahoma, sans-serif;
     color: #282828;
     margin: 0px;
+    background: #f4f6f8;
+    min-height: 100vh;
 }
 
 #header {
     text-align: center;
+    background: #4a6fa5;
+    color: #fff;
+    padding: 18px 0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
 
+#header h3 {
+    margin: 0;
+    letter-spacing: 0.5px;
+}
+
+#app {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px 24px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#app > p, #app > button {
+    text-align: center;
+}
+
+#app > button {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 6px;
+    background: #4a6fa5;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+#app > button:hover {
+    background: #3a5a85;
 }
 
 #search-todo {
-    margin-left: 30px;
-    padding: 5px;
-    border-radius: 5px;
-    width: 250px;
+    margin: 15px 0 25px;
+    padding: 8px 12px;
+    border: 1px solid #d0d5db;
+    border-radius: 20px;
+    width: 280px;
+    max-width: 90%;
+    font-size: 0.95rem;
+}
+
+#search-todo:focus {
+    outline: none;
+    border-color: #4a6fa5;
 }
 
 /* enter-todo */
 
 #app #enter-todo {
-    height: 300px;
-    width: 300px;
+    width: 100%;
+    max-width: 400px;
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
-    margin: 30px;
+    gap: 10px;
+    margin: 10px 0 30px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
-#app #enter-todo #todo, #app #enter-todo #todo-body, #app #enter-todo #todo-btn {
-    width: 80%;
-    padding: 5px 10px;
-    border-radius: 5px;
 
+#app #enter-todo label {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 2px;
+    display: block;
+}
+
+#app #enter-todo #todo,
+#app #enter-todo #todo-body {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #d0d5db;
+    border-radius: 6px;
+    font-family: inherit;
+    resize: vertical;
+}
+
+#app #enter-todo #todo:focus,
+#app #enter-todo #todo-body:focus {
+    outline: none;
+    border-color: #4a6fa5;
+}
+
+#app #enter-todo #todo-btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    background: #4a6fa5;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+#app #enter-todo #todo-btn:hover {
+    background: #3a5a85;
+}
+
+/* todo list */
+
+#todo-list-wrapper {
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
 }
 
 /* todo-element */
 #app .todo-element {
-    width: 400px;
-    margin: 30px;
-    /* border-bottom: grey solid 1px; */
+    width: 100%;
+    margin: 0;
+    padding: 14px 16px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+#app .todo-element .todo-title {
+    margin: 0 0 6px;
+    cursor: pointer;
 }
 
 #app .todo-element .todo-body {
+    margin: 0 0 10px;
     padding: 0.5rem;
     font-size: smaller;
     cursor: pointer;
-    border-left: solid lightgrey 0.01rem;
+    color: #555;
+    border-left: solid #e0e0e0 3px;
+}
+
+#app .todo-element hr {
+    display: none;
 }
 
 /* buttons */
-#btn-done {
-    background: limegreen;
+#app .todo-element button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.85rem;
     cursor: pointer;
+    margin-right: 8px;
+    color: #fff;
+    transition: opacity 0.15s ease;
 }
 
+#app .todo-element button:hover {
+    opacity: 0.85;
+}
+
+#btn-done {
+    background: #4caf50;
+}
 
 #btn-delete-todo-elem {
-    background: rgb(238, 180, 165);
-    cursor: pointer;
+    background: #e57373;
+}
 
+#num {
+    margin-top: 25px;
+    color: #666;
+    font-size: 0.9rem;
 }
