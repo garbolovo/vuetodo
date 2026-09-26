@@ -10,26 +10,81 @@ body {
     min-height: 100vh;
 }
 
-#header {
-    text-align: center;
-    background: #4a6fa5;
-    color: #fff;
-    padding: 18px 0;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-}
-
-#header h3 {
-    margin: 0;
-    letter-spacing: 0.5px;
-}
-
 #app {
     max-width: 1300px;
     margin: 0 auto;
-    padding: 20px 24px 40px;
+    padding: 0 24px 40px;
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+/* top bar */
+
+#topbar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e2e6eb;
+}
+
+.topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.brand-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: #4a6fa5;
+    color: #fff;
+    font-weight: 700;
+}
+
+.brand-name {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: #282828;
+}
+
+#new-task-btn {
+    flex-shrink: 0;
+    margin-left: auto;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    background: #4a6fa5;
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+#new-task-btn:hover {
+    background: #3a5a85;
+}
+
+.topbar-user {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: #4caf50;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
 }
 
 #workspace {
@@ -68,32 +123,13 @@ body {
     }
 }
 
-#app > p, #app > button {
-    text-align: center;
-}
-
-#app > button {
-    padding: 6px 14px;
-    border: none;
-    border-radius: 6px;
-    background: #4a6fa5;
-    color: #fff;
-    cursor: pointer;
-    transition: background 0.15s ease;
-}
-
-#app > button:hover {
-    background: #3a5a85;
-}
-
 #search-todo {
-    margin: 15px 0 25px;
+    flex: 1;
+    max-width: 420px;
     padding: 8px 12px;
     border: 1px solid #d0d5db;
     border-radius: 20px;
-    width: 280px;
-    max-width: 90%;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
 }
 
 #search-todo:focus {
@@ -216,15 +252,34 @@ body {
 
 #todo-list-wrapper {
     width: 100%;
-    max-width: 700px;
+    max-width: 900px;
     background: #fff;
     border-radius: 10px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
     overflow: hidden;
 }
 
+.todo-list-header,
 .todo-row {
-    padding: 9px 16px 9px 14px;
+    display: grid;
+    grid-template-columns: minmax(160px, 1fr) 90px 90px minmax(140px, 1fr) 60px;
+    align-items: center;
+    column-gap: 10px;
+}
+
+.todo-list-header {
+    padding: 8px 16px;
+    background: #f8f9fb;
+    border-bottom: 1px solid #eef0f3;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #99a3b0;
+}
+
+.todo-row {
+    padding: 9px 16px;
     border-bottom: 1px solid #eef0f3;
     cursor: pointer;
 }
@@ -242,10 +297,17 @@ body {
     background: #eaf0f9;
 }
 
-.todo-row-main {
+.col-title {
     display: flex;
     align-items: center;
     gap: 8px;
+    min-width: 0;
+}
+
+.row-icon {
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    opacity: 0.8;
 }
 
 .disclosure {
@@ -274,6 +336,10 @@ body {
 
 .todo-title {
     flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     cursor: pointer;
 }
 
@@ -282,31 +348,30 @@ body {
     text-decoration-line: line-through;
 }
 
-/* due date badge, MLO-style colored pill */
-.due-badge {
-    flex-shrink: 0;
-    padding: 2px 9px;
-    border-radius: 4px;
-    font-size: 0.72rem;
+.col-due {
+    font-size: 0.8rem;
+}
+
+/* due date, MLO-style colored text (no pill) */
+.due-text {
     font-weight: 600;
-    color: #fff;
     white-space: nowrap;
 }
 
 .due-overdue {
-    background: #e05252;
+    color: #e05252;
 }
 
 .due-today {
-    background: #e08a3c;
+    color: #e08a3c;
 }
 
 .due-soon {
-    background: #4a6fa5;
+    color: #4a6fa5;
 }
 
 .due-future {
-    background: #8a97a8;
+    color: #8a97a8;
 }
 
 /* priority badge */
@@ -332,6 +397,21 @@ body {
 .priority-low {
     background: #e3f3e3;
     color: #2e7d32;
+}
+
+.col-tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.col-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 2px;
 }
 
 /* context */
@@ -395,7 +475,9 @@ body {
 }
 
 .todo-row .todo-body {
-    margin: 4px 0 0 60px;
+    grid-column: 1 / -1;
+    margin: 4px 0 0;
+    padding-left: 8px;
     font-size: 0.8rem;
     color: #777;
     cursor: pointer;
@@ -450,6 +532,35 @@ body {
     #detail-panel {
         width: 100%;
         position: static;
+    }
+
+    #topbar {
+        flex-wrap: wrap;
+    }
+
+    #search-todo {
+        order: 3;
+        max-width: none;
+        flex-basis: 100%;
+    }
+
+    .todo-list-header {
+        display: none;
+    }
+
+    .todo-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px 10px;
+    }
+
+    .col-title {
+        width: 100%;
+    }
+
+    .todo-row .todo-body {
+        padding-left: 0;
     }
 }
 
@@ -528,20 +639,35 @@ body {
     border-color: #4a6fa5;
 }
 
+.detail-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
 .detail-status-btn {
-    padding: 6px 12px;
-    border: 1px solid #d0d5db;
+    flex: 1;
+    padding: 10px;
+    border: none;
     border-radius: 6px;
-    background: #fff;
-    color: #555;
-    font-size: 0.85rem;
+    background: #4a6fa5;
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.9rem;
     cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.detail-status-btn:hover {
+    background: #3a5a85;
 }
 
 .detail-status-btn.done {
-    background: #eaf6ea;
-    border-color: #4caf50;
-    color: #2e7d32;
+    background: #4caf50;
+}
+
+.detail-status-btn.done:hover {
+    background: #3d9440;
 }
 
 .detail-due-row {
@@ -610,15 +736,15 @@ body {
 }
 
 .detail-delete {
-    width: 100%;
+    flex-shrink: 0;
+    width: 42px;
     padding: 8px;
     border: 1px solid #f0c4c4;
     border-radius: 6px;
     background: #fff;
     color: #e05252;
-    font-size: 0.85rem;
+    font-size: 1rem;
     cursor: pointer;
-    margin-top: 6px;
 }
 
 .detail-delete:hover {

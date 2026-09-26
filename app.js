@@ -15,6 +15,7 @@ Vue.createApp({
             activeView: 'all',
             activeContext: null,
             activeProject: null,
+            showAddForm: false,
         };
     },
     computed: {
@@ -200,6 +201,7 @@ Vue.createApp({
                 this.todoList.push(todoItem);
                 this.saveTodos();
                 this.num = this.todoList.length;
+                this.showAddForm = false;
             } else {
                 alert('Todo title is empty')
             }
