@@ -110,7 +110,8 @@ body {
 
 #app #enter-todo #todo,
 #app #enter-todo #todo-body,
-#app #enter-todo #todo-due {
+#app #enter-todo #todo-due,
+#app #enter-todo #todo-priority {
     width: 100%;
     padding: 8px 10px;
     border: 1px solid #d0d5db;
@@ -121,7 +122,8 @@ body {
 
 #app #enter-todo #todo:focus,
 #app #enter-todo #todo-body:focus,
-#app #enter-todo #todo-due:focus {
+#app #enter-todo #todo-due:focus,
+#app #enter-todo #todo-priority:focus {
     outline: none;
     border-color: #4a6fa5;
 }
@@ -237,6 +239,31 @@ body {
 
 .due-future {
     background: #8a97a8;
+}
+
+/* priority badge */
+.priority-badge {
+    flex-shrink: 0;
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.priority-high {
+    background: #fbe2e2;
+    color: #c0392b;
+}
+
+.priority-medium {
+    background: #fdecd2;
+    color: #b3701a;
+}
+
+.priority-low {
+    background: #e3f3e3;
+    color: #2e7d32;
 }
 
 .todo-row .todo-body {
@@ -355,7 +382,8 @@ body {
 }
 
 .detail-field textarea,
-.detail-due-row input {
+.detail-due-row input,
+.detail-field select {
     width: 100%;
     padding: 7px 9px;
     border: 1px solid #d0d5db;
@@ -366,7 +394,8 @@ body {
 }
 
 .detail-field textarea:focus,
-.detail-due-row input:focus {
+.detail-due-row input:focus,
+.detail-field select:focus {
     outline: none;
     border-color: #4a6fa5;
 }
