@@ -1,21 +1,17 @@
-// console.log(uuidv4());
-//DOM Load event
 document.addEventListener('DOMContentLoaded', function() {
-    // console.log('DOM is ready');
     if(localStorage.getItem('todoList') === null) {
         app.__vue__.todoList = [];
     } else {
         let todoList = JSON.parse(localStorage.getItem('todoList'));
-        app.__vue__.todoList = JSON.parse(localStorage.getItem('todoList'));
+        app.__vue__.todoList = todoList;
         app.__vue__.num = todoList.length;
-        console.log(todoList)
     }
 
 });
 new Vue ({
     el: "#app",
     data: {
-        
+
         name: "John Doe",
 
         nameClicked: false,
@@ -25,6 +21,34 @@ new Vue ({
         filteredOff: true,
         filteredOn: false,
 
+    },
+    computed: {
+        // Flattens todoList into a tree order (parents before their children),
+        // with a depth for indentation and hasChildren to show a disclosure arrow.
+        // Collapsed branches are skipped entirely.
+        visibleTodoList() {
+            const childrenOf = parentId => this.todoList.filter(t => t.parentId === parentId);
+            const entries = [];
+            const walk = (parentId, depth) => {
+                childrenOf(parentId).forEach(item => {
+                    const hasChildren = childrenOf(item.id).length > 0;
+                    entries.push({ item, depth, hasChildren });
+                    if (hasChildren && !item.collapsed) {
+                        walk(item.id, depth + 1);
+                    }
+                });
+            };
+            walk(null, 0);
+            return entries;
+        },
+
+        // While searching, show a flat match list instead of the tree.
+        displayEntries() {
+            if (this.filteredOn) {
+                return this.filteredTodoList.map(item => ({ item, depth: 0, hasChildren: false }));
+            }
+            return this.visibleTodoList;
+        },
     },
     methods: {
 
@@ -39,36 +63,37 @@ new Vue ({
             }
         },
 
-        beforeCreate() {
-            alert('Massage from Before Created')
+        saveTodos() {
+            localStorage.setItem('todoList', JSON.stringify(this.todoList));
         },
 
-        created() {
-            alert('created hook')
+        doneTodo(id) {
+            const item = this.todoList.find(t => t.id === id);
+            item.done = !item.done;
+            this.saveTodos();
         },
 
-
-        doneTodo(e) {
-            const isDone = e.target.parentElement.children[0].classList.toggle('done');
-            e.target.parentElement.children[1].classList.toggle('deleted');
-            e.target.textContent = isDone ? 'Undone' : 'Done';
-        },
-
-        deleteTodo(e) {
-
+        deleteTodo(id) {
             if(confirm('Are you sure ?')) {
-                const todoIndex = this.todoList.findIndex( item => item.id === e.target.attributes[1].nodeValue);
-                this.todoList.splice(todoIndex, 1);
-                console.log(todoIndex);
-                console.log(this.todoList);
-                localStorage.setItem('todoList', JSON.stringify(this.todoList));
+                // Deleting a task also removes its subtasks, recursively.
+                const idsToRemove = new Set([id]);
+                let added = true;
+                while (added) {
+                    added = false;
+                    this.todoList.forEach(t => {
+                        if (idsToRemove.has(t.parentId) && !idsToRemove.has(t.id)) {
+                            idsToRemove.add(t.id);
+                            added = true;
+                        }
+                    });
+                }
+                this.todoList = this.todoList.filter(t => !idsToRemove.has(t.id));
+                this.saveTodos();
                 this.num = this.todoList.length;
-
             }
-
         },
-        
-        regTodo(e, arr) {
+
+        regTodo(e) {
             let todoItem = {};
             const id = uuidv4();
             let item = e.target.parentElement.children[1].value;
@@ -82,72 +107,65 @@ new Vue ({
                 todoItem.title = item;
                 todoItem.body = body;
                 todoItem.dueDate = dueDate;
+                todoItem.parentId = null;
+                todoItem.done = false;
+                todoItem.collapsed = false;
                 this.todoList.push(todoItem);
-                localStorage.setItem('todoList', JSON.stringify(this.todoList));
+                this.saveTodos();
                 this.num = this.todoList.length;
-                // console.log(this.todoList);
             } else {
                 alert('Todo title is empty')
             }
-            
 
         },
 
-        editTitle(e) {
-            let newItem = prompt('Enter New Content', e.target.textContent);
-            if(newItem) {
-                this.todoList.forEach( (item, index) => {
-                    if(item.id === e.target.attributes[0].nodeValue) {
-                        // e.target.textContent = newItem;
-                        item.title = newItem;
-
-                    } 
+        addSubtask(parentId) {
+            const title = prompt('Subtask title');
+            if(title) {
+                this.todoList.push({
+                    id: uuidv4(),
+                    title,
+                    body: '',
+                    dueDate: '',
+                    parentId,
+                    done: false,
+                    collapsed: false,
                 });
-                localStorage.setItem('todoList', JSON.stringify(this.todoList));
+                this.saveTodos();
+                this.num = this.todoList.length;
             }
         },
 
-        editBody(e) {
-            console.dir(e.target);
-            let newItem = prompt('Enter New Content', e.target.textContent);
+        toggleCollapse(id) {
+            const item = this.todoList.find(t => t.id === id);
+            item.collapsed = !item.collapsed;
+        },
+
+        editTitle(id, currentTitle) {
+            let newItem = prompt('Enter New Content', currentTitle);
             if(newItem) {
-                this.todoList.forEach( item => {
-                    if(item.id === e.target.attributes[0].nodeValue) {
-                        // e.target.textContent = newItem;
-                        item.body = newItem;
+                const item = this.todoList.find(t => t.id === id);
+                item.title = newItem;
+                this.saveTodos();
+            }
+        },
 
-                    } 
-                });
-                localStorage.setItem('todoList', JSON.stringify(this.todoList));
-
+        editBody(id, currentBody) {
+            let newItem = prompt('Enter New Content', currentBody);
+            if(newItem) {
+                const item = this.todoList.find(t => t.id === id);
+                item.body = newItem;
+                this.saveTodos();
             }
         },
 
         filterTodo(e) {
             let snippet = e.target.value;
             if(snippet) {
-                    // 1
-            //     this.todoList.forEach( (item, index) => {
-            //        console.log(snippet)
-            //        console.log(item.title)
-            //        if (item.title.includes(snippet)) {
-            //            this.showMe = true
-                       
-            //        } else  {
-            //            this.showMe = false
-            //        } 
-            //     })
-            // } else {
-            //     this.showMe = true;
-
-                //2
-            this.filteredOff = false;
-            this.filteredOn = true;
-            this.filteredTodoList  = this.todoList.filter( todo => todo.title.includes(snippet))
-            console.log(this.filteredTodoList);
-            this.num = this.filteredTodoList.length
-
-
+                this.filteredOff = false;
+                this.filteredOn = true;
+                this.filteredTodoList = this.todoList.filter( todo => todo.title.includes(snippet))
+                this.num = this.filteredTodoList.length
             } if(!snippet) {
                 this.filteredOff = true;
                 this.filteredOn = false;
@@ -177,4 +195,3 @@ new Vue ({
         },
     }
 })
-

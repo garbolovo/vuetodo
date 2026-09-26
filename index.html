@@ -25,26 +25,21 @@
     </div>
 
     <div id="todo-list-wrapper">
-      <!-- Off -->
-      <div class="todo-element" v-for="todo in todoList" v-show="filteredOff">
-        <h4 class="todo-title" v-bind:data-id=todo.id @click="editTitle" >{{ todo.title }}</h4>
-        <p class="todo-body" v-bind:data-id=todo.id @click="editBody" >{{ todo.body }}</p>
-        <span class="due-badge" v-bind:class="dueDateClass(todo.dueDate)" v-if="todo.dueDate">{{ dueDateLabel(todo.dueDate) }}</span>
+      <div class="todo-row" v-for="entry in displayEntries" :key="entry.item.id" :style="{ paddingLeft: (14 + entry.depth * 22) + 'px' }">
+        <div class="todo-row-main">
+          <span class="disclosure" v-if="entry.hasChildren" @click="toggleCollapse(entry.item.id)">{{ entry.item.collapsed ? '▸' : '▾' }}</span>
+          <span class="disclosure-spacer" v-else></span>
 
-        <button id="btn-done" @click="doneTodo">Done</button>
-        <button id="btn-delete-todo-elem" v-bind:data-id=todo.id @click="deleteTodo">Delete</button>
-        <hr>
-      </div>
+          <input type="checkbox" class="todo-check" :checked="entry.item.done" @change="doneTodo(entry.item.id)">
 
-      <!-- On -->
-      <div class="todo-element" v-for="todo in filteredTodoList" v-show="filteredOn">
-        <h4 class="todo-title" v-bind:data-id=todo.id @click="editTitle" >{{ todo.title }}</h4>
-        <p class="todo-body" v-bind:data-id=todo.id @click="editBody" >{{ todo.body }}</p>
-        <span class="due-badge" v-bind:class="dueDateClass(todo.dueDate)" v-if="todo.dueDate">{{ dueDateLabel(todo.dueDate) }}</span>
+          <span class="todo-title" :class="{ done: entry.item.done }" @click="editTitle(entry.item.id, entry.item.title)">{{ entry.item.title }}</span>
 
-        <button id="btn-done" @click="doneTodo">Done</button>
-        <button id="btn-delete-todo-elem" v-bind:data-id=todo.id @click="deleteTodo">Delete</button>
-        <hr>
+          <span class="due-badge" v-bind:class="dueDateClass(entry.item.dueDate)" v-if="entry.item.dueDate">{{ dueDateLabel(entry.item.dueDate) }}</span>
+
+          <button class="btn-add-sub" title="Add subtask" @click="addSubtask(entry.item.id)">+</button>
+          <button class="btn-delete-todo-elem" title="Delete" @click="deleteTodo(entry.item.id)">×</button>
+        </div>
+        <p class="todo-body" v-if="entry.item.body" @click="editBody(entry.item.id, entry.item.body)">{{ entry.item.body }}</p>
       </div>
     </div>
 
