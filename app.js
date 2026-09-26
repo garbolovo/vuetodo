@@ -14,34 +14,37 @@ Vue.createApp({
             selectedId: null,
             activeView: 'all',
             activeContext: null,
+            activeProject: null,
+            showAddForm: false,
         };
     },
     computed: {
-        // Flattens todoList into a tree order (parents before their children),
-        // with a depth for indentation and hasChildren to show a disclosure arrow.
-        // Collapsed branches are skipped entirely.
-        visibleTodoList() {
-            const childrenOf = parentId => this.todoList.filter(t => t.parentId === parentId);
-            const entries = [];
-            const walk = (parentId, depth) => {
-                childrenOf(parentId).forEach(item => {
-                    const hasChildren = childrenOf(item.id).length > 0;
-                    entries.push({ item, depth, hasChildren });
-                    if (hasChildren && !item.collapsed) {
-                        walk(item.id, depth + 1);
-                    }
-                });
-            };
-            walk(null, 0);
-            return entries;
+        // The tree rooted at activeProject (or the whole forest if null),
+        // flattened in parent-before-children order with a depth for
+        // indentation and hasChildren to show a disclosure arrow. Collapsed
+        // branches are skipped entirely.
+        treeEntries() {
+            return this.buildTree(this.activeProject);
         },
 
-        // Non-"all" views (and any active context filter) cut across the
-        // hierarchy, so they show a flat matching list rather than the tree.
+        // Today/Overdue/Completed and an active context filter cut across
+        // the hierarchy (a subtask's due date or context is independent of
+        // its parent's), so they show a flat matching list instead of a
+        // tree. A project selection narrows either mode to that project's
+        // own descendants.
         viewEntries() {
-            const base = this.activeContext === null
-                ? this.todoList
-                : this.todoList.filter(t => this.activeContext === '' ? !t.context : t.context === this.activeContext);
+            const contextMatches = t => this.activeContext === null
+                || (this.activeContext === '' ? !t.context : t.context === this.activeContext);
+
+            if (this.activeView === 'all' && this.activeContext === null) {
+                return this.treeEntries;
+            }
+
+            let base = this.todoList.filter(contextMatches);
+            if (this.activeProject) {
+                const ids = this.projectDescendantIds(this.activeProject);
+                base = base.filter(t => ids.has(t.id));
+            }
 
             let list;
             if (this.activeView === 'today') {
@@ -50,10 +53,8 @@ Vue.createApp({
                 list = base.filter(t => !t.done && this.dueDateDiffDays(t.dueDate) < 0);
             } else if (this.activeView === 'completed') {
                 list = base.filter(t => t.done);
-            } else if (this.activeContext !== null) {
-                list = base;
             } else {
-                return this.visibleTodoList;
+                list = base;
             }
             return list.map(item => ({ item, depth: 0, hasChildren: false }));
         },
@@ -64,6 +65,12 @@ Vue.createApp({
                 return this.filteredTodoList.map(item => ({ item, depth: 0, hasChildren: false }));
             }
             return this.viewEntries;
+        },
+
+        // Root-level tasks that have subtasks act as "projects" for the
+        // sidebar, since the app has no separate project entity.
+        projectList() {
+            return this.todoList.filter(t => t.parentId === null && this.todoList.some(c => c.parentId === t.id));
         },
 
         todayCount() {
@@ -194,6 +201,7 @@ Vue.createApp({
                 this.todoList.push(todoItem);
                 this.saveTodos();
                 this.num = this.todoList.length;
+                this.showAddForm = false;
             } else {
                 alert('Todo title is empty')
             }
@@ -223,6 +231,59 @@ Vue.createApp({
         toggleCollapse(id) {
             const item = this.todoList.find(t => t.id === id);
             item.collapsed = !item.collapsed;
+        },
+
+        // Flattens the subtree rooted at rootId (or the whole forest when
+        // rootId is null) in parent-before-children order, skipping the
+        // children of any collapsed item.
+        buildTree(rootId) {
+            const childrenOf = parentId => this.todoList.filter(t => t.parentId === parentId);
+            const entries = [];
+            const walk = (parentId, depth) => {
+                childrenOf(parentId).forEach(item => {
+                    const hasChildren = childrenOf(item.id).length > 0;
+                    entries.push({ item, depth, hasChildren });
+                    if (hasChildren && !item.collapsed) {
+                        walk(item.id, depth + 1);
+                    }
+                });
+            };
+
+            if (rootId) {
+                const rootItem = this.todoList.find(t => t.id === rootId);
+                if (!rootItem) return [];
+                entries.push({ item: rootItem, depth: 0, hasChildren: childrenOf(rootId).length > 0 });
+                if (!rootItem.collapsed) walk(rootId, 1);
+            } else {
+                walk(null, 0);
+            }
+            return entries;
+        },
+
+        // A project (root task) plus every one of its nested descendants.
+        projectDescendantIds(rootId) {
+            const ids = new Set([rootId]);
+            let added = true;
+            while (added) {
+                added = false;
+                this.todoList.forEach(t => {
+                    if (ids.has(t.parentId) && !ids.has(t.id)) {
+                        ids.add(t.id);
+                        added = true;
+                    }
+                });
+            }
+            return ids;
+        },
+
+        projectIncompleteCount(rootId) {
+            const ids = this.projectDescendantIds(rootId);
+            return this.todoList.filter(t => ids.has(t.id) && !t.done).length;
+        },
+
+        setProject(id) {
+            this.activeProject = this.activeProject === id ? null : id;
+            this.resetSearch();
         },
 
         selectTodo(id) {

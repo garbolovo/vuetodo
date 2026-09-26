@@ -8,19 +8,45 @@
 
 </head>
 <body>
-  <div id="header">
-    <h3>Todo App</h3>
-  </div>
-
   <div id="app">
-    <p>{{ name }}<p> <p>ПРЕДСТАВЛЯЕТ</p>
-    <button @click="changeName">Change Name</button>
+    <div id="topbar">
+      <div class="topbar-brand">
+        <span class="brand-icon">✓</span>
+        <span class="brand-name">Todo App</span>
+      </div>
+
+      <input type="text" id="search-todo" @keyup="filterTodo" placeholder="Search tasks... (Ctrl+K)">
+
+      <button id="new-task-btn" @click="showAddForm = !showAddForm">+ New Task</button>
+
+      <button class="topbar-user" title="Click to change name" @click="changeName">{{ name.split(' ').map(w => w[0]).join('') }}</button>
+    </div>
 
     <div id="workspace">
-      <div id="main-column">
-        <input type="text" id="search-todo" @keyup="filterTodo" placeholder="Search">
+      <div id="sidebar">
+        <div class="sidebar-section">
+          <h4>Views</h4>
+          <button class="sidebar-item" :class="{ active: activeView === 'all' }" @click="setView('all')">All <span class="view-count">{{ allCount }}</span></button>
+          <button class="sidebar-item" :class="{ active: activeView === 'today' }" @click="setView('today')">Today <span class="view-count">{{ todayCount }}</span></button>
+          <button class="sidebar-item" :class="{ active: activeView === 'overdue' }" @click="setView('overdue')">Overdue <span class="view-count">{{ overdueCount }}</span></button>
+          <button class="sidebar-item" :class="{ active: activeView === 'completed' }" @click="setView('completed')">Completed <span class="view-count">{{ completedCount }}</span></button>
+        </div>
 
-        <div id="enter-todo">
+        <div class="sidebar-section" v-if="projectList.length">
+          <h4>Projects</h4>
+          <button class="sidebar-item" v-for="proj in projectList" :key="proj.id" :class="{ active: activeProject === proj.id }" @click="setProject(proj.id)">{{ proj.title }} <span class="view-count">{{ projectIncompleteCount(proj.id) }}</span></button>
+        </div>
+
+        <div class="sidebar-section" v-if="allContexts.length">
+          <h4>Contexts</h4>
+          <button class="sidebar-item" :class="{ active: activeContext === null }" @click="setContext(null)">All contexts</button>
+          <button class="sidebar-item" v-for="ctx in allContexts" :key="ctx" :class="{ active: activeContext === ctx }" @click="setContext(ctx)">{{ ctx }} <span class="view-count">{{ contextCount(ctx) }}</span></button>
+          <button class="sidebar-item" :class="{ active: activeContext === '' }" @click="setContext('')">No context <span class="view-count">{{ noContextCount }}</span></button>
+        </div>
+      </div>
+
+      <div id="main-column">
+        <div id="enter-todo" v-if="showAddForm">
           <label for="todo">Task Title </label><input id="todo" type="text">
           <label for="todo-body">Task Body </label><textarea id="todo-body" type="text" rows="8"></textarea>
           <label for="todo-due">Due Date </label><input id="todo-due" type="date">
@@ -34,40 +60,45 @@
           <button id="todo-btn" @click="regTodo">Add Todo</button>
         </div>
 
-        <div id="view-tabs">
-          <button :class="{ active: activeView === 'all' }" @click="setView('all')">All <span class="view-count">{{ allCount }}</span></button>
-          <button :class="{ active: activeView === 'today' }" @click="setView('today')">Today <span class="view-count">{{ todayCount }}</span></button>
-          <button :class="{ active: activeView === 'overdue' }" @click="setView('overdue')">Overdue <span class="view-count">{{ overdueCount }}</span></button>
-          <button :class="{ active: activeView === 'completed' }" @click="setView('completed')">Completed <span class="view-count">{{ completedCount }}</span></button>
-        </div>
-
-        <div id="context-tabs" v-if="allContexts.length">
-          <button :class="{ active: activeContext === null }" @click="setContext(null)">All contexts</button>
-          <button v-for="ctx in allContexts" :key="ctx" :class="{ active: activeContext === ctx }" @click="setContext(ctx)">{{ ctx }} <span class="view-count">{{ contextCount(ctx) }}</span></button>
-          <button :class="{ active: activeContext === '' }" @click="setContext('')">No context <span class="view-count">{{ noContextCount }}</span></button>
-        </div>
-
         <div id="todo-list-wrapper">
-          <div class="todo-row" v-for="entry in displayEntries" :key="entry.item.id" :class="{ 'todo-row-selected': entry.item.id === selectedId }" :style="{ paddingLeft: (14 + entry.depth * 22) + 'px' }" @click="selectTodo(entry.item.id)">
-            <div class="todo-row-main">
+          <div class="todo-list-header">
+            <div class="col-title">Task Name</div>
+            <div class="col-due">Due</div>
+            <div class="col-priority">Priority</div>
+            <div class="col-tags"></div>
+            <div class="col-actions"></div>
+          </div>
+
+          <div class="todo-row" v-for="entry in displayEntries" :key="entry.item.id" :class="{ 'todo-row-selected': entry.item.id === selectedId }" @click="selectTodo(entry.item.id)">
+            <div class="col-title" :style="{ paddingLeft: (8 + entry.depth * 22) + 'px' }">
               <span class="disclosure" v-if="entry.hasChildren" @click.stop="toggleCollapse(entry.item.id)">{{ entry.item.collapsed ? '▸' : '▾' }}</span>
               <span class="disclosure-spacer" v-else></span>
 
               <input type="checkbox" class="todo-check" :checked="entry.item.done" @click.stop @change="doneTodo(entry.item.id)">
 
+              <span class="row-icon">{{ entry.hasChildren ? '📁' : '📄' }}</span>
+
               <span class="todo-title" :class="{ done: entry.item.done }">{{ entry.item.title }}</span>
+            </div>
 
-              <span class="due-badge" v-bind:class="dueDateClass(entry.item.dueDate)" v-if="entry.item.dueDate">{{ dueDateLabel(entry.item.dueDate) }}</span>
+            <div class="col-due">
+              <span class="due-text" v-bind:class="dueDateClass(entry.item.dueDate)" v-if="entry.item.dueDate">{{ dueDateLabel(entry.item.dueDate) }}</span>
+            </div>
 
+            <div class="col-priority">
               <span class="priority-badge" v-bind:class="priorityClass(entry.item.priority)" v-if="entry.item.priority">{{ priorityLabel(entry.item.priority) }}</span>
+            </div>
 
+            <div class="col-tags">
               <span class="context-badge" v-if="entry.item.context">{{ entry.item.context }}</span>
-
               <span class="tag-pill" v-for="tag in (entry.item.tags || [])" :key="tag">{{ tag }}</span>
+            </div>
 
+            <div class="col-actions">
               <button class="btn-add-sub" title="Add subtask" @click.stop="addSubtask(entry.item.id)">+</button>
               <button class="btn-delete-todo-elem" title="Delete" @click.stop="deleteTodo(entry.item.id)">×</button>
             </div>
+
             <p class="todo-body" v-if="entry.item.body">{{ entry.item.body }}</p>
           </div>
         </div>
@@ -84,14 +115,7 @@
         <input class="detail-title" v-model="selectedItem.title" @change="saveTodos">
 
         <div class="detail-field">
-          <label>Status</label>
-          <button class="detail-status-btn" :class="{ done: selectedItem.done }" @click="doneTodo(selectedItem.id)">
-            {{ selectedItem.done ? '✓ Done' : 'Not done' }}
-          </button>
-        </div>
-
-        <div class="detail-field">
-          <label>Due Date</label>
+          <label>📅 Due Date</label>
           <div class="detail-due-row">
             <input type="date" v-model="selectedItem.dueDate" @change="saveTodos">
             <button v-if="selectedItem.dueDate" class="detail-due-clear" title="Clear due date" @click="clearDueDate">×</button>
@@ -99,7 +123,7 @@
         </div>
 
         <div class="detail-field">
-          <label>Priority</label>
+          <label>🚩 Priority</label>
           <select v-model="selectedItem.priority" @change="saveTodos">
             <option value="">No priority</option>
             <option value="high">High</option>
@@ -109,7 +133,7 @@
         </div>
 
         <div class="detail-field">
-          <label>Context</label>
+          <label>📍 Context</label>
           <select v-model="selectedItem.context" @change="onContextChange">
             <option value="">No context</option>
             <option v-for="ctx in allContexts" :key="ctx" :value="ctx">{{ ctx }}</option>
@@ -118,7 +142,7 @@
         </div>
 
         <div class="detail-field">
-          <label>Tags</label>
+          <label>🏷 Tags</label>
           <div class="detail-tags">
             <span class="tag-pill" v-for="tag in (selectedItem.tags || [])" :key="tag">
               {{ tag }}
@@ -129,12 +153,12 @@
         </div>
 
         <div class="detail-field">
-          <label>Notes</label>
+          <label>📝 Notes</label>
           <textarea v-model="selectedItem.body" @change="saveTodos" rows="5"></textarea>
         </div>
 
         <div class="detail-field">
-          <label>Subtasks ({{ selectedSubtasks.length }})</label>
+          <label>☑ Subtasks ({{ selectedSubtasks.length }})</label>
           <div class="detail-subtask-progress" v-if="selectedSubtasks.length">
             <div class="detail-subtask-progress-bar" :style="{ width: selectedSubtaskProgressPct + '%' }"></div>
           </div>
@@ -145,7 +169,12 @@
           <button class="detail-add-subtask" @click="addSubtask(selectedItem.id)">+ Add subtask</button>
         </div>
 
-        <button class="detail-delete" @click="deleteTodo(selectedItem.id)">Delete task</button>
+        <div class="detail-actions">
+          <button class="detail-status-btn" :class="{ done: selectedItem.done }" @click="doneTodo(selectedItem.id)">
+            {{ selectedItem.done ? '✓ Completed' : 'Mark Complete' }}
+          </button>
+          <button class="detail-delete" title="Delete task" @click="deleteTodo(selectedItem.id)">🗑</button>
+        </div>
       </div>
     </div>
 
