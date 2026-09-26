@@ -146,7 +146,8 @@ body {
 
 /* view tabs */
 
-#view-tabs {
+#view-tabs,
+#context-tabs {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
@@ -155,7 +156,8 @@ body {
     margin-bottom: 14px;
 }
 
-#view-tabs button {
+#view-tabs button,
+#context-tabs button {
     display: flex;
     align-items: center;
     gap: 6px;
@@ -169,17 +171,20 @@ body {
     transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
-#view-tabs button:hover {
+#view-tabs button:hover,
+#context-tabs button:hover {
     background: #f4f6f8;
 }
 
-#view-tabs button.active {
+#view-tabs button.active,
+#context-tabs button.active {
     background: #4a6fa5;
     border-color: #4a6fa5;
     color: #fff;
 }
 
-#view-tabs button.active .view-count {
+#view-tabs button.active .view-count,
+#context-tabs button.active .view-count {
     background: rgba(255, 255, 255, 0.25);
     color: #fff;
 }
@@ -313,6 +318,18 @@ body {
 .priority-low {
     background: #e3f3e3;
     color: #2e7d32;
+}
+
+/* context */
+.context-badge {
+    flex-shrink: 0;
+    background: #e6edf7;
+    color: #4a6fa5;
+    border-radius: 4px;
+    padding: 2px 9px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
 }
 
 /* tags */

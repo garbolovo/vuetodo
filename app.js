@@ -13,6 +13,7 @@ Vue.createApp({
             filteredOn: false,
             selectedId: null,
             activeView: 'all',
+            activeContext: null,
         };
     },
     computed: {
@@ -35,16 +36,22 @@ Vue.createApp({
             return entries;
         },
 
-        // Non-"all" views cut across the hierarchy, so they show a flat
-        // matching list rather than the tree.
+        // Non-"all" views (and any active context filter) cut across the
+        // hierarchy, so they show a flat matching list rather than the tree.
         viewEntries() {
+            const base = this.activeContext === null
+                ? this.todoList
+                : this.todoList.filter(t => this.activeContext === '' ? !t.context : t.context === this.activeContext);
+
             let list;
             if (this.activeView === 'today') {
-                list = this.todoList.filter(t => !t.done && this.dueDateDiffDays(t.dueDate) === 0);
+                list = base.filter(t => !t.done && this.dueDateDiffDays(t.dueDate) === 0);
             } else if (this.activeView === 'overdue') {
-                list = this.todoList.filter(t => !t.done && this.dueDateDiffDays(t.dueDate) < 0);
+                list = base.filter(t => !t.done && this.dueDateDiffDays(t.dueDate) < 0);
             } else if (this.activeView === 'completed') {
-                list = this.todoList.filter(t => t.done);
+                list = base.filter(t => t.done);
+            } else if (this.activeContext !== null) {
+                list = base;
             } else {
                 return this.visibleTodoList;
             }
@@ -73,6 +80,18 @@ Vue.createApp({
 
         allCount() {
             return this.todoList.length;
+        },
+
+        // Distinct contexts already used across all tasks, for the filter tabs
+        // and the detail panel's context picker.
+        allContexts() {
+            const set = new Set();
+            this.todoList.forEach(t => { if (t.context) set.add(t.context); });
+            return Array.from(set).sort();
+        },
+
+        noContextCount() {
+            return this.todoList.filter(t => !t.context).length;
         },
 
         selectedItem() {
@@ -168,6 +187,7 @@ Vue.createApp({
                 todoItem.dueDate = dueDate;
                 todoItem.priority = priority;
                 todoItem.tags = [];
+                todoItem.context = '';
                 todoItem.parentId = null;
                 todoItem.done = false;
                 todoItem.collapsed = false;
@@ -190,6 +210,7 @@ Vue.createApp({
                     dueDate: '',
                     priority: '',
                     tags: [],
+                    context: '',
                     parentId,
                     done: false,
                     collapsed: false,
@@ -239,12 +260,34 @@ Vue.createApp({
             }
         },
 
-        setView(view) {
-            this.activeView = view;
+        resetSearch() {
             this.filteredOn = false;
             this.filteredOff = true;
             const searchInput = document.getElementById('search-todo');
             if (searchInput) searchInput.value = '';
+        },
+
+        setView(view) {
+            this.activeView = view;
+            this.resetSearch();
+        },
+
+        // ctx is null for "all contexts", '' for "no context", or a context string.
+        setContext(ctx) {
+            this.activeContext = ctx;
+            this.resetSearch();
+        },
+
+        contextCount(ctx) {
+            return this.todoList.filter(t => t.context === ctx).length;
+        },
+
+        onContextChange() {
+            if (this.selectedItem.context === '__new__') {
+                const ctx = prompt('New context name (e.g. @computer)');
+                this.selectedItem.context = ctx && ctx.trim() ? ctx.trim() : '';
+            }
+            this.saveTodos();
         },
 
         filterTodo(e) {
