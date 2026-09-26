@@ -167,6 +167,7 @@ Vue.createApp({
                 todoItem.body = body;
                 todoItem.dueDate = dueDate;
                 todoItem.priority = priority;
+                todoItem.tags = [];
                 todoItem.parentId = null;
                 todoItem.done = false;
                 todoItem.collapsed = false;
@@ -188,6 +189,7 @@ Vue.createApp({
                     body: '',
                     dueDate: '',
                     priority: '',
+                    tags: [],
                     parentId,
                     done: false,
                     collapsed: false,
@@ -213,6 +215,26 @@ Vue.createApp({
         clearDueDate() {
             if (this.selectedItem) {
                 this.selectedItem.dueDate = '';
+                this.saveTodos();
+            }
+        },
+
+        addTag(id) {
+            const tag = prompt('Tag name');
+            if (tag && tag.trim()) {
+                const item = this.todoList.find(t => t.id === id);
+                if (!item.tags) item.tags = [];
+                if (!item.tags.includes(tag.trim())) {
+                    item.tags.push(tag.trim());
+                    this.saveTodos();
+                }
+            }
+        },
+
+        removeTag(id, tag) {
+            const item = this.todoList.find(t => t.id === id);
+            if (item && item.tags) {
+                item.tags = item.tags.filter(t => t !== tag);
                 this.saveTodos();
             }
         },

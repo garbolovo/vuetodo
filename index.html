@@ -55,6 +55,8 @@
 
               <span class="priority-badge" v-bind:class="priorityClass(entry.item.priority)" v-if="entry.item.priority">{{ priorityLabel(entry.item.priority) }}</span>
 
+              <span class="tag-pill" v-for="tag in (entry.item.tags || [])" :key="tag">{{ tag }}</span>
+
               <button class="btn-add-sub" title="Add subtask" @click.stop="addSubtask(entry.item.id)">+</button>
               <button class="btn-delete-todo-elem" title="Delete" @click.stop="deleteTodo(entry.item.id)">×</button>
             </div>
@@ -96,6 +98,17 @@
             <option value="medium">Medium</option>
             <option value="low">Low</option>
           </select>
+        </div>
+
+        <div class="detail-field">
+          <label>Tags</label>
+          <div class="detail-tags">
+            <span class="tag-pill" v-for="tag in (selectedItem.tags || [])" :key="tag">
+              {{ tag }}
+              <button class="tag-remove" title="Remove tag" @click="removeTag(selectedItem.id, tag)">×</button>
+            </span>
+            <button class="tag-add" @click="addTag(selectedItem.id)">+ Add tag</button>
+          </div>
         </div>
 
         <div class="detail-field">
