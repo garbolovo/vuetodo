@@ -123,14 +123,17 @@ Vue.createApp({
             let item = e.target.parentElement.children[1].value;
             let body = e.target.parentElement.children[3].value;
             let dueDate = e.target.parentElement.children[5].value;
+            let priority = e.target.parentElement.children[7].value;
             e.target.parentElement.children[1].value = '';
             e.target.parentElement.children[3].value = '';
             e.target.parentElement.children[5].value = '';
+            e.target.parentElement.children[7].value = '';
             if(item) {
                 todoItem.id = id;
                 todoItem.title = item;
                 todoItem.body = body;
                 todoItem.dueDate = dueDate;
+                todoItem.priority = priority;
                 todoItem.parentId = null;
                 todoItem.done = false;
                 todoItem.collapsed = false;
@@ -151,6 +154,7 @@ Vue.createApp({
                     title,
                     body: '',
                     dueDate: '',
+                    priority: '',
                     parentId,
                     done: false,
                     collapsed: false,
@@ -213,6 +217,14 @@ Vue.createApp({
 
         dueDateClass(dueDate) {
             return this.dueDateInfo(dueDate).cls;
+        },
+
+        priorityLabel(priority) {
+            return { high: 'High', medium: 'Medium', low: 'Low' }[priority] || '';
+        },
+
+        priorityClass(priority) {
+            return priority ? 'priority-' + priority : '';
         },
     }
 }).mount('#app');

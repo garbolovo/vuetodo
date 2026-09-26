@@ -24,6 +24,13 @@
           <label for="todo">Task Title </label><input id="todo" type="text">
           <label for="todo-body">Task Body </label><textarea id="todo-body" type="text" rows="8"></textarea>
           <label for="todo-due">Due Date </label><input id="todo-due" type="date">
+          <label for="todo-priority">Priority </label>
+          <select id="todo-priority">
+            <option value="">No priority</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
           <button id="todo-btn" @click="regTodo">Add Todo</button>
         </div>
 
@@ -38,6 +45,8 @@
               <span class="todo-title" :class="{ done: entry.item.done }">{{ entry.item.title }}</span>
 
               <span class="due-badge" v-bind:class="dueDateClass(entry.item.dueDate)" v-if="entry.item.dueDate">{{ dueDateLabel(entry.item.dueDate) }}</span>
+
+              <span class="priority-badge" v-bind:class="priorityClass(entry.item.priority)" v-if="entry.item.priority">{{ priorityLabel(entry.item.priority) }}</span>
 
               <button class="btn-add-sub" title="Add subtask" @click.stop="addSubtask(entry.item.id)">+</button>
               <button class="btn-delete-todo-elem" title="Delete" @click.stop="deleteTodo(entry.item.id)">×</button>
@@ -70,6 +79,16 @@
             <input type="date" v-model="selectedItem.dueDate" @change="saveTodos">
             <button v-if="selectedItem.dueDate" class="detail-due-clear" title="Clear due date" @click="clearDueDate">×</button>
           </div>
+        </div>
+
+        <div class="detail-field">
+          <label>Priority</label>
+          <select v-model="selectedItem.priority" @change="saveTodos">
+            <option value="">No priority</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
         </div>
 
         <div class="detail-field">
