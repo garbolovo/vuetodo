@@ -315,6 +315,54 @@ body {
     color: #2e7d32;
 }
 
+/* tags */
+.tag-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    background: #eef0f3;
+    color: #666;
+    border-radius: 10px;
+    padding: 1px 8px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+}
+
+.tag-remove {
+    border: none;
+    background: transparent;
+    color: #99a3b0;
+    cursor: pointer;
+    font-size: 0.85rem;
+    line-height: 1;
+    padding: 0;
+}
+
+.tag-remove:hover {
+    color: #e05252;
+}
+
+.detail-tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.tag-add {
+    border: none;
+    background: transparent;
+    color: #4a6fa5;
+    font-size: 0.8rem;
+    cursor: pointer;
+    padding: 2px 4px;
+}
+
+.tag-add:hover {
+    text-decoration: underline;
+}
+
 .todo-row .todo-body {
     margin: 4px 0 0 60px;
     font-size: 0.8rem;
