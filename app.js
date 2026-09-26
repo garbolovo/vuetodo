@@ -1,27 +1,18 @@
-document.addEventListener('DOMContentLoaded', function() {
-    if(localStorage.getItem('todoList') === null) {
-        app.__vue__.todoList = [];
-    } else {
-        let todoList = JSON.parse(localStorage.getItem('todoList'));
-        app.__vue__.todoList = todoList;
-        app.__vue__.num = todoList.length;
-    }
+Vue.createApp({
+    data() {
+        const stored = localStorage.getItem('todoList');
+        const todoList = stored ? JSON.parse(stored) : [];
 
-});
-new Vue ({
-    el: "#app",
-    data: {
-
-        name: "John Doe",
-
-        nameClicked: false,
-        todoList: [ ],
-        num: 0,
-        filteredTodoList: [],
-        filteredOff: true,
-        filteredOn: false,
-        selectedId: null,
-
+        return {
+            name: "John Doe",
+            nameClicked: false,
+            todoList,
+            num: todoList.length,
+            filteredTodoList: [],
+            filteredOff: true,
+            filteredOn: false,
+            selectedId: null,
+        };
     },
     computed: {
         // Flattens todoList into a tree order (parents before their children),
@@ -224,4 +215,4 @@ new Vue ({
             return this.dueDateInfo(dueDate).cls;
         },
     }
-})
+}).mount('#app');
