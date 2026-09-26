@@ -12,6 +12,7 @@ Vue.createApp({
             filteredOff: true,
             filteredOn: false,
             selectedId: null,
+            activeView: 'all',
         };
     },
     computed: {
@@ -34,12 +35,44 @@ Vue.createApp({
             return entries;
         },
 
-        // While searching, show a flat match list instead of the tree.
+        // Non-"all" views cut across the hierarchy, so they show a flat
+        // matching list rather than the tree.
+        viewEntries() {
+            let list;
+            if (this.activeView === 'today') {
+                list = this.todoList.filter(t => !t.done && this.dueDateDiffDays(t.dueDate) === 0);
+            } else if (this.activeView === 'overdue') {
+                list = this.todoList.filter(t => !t.done && this.dueDateDiffDays(t.dueDate) < 0);
+            } else if (this.activeView === 'completed') {
+                list = this.todoList.filter(t => t.done);
+            } else {
+                return this.visibleTodoList;
+            }
+            return list.map(item => ({ item, depth: 0, hasChildren: false }));
+        },
+
+        // While searching, show a flat match list instead of the current view.
         displayEntries() {
             if (this.filteredOn) {
                 return this.filteredTodoList.map(item => ({ item, depth: 0, hasChildren: false }));
             }
-            return this.visibleTodoList;
+            return this.viewEntries;
+        },
+
+        todayCount() {
+            return this.todoList.filter(t => !t.done && this.dueDateDiffDays(t.dueDate) === 0).length;
+        },
+
+        overdueCount() {
+            return this.todoList.filter(t => !t.done && this.dueDateDiffDays(t.dueDate) < 0).length;
+        },
+
+        completedCount() {
+            return this.todoList.filter(t => t.done).length;
+        },
+
+        allCount() {
+            return this.todoList.length;
         },
 
         selectedItem() {
@@ -184,6 +217,14 @@ Vue.createApp({
             }
         },
 
+        setView(view) {
+            this.activeView = view;
+            this.filteredOn = false;
+            this.filteredOff = true;
+            const searchInput = document.getElementById('search-todo');
+            if (searchInput) searchInput.value = '';
+        },
+
         filterTodo(e) {
             let snippet = e.target.value;
             if(snippet) {
@@ -198,11 +239,17 @@ Vue.createApp({
             }
         },
 
-        dueDateInfo(dueDate) {
+        dueDateDiffDays(dueDate) {
+            if (!dueDate) return null;
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const due = new Date(dueDate + 'T00:00:00');
-            const diffDays = Math.round((due - today) / 86400000);
+            return Math.round((due - today) / 86400000);
+        },
+
+        dueDateInfo(dueDate) {
+            const due = new Date(dueDate + 'T00:00:00');
+            const diffDays = this.dueDateDiffDays(dueDate);
 
             if (diffDays < 0) return { label: 'Overdue', cls: 'due-overdue' };
             if (diffDays === 0) return { label: 'Today', cls: 'due-today' };

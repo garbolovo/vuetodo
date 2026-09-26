@@ -144,6 +144,55 @@ body {
     background: #3a5a85;
 }
 
+/* view tabs */
+
+#view-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    width: 100%;
+    max-width: 700px;
+    margin-bottom: 14px;
+}
+
+#view-tabs button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid #d0d5db;
+    border-radius: 20px;
+    background: #fff;
+    color: #555;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+#view-tabs button:hover {
+    background: #f4f6f8;
+}
+
+#view-tabs button.active {
+    background: #4a6fa5;
+    border-color: #4a6fa5;
+    color: #fff;
+}
+
+#view-tabs button.active .view-count {
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
+}
+
+.view-count {
+    background: #eef0f3;
+    color: #666;
+    border-radius: 10px;
+    padding: 1px 7px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
 /* todo list — compact outline/tree, MLO-style */
 
 #todo-list-wrapper {

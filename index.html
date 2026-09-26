@@ -34,6 +34,13 @@
           <button id="todo-btn" @click="regTodo">Add Todo</button>
         </div>
 
+        <div id="view-tabs">
+          <button :class="{ active: activeView === 'all' }" @click="setView('all')">All <span class="view-count">{{ allCount }}</span></button>
+          <button :class="{ active: activeView === 'today' }" @click="setView('today')">Today <span class="view-count">{{ todayCount }}</span></button>
+          <button :class="{ active: activeView === 'overdue' }" @click="setView('overdue')">Overdue <span class="view-count">{{ overdueCount }}</span></button>
+          <button :class="{ active: activeView === 'completed' }" @click="setView('completed')">Completed <span class="view-count">{{ completedCount }}</span></button>
+        </div>
+
         <div id="todo-list-wrapper">
           <div class="todo-row" v-for="entry in displayEntries" :key="entry.item.id" :class="{ 'todo-row-selected': entry.item.id === selectedId }" :style="{ paddingLeft: (14 + entry.depth * 22) + 'px' }" @click="selectTodo(entry.item.id)">
             <div class="todo-row-main">
