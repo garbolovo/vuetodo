@@ -17,6 +17,28 @@
     <button @click="changeName">Change Name</button>
 
     <div id="workspace">
+      <div id="sidebar">
+        <div class="sidebar-section">
+          <h4>Views</h4>
+          <button class="sidebar-item" :class="{ active: activeView === 'all' }" @click="setView('all')">All <span class="view-count">{{ allCount }}</span></button>
+          <button class="sidebar-item" :class="{ active: activeView === 'today' }" @click="setView('today')">Today <span class="view-count">{{ todayCount }}</span></button>
+          <button class="sidebar-item" :class="{ active: activeView === 'overdue' }" @click="setView('overdue')">Overdue <span class="view-count">{{ overdueCount }}</span></button>
+          <button class="sidebar-item" :class="{ active: activeView === 'completed' }" @click="setView('completed')">Completed <span class="view-count">{{ completedCount }}</span></button>
+        </div>
+
+        <div class="sidebar-section" v-if="projectList.length">
+          <h4>Projects</h4>
+          <button class="sidebar-item" v-for="proj in projectList" :key="proj.id" :class="{ active: activeProject === proj.id }" @click="setProject(proj.id)">{{ proj.title }} <span class="view-count">{{ projectIncompleteCount(proj.id) }}</span></button>
+        </div>
+
+        <div class="sidebar-section" v-if="allContexts.length">
+          <h4>Contexts</h4>
+          <button class="sidebar-item" :class="{ active: activeContext === null }" @click="setContext(null)">All contexts</button>
+          <button class="sidebar-item" v-for="ctx in allContexts" :key="ctx" :class="{ active: activeContext === ctx }" @click="setContext(ctx)">{{ ctx }} <span class="view-count">{{ contextCount(ctx) }}</span></button>
+          <button class="sidebar-item" :class="{ active: activeContext === '' }" @click="setContext('')">No context <span class="view-count">{{ noContextCount }}</span></button>
+        </div>
+      </div>
+
       <div id="main-column">
         <input type="text" id="search-todo" @keyup="filterTodo" placeholder="Search">
 
@@ -32,19 +54,6 @@
             <option value="low">Low</option>
           </select>
           <button id="todo-btn" @click="regTodo">Add Todo</button>
-        </div>
-
-        <div id="view-tabs">
-          <button :class="{ active: activeView === 'all' }" @click="setView('all')">All <span class="view-count">{{ allCount }}</span></button>
-          <button :class="{ active: activeView === 'today' }" @click="setView('today')">Today <span class="view-count">{{ todayCount }}</span></button>
-          <button :class="{ active: activeView === 'overdue' }" @click="setView('overdue')">Overdue <span class="view-count">{{ overdueCount }}</span></button>
-          <button :class="{ active: activeView === 'completed' }" @click="setView('completed')">Completed <span class="view-count">{{ completedCount }}</span></button>
-        </div>
-
-        <div id="context-tabs" v-if="allContexts.length">
-          <button :class="{ active: activeContext === null }" @click="setContext(null)">All contexts</button>
-          <button v-for="ctx in allContexts" :key="ctx" :class="{ active: activeContext === ctx }" @click="setContext(ctx)">{{ ctx }} <span class="view-count">{{ contextCount(ctx) }}</span></button>
-          <button :class="{ active: activeContext === '' }" @click="setContext('')">No context <span class="view-count">{{ noContextCount }}</span></button>
         </div>
 
         <div id="todo-list-wrapper">

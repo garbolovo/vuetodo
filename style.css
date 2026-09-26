@@ -24,7 +24,7 @@ body {
 }
 
 #app {
-    max-width: 1100px;
+    max-width: 1300px;
     margin: 0 auto;
     padding: 20px 24px 40px;
     display: flex;
@@ -39,6 +39,16 @@ body {
     gap: 20px;
 }
 
+#sidebar {
+    width: 190px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: sticky;
+    top: 20px;
+}
+
 #main-column {
     flex: 1;
     min-width: 0;
@@ -50,6 +60,11 @@ body {
 @media (max-width: 760px) {
     #workspace {
         flex-direction: column;
+    }
+
+    #sidebar {
+        width: 100%;
+        position: static;
     }
 }
 
@@ -144,52 +159,51 @@ body {
     background: #3a5a85;
 }
 
-/* view tabs */
+/* sidebar navigation */
 
-#view-tabs,
-#context-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    width: 100%;
-    max-width: 700px;
-    margin-bottom: 14px;
+.sidebar-section h4 {
+    margin: 0 0 6px;
+    padding: 0 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #99a3b0;
 }
 
-#view-tabs button,
-#context-tabs button {
+.sidebar-item {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 6px;
-    padding: 6px 12px;
-    border: 1px solid #d0d5db;
-    border-radius: 20px;
-    background: #fff;
-    color: #555;
+    width: 100%;
+    padding: 7px 10px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #444;
     font-size: 0.85rem;
+    text-align: left;
     cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    transition: background 0.15s ease, color 0.15s ease;
 }
 
-#view-tabs button:hover,
-#context-tabs button:hover {
-    background: #f4f6f8;
+.sidebar-item:hover {
+    background: #eef0f3;
 }
 
-#view-tabs button.active,
-#context-tabs button.active {
+.sidebar-item.active {
     background: #4a6fa5;
-    border-color: #4a6fa5;
     color: #fff;
 }
 
-#view-tabs button.active .view-count,
-#context-tabs button.active .view-count {
+.sidebar-item.active .view-count {
     background: rgba(255, 255, 255, 0.25);
     color: #fff;
 }
 
 .view-count {
+    flex-shrink: 0;
     background: #eef0f3;
     color: #666;
     border-radius: 10px;
