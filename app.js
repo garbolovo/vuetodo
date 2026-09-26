@@ -73,12 +73,15 @@ new Vue ({
             const id = uuidv4();
             let item = e.target.parentElement.children[1].value;
             let body = e.target.parentElement.children[3].value;
+            let dueDate = e.target.parentElement.children[5].value;
             e.target.parentElement.children[1].value = '';
             e.target.parentElement.children[3].value = '';
+            e.target.parentElement.children[5].value = '';
             if(item) {
                 todoItem.id = id;
                 todoItem.title = item;
                 todoItem.body = body;
+                todoItem.dueDate = dueDate;
                 this.todoList.push(todoItem);
                 localStorage.setItem('todoList', JSON.stringify(this.todoList));
                 this.num = this.todoList.length;
@@ -150,6 +153,27 @@ new Vue ({
                 this.filteredOn = false;
                 this.num = this.todoList.length;
             }
+        },
+
+        dueDateInfo(dueDate) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const due = new Date(dueDate + 'T00:00:00');
+            const diffDays = Math.round((due - today) / 86400000);
+
+            if (diffDays < 0) return { label: 'Overdue', cls: 'due-overdue' };
+            if (diffDays === 0) return { label: 'Today', cls: 'due-today' };
+            if (diffDays === 1) return { label: 'Tomorrow', cls: 'due-soon' };
+            if (diffDays <= 6) return { label: due.toLocaleDateString('en-US', { weekday: 'long' }), cls: 'due-soon' };
+            return { label: due.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }), cls: 'due-future' };
+        },
+
+        dueDateLabel(dueDate) {
+            return this.dueDateInfo(dueDate).label;
+        },
+
+        dueDateClass(dueDate) {
+            return this.dueDateInfo(dueDate).cls;
         },
     }
 })
