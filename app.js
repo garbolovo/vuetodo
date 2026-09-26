@@ -20,6 +20,7 @@ new Vue ({
         filteredTodoList: [],
         filteredOff: true,
         filteredOn: false,
+        selectedId: null,
 
     },
     computed: {
@@ -48,6 +49,35 @@ new Vue ({
                 return this.filteredTodoList.map(item => ({ item, depth: 0, hasChildren: false }));
             }
             return this.visibleTodoList;
+        },
+
+        selectedItem() {
+            return this.todoList.find(t => t.id === this.selectedId) || null;
+        },
+
+        selectedSubtasks() {
+            if (!this.selectedItem) return [];
+            return this.todoList.filter(t => t.parentId === this.selectedItem.id);
+        },
+
+        selectedSubtaskProgressPct() {
+            if (!this.selectedSubtasks.length) return 0;
+            const doneCount = this.selectedSubtasks.filter(t => t.done).length;
+            return Math.round((doneCount / this.selectedSubtasks.length) * 100);
+        },
+
+        // Ancestor titles from the root down to (not including) the selected task.
+        selectedBreadcrumb() {
+            if (!this.selectedItem) return [];
+            const trail = [];
+            let current = this.selectedItem;
+            while (current.parentId) {
+                const parent = this.todoList.find(t => t.id === current.parentId);
+                if (!parent) break;
+                trail.unshift(parent.title);
+                current = parent;
+            }
+            return trail;
         },
     },
     methods: {
@@ -88,6 +118,9 @@ new Vue ({
                     });
                 }
                 this.todoList = this.todoList.filter(t => !idsToRemove.has(t.id));
+                if (idsToRemove.has(this.selectedId)) {
+                    this.selectedId = null;
+                }
                 this.saveTodos();
                 this.num = this.todoList.length;
             }
@@ -141,20 +174,17 @@ new Vue ({
             item.collapsed = !item.collapsed;
         },
 
-        editTitle(id, currentTitle) {
-            let newItem = prompt('Enter New Content', currentTitle);
-            if(newItem) {
-                const item = this.todoList.find(t => t.id === id);
-                item.title = newItem;
-                this.saveTodos();
-            }
+        selectTodo(id) {
+            this.selectedId = id;
         },
 
-        editBody(id, currentBody) {
-            let newItem = prompt('Enter New Content', currentBody);
-            if(newItem) {
-                const item = this.todoList.find(t => t.id === id);
-                item.body = newItem;
+        closeDetail() {
+            this.selectedId = null;
+        },
+
+        clearDueDate() {
+            if (this.selectedItem) {
+                this.selectedItem.dueDate = '';
                 this.saveTodos();
             }
         },

@@ -15,35 +15,83 @@
   <div id="app">
     <p>{{ name }}<p> <p>ПРЕДСТАВЛЯЕТ</p>
     <button @click="changeName">Change Name</button>
-    <input type="text" id="search-todo" @keyup="filterTodo" placeholder="Search">
 
-    <div id="enter-todo">
-      <label for="todo">Task Title </label><input id="todo" type="text">
-      <label for="todo-body">Task Body </label><textarea id="todo-body" type="text" rows="8"></textarea>
-      <label for="todo-due">Due Date </label><input id="todo-due" type="date">
-      <button id="todo-btn" @click="regTodo">Add Todo</button>
-    </div>
+    <div id="workspace">
+      <div id="main-column">
+        <input type="text" id="search-todo" @keyup="filterTodo" placeholder="Search">
 
-    <div id="todo-list-wrapper">
-      <div class="todo-row" v-for="entry in displayEntries" :key="entry.item.id" :style="{ paddingLeft: (14 + entry.depth * 22) + 'px' }">
-        <div class="todo-row-main">
-          <span class="disclosure" v-if="entry.hasChildren" @click="toggleCollapse(entry.item.id)">{{ entry.item.collapsed ? '▸' : '▾' }}</span>
-          <span class="disclosure-spacer" v-else></span>
-
-          <input type="checkbox" class="todo-check" :checked="entry.item.done" @change="doneTodo(entry.item.id)">
-
-          <span class="todo-title" :class="{ done: entry.item.done }" @click="editTitle(entry.item.id, entry.item.title)">{{ entry.item.title }}</span>
-
-          <span class="due-badge" v-bind:class="dueDateClass(entry.item.dueDate)" v-if="entry.item.dueDate">{{ dueDateLabel(entry.item.dueDate) }}</span>
-
-          <button class="btn-add-sub" title="Add subtask" @click="addSubtask(entry.item.id)">+</button>
-          <button class="btn-delete-todo-elem" title="Delete" @click="deleteTodo(entry.item.id)">×</button>
+        <div id="enter-todo">
+          <label for="todo">Task Title </label><input id="todo" type="text">
+          <label for="todo-body">Task Body </label><textarea id="todo-body" type="text" rows="8"></textarea>
+          <label for="todo-due">Due Date </label><input id="todo-due" type="date">
+          <button id="todo-btn" @click="regTodo">Add Todo</button>
         </div>
-        <p class="todo-body" v-if="entry.item.body" @click="editBody(entry.item.id, entry.item.body)">{{ entry.item.body }}</p>
+
+        <div id="todo-list-wrapper">
+          <div class="todo-row" v-for="entry in displayEntries" :key="entry.item.id" :class="{ 'todo-row-selected': entry.item.id === selectedId }" :style="{ paddingLeft: (14 + entry.depth * 22) + 'px' }" @click="selectTodo(entry.item.id)">
+            <div class="todo-row-main">
+              <span class="disclosure" v-if="entry.hasChildren" @click.stop="toggleCollapse(entry.item.id)">{{ entry.item.collapsed ? '▸' : '▾' }}</span>
+              <span class="disclosure-spacer" v-else></span>
+
+              <input type="checkbox" class="todo-check" :checked="entry.item.done" @click.stop @change="doneTodo(entry.item.id)">
+
+              <span class="todo-title" :class="{ done: entry.item.done }">{{ entry.item.title }}</span>
+
+              <span class="due-badge" v-bind:class="dueDateClass(entry.item.dueDate)" v-if="entry.item.dueDate">{{ dueDateLabel(entry.item.dueDate) }}</span>
+
+              <button class="btn-add-sub" title="Add subtask" @click.stop="addSubtask(entry.item.id)">+</button>
+              <button class="btn-delete-todo-elem" title="Delete" @click.stop="deleteTodo(entry.item.id)">×</button>
+            </div>
+            <p class="todo-body" v-if="entry.item.body">{{ entry.item.body }}</p>
+          </div>
+        </div>
+
+        <p id="num">You have {{ num }} tasks incomplete yet</p>
+      </div>
+
+      <div id="detail-panel" v-if="selectedItem">
+        <div class="detail-header">
+          <div class="detail-breadcrumb" v-if="selectedBreadcrumb.length">{{ selectedBreadcrumb.join(' / ') }}</div>
+          <button class="detail-close" title="Close" @click="closeDetail">×</button>
+        </div>
+
+        <input class="detail-title" v-model="selectedItem.title" @change="saveTodos">
+
+        <div class="detail-field">
+          <label>Status</label>
+          <button class="detail-status-btn" :class="{ done: selectedItem.done }" @click="doneTodo(selectedItem.id)">
+            {{ selectedItem.done ? '✓ Done' : 'Not done' }}
+          </button>
+        </div>
+
+        <div class="detail-field">
+          <label>Due Date</label>
+          <div class="detail-due-row">
+            <input type="date" v-model="selectedItem.dueDate" @change="saveTodos">
+            <button v-if="selectedItem.dueDate" class="detail-due-clear" title="Clear due date" @click="clearDueDate">×</button>
+          </div>
+        </div>
+
+        <div class="detail-field">
+          <label>Notes</label>
+          <textarea v-model="selectedItem.body" @change="saveTodos" rows="5"></textarea>
+        </div>
+
+        <div class="detail-field">
+          <label>Subtasks ({{ selectedSubtasks.length }})</label>
+          <div class="detail-subtask-progress" v-if="selectedSubtasks.length">
+            <div class="detail-subtask-progress-bar" :style="{ width: selectedSubtaskProgressPct + '%' }"></div>
+          </div>
+          <div class="detail-subtask" v-for="sub in selectedSubtasks" :key="sub.id">
+            <input type="checkbox" :checked="sub.done" @change="doneTodo(sub.id)">
+            <span :class="{ done: sub.done }" @click="selectTodo(sub.id)">{{ sub.title }}</span>
+          </div>
+          <button class="detail-add-subtask" @click="addSubtask(selectedItem.id)">+ Add subtask</button>
+        </div>
+
+        <button class="detail-delete" @click="deleteTodo(selectedItem.id)">Delete task</button>
       </div>
     </div>
-
-    <p id="num">You have {{ num }} tasks incomplete yet</p>
 
   </div>
   <script src="uuidv4.js"></script>
