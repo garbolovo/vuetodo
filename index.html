@@ -20,6 +20,7 @@
     <div id="enter-todo">
       <label for="todo">Task Title </label><input id="todo" type="text">
       <label for="todo-body">Task Body </label><textarea id="todo-body" type="text" rows="8"></textarea>
+      <label for="todo-due">Due Date </label><input id="todo-due" type="date">
       <button id="todo-btn" @click="regTodo">Add Todo</button>
     </div>
 
@@ -28,6 +29,7 @@
       <div class="todo-element" v-for="todo in todoList" v-show="filteredOff">
         <h4 class="todo-title" v-bind:data-id=todo.id @click="editTitle" >{{ todo.title }}</h4>
         <p class="todo-body" v-bind:data-id=todo.id @click="editBody" >{{ todo.body }}</p>
+        <span class="due-badge" v-bind:class="dueDateClass(todo.dueDate)" v-if="todo.dueDate">{{ dueDateLabel(todo.dueDate) }}</span>
 
         <button id="btn-done" @click="doneTodo">Done</button>
         <button id="btn-delete-todo-elem" v-bind:data-id=todo.id @click="deleteTodo">Delete</button>
@@ -38,6 +40,7 @@
       <div class="todo-element" v-for="todo in filteredTodoList" v-show="filteredOn">
         <h4 class="todo-title" v-bind:data-id=todo.id @click="editTitle" >{{ todo.title }}</h4>
         <p class="todo-body" v-bind:data-id=todo.id @click="editBody" >{{ todo.body }}</p>
+        <span class="due-badge" v-bind:class="dueDateClass(todo.dueDate)" v-if="todo.dueDate">{{ dueDateLabel(todo.dueDate) }}</span>
 
         <button id="btn-done" @click="doneTodo">Done</button>
         <button id="btn-delete-todo-elem" v-bind:data-id=todo.id @click="deleteTodo">Delete</button>

@@ -101,7 +101,8 @@ body {
 }
 
 #app #enter-todo #todo,
-#app #enter-todo #todo-body {
+#app #enter-todo #todo-body,
+#app #enter-todo #todo-due {
     width: 100%;
     padding: 8px 10px;
     border: 1px solid #d0d5db;
@@ -111,7 +112,8 @@ body {
 }
 
 #app #enter-todo #todo:focus,
-#app #enter-todo #todo-body:focus {
+#app #enter-todo #todo-body:focus,
+#app #enter-todo #todo-due:focus {
     outline: none;
     border-color: #4a6fa5;
 }
@@ -144,6 +146,7 @@ body {
 
 /* todo-element */
 #app .todo-element {
+    position: relative;
     width: 100%;
     margin: 0;
     padding: 14px 16px;
@@ -153,8 +156,37 @@ body {
 }
 
 #app .todo-element .todo-title {
-    margin: 0 0 6px;
+    margin: 0 90px 6px 0;
     cursor: pointer;
+}
+
+/* due date badge, MLO-style colored pill */
+.due-badge {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+}
+
+.due-overdue {
+    background: #e05252;
+}
+
+.due-today {
+    background: #e08a3c;
+}
+
+.due-soon {
+    background: #4a6fa5;
+}
+
+.due-future {
+    background: #8a97a8;
 }
 
 #app .todo-element .todo-body {
