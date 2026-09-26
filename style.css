@@ -1,16 +1,3 @@
-/* Utility */
-
-.done {
-    color: #b0b0b0;
-    text-decoration-line: line-through;
-}
-
-.deleted {
-    display: none;
-}
-
-/* End Utility */
-
 * {
     box-sizing: border-box;
 }
@@ -134,40 +121,76 @@ body {
     background: #3a5a85;
 }
 
-/* todo list */
+/* todo list — compact outline/tree, MLO-style */
 
 #todo-list-wrapper {
     width: 100%;
-    max-width: 500px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-/* todo-element */
-#app .todo-element {
-    position: relative;
-    width: 100%;
-    margin: 0;
-    padding: 14px 16px;
+    max-width: 700px;
     background: #fff;
     border-radius: 10px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
 }
 
-#app .todo-element .todo-title {
-    margin: 0 90px 6px 0;
+.todo-row {
+    padding: 9px 16px 9px 14px;
+    border-bottom: 1px solid #eef0f3;
+}
+
+.todo-row:last-child {
+    border-bottom: none;
+}
+
+.todo-row:hover {
+    background: #f8f9fb;
+}
+
+.todo-row-main {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.disclosure {
+    width: 14px;
+    flex-shrink: 0;
+    text-align: center;
+    font-size: 0.7rem;
+    color: #8a97a8;
     cursor: pointer;
+    user-select: none;
+}
+
+.disclosure-spacer {
+    width: 14px;
+    flex-shrink: 0;
+    display: inline-block;
+}
+
+.todo-check {
+    flex-shrink: 0;
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    accent-color: #4a6fa5;
+}
+
+.todo-title {
+    flex: 1;
+    cursor: pointer;
+}
+
+.todo-title.done {
+    color: #b0b0b0;
+    text-decoration-line: line-through;
 }
 
 /* due date badge, MLO-style colored pill */
 .due-badge {
-    position: absolute;
-    top: 14px;
-    right: 16px;
-    padding: 3px 10px;
+    flex-shrink: 0;
+    padding: 2px 9px;
     border-radius: 4px;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 600;
     color: #fff;
     white-space: nowrap;
@@ -189,41 +212,37 @@ body {
     background: #8a97a8;
 }
 
-#app .todo-element .todo-body {
-    margin: 0 0 10px;
-    padding: 0.5rem;
-    font-size: smaller;
+.todo-row .todo-body {
+    margin: 4px 0 0 60px;
+    font-size: 0.8rem;
+    color: #777;
     cursor: pointer;
-    color: #555;
-    border-left: solid #e0e0e0 3px;
 }
 
-#app .todo-element hr {
-    display: none;
-}
-
-/* buttons */
-#app .todo-element button {
-    padding: 6px 12px;
+/* row action buttons */
+.btn-add-sub,
+.btn-delete-todo-elem {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
     border: none;
-    border-radius: 6px;
-    font-size: 0.85rem;
+    border-radius: 4px;
+    background: transparent;
+    color: #99a3b0;
+    font-size: 1rem;
+    line-height: 1;
     cursor: pointer;
-    margin-right: 8px;
-    color: #fff;
-    transition: opacity 0.15s ease;
+    transition: background 0.15s ease, color 0.15s ease;
 }
 
-#app .todo-element button:hover {
-    opacity: 0.85;
+.btn-add-sub:hover {
+    background: #e5f3e5;
+    color: #4caf50;
 }
 
-#btn-done {
-    background: #4caf50;
-}
-
-#btn-delete-todo-elem {
-    background: #e57373;
+.btn-delete-todo-elem:hover {
+    background: #fbe6e6;
+    color: #e05252;
 }
 
 #num {
