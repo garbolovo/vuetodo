@@ -16,7 +16,16 @@ Vue.createApp({
             activeContext: null,
             activeProject: null,
             showAddForm: false,
+            openMenuId: null,
         };
+    },
+    mounted() {
+        // Close any open row menu when clicking outside of it.
+        document.addEventListener('click', (e) => {
+            if (this.openMenuId !== null && !e.target.closest('.row-menu')) {
+                this.openMenuId = null;
+            }
+        });
     },
     computed: {
         // The tree rooted at activeProject (or the whole forest if null),
@@ -231,6 +240,55 @@ Vue.createApp({
         toggleCollapse(id) {
             const item = this.todoList.find(t => t.id === id);
             item.collapsed = !item.collapsed;
+        },
+
+        toggleRowMenu(id) {
+            this.openMenuId = this.openMenuId === id ? null : id;
+        },
+
+        // Reparents a task by title lookup, reusing the existing parentId
+        // field (no new data model needed). Refuses to move a task under
+        // its own descendant, which would create a cycle.
+        moveTask(id) {
+            const item = this.todoList.find(t => t.id === id);
+            const title = prompt('Move under task titled (leave empty to move to top level):', '');
+            if (title === null) return;
+            if (title.trim() === '') {
+                item.parentId = null;
+                this.saveTodos();
+                return;
+            }
+            const target = this.todoList.find(t => t.title === title.trim() && t.id !== id);
+            if (!target) {
+                alert('No task found with that title');
+                return;
+            }
+            if (this.projectDescendantIds(id).has(target.id)) {
+                alert('Cannot move a task under its own subtask');
+                return;
+            }
+            item.parentId = target.id;
+            this.saveTodos();
+        },
+
+        menuAddSubtask(id) {
+            this.addSubtask(id);
+            this.openMenuId = null;
+        },
+
+        menuEdit(id) {
+            this.selectTodo(id);
+            this.openMenuId = null;
+        },
+
+        menuMove(id) {
+            this.moveTask(id);
+            this.openMenuId = null;
+        },
+
+        menuDelete(id) {
+            this.deleteTodo(id);
+            this.openMenuId = null;
         },
 
         // Flattens the subtree rooted at rootId (or the whole forest when

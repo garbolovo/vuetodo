@@ -70,15 +70,17 @@
           </div>
 
           <div class="todo-row" v-for="entry in displayEntries" :key="entry.item.id" :class="{ 'todo-row-selected': entry.item.id === selectedId }" @click="selectTodo(entry.item.id)">
-            <div class="col-title" :style="{ paddingLeft: (8 + entry.depth * 22) + 'px' }">
-              <span class="disclosure" v-if="entry.hasChildren" @click.stop="toggleCollapse(entry.item.id)">{{ entry.item.collapsed ? '▸' : '▾' }}</span>
+            <div class="col-title">
+              <span class="tree-guide" v-for="n in entry.depth" :key="n"></span>
+
+              <span class="disclosure" v-if="entry.hasChildren" @click.stop="toggleCollapse(entry.item.id)">{{ entry.item.collapsed ? '▶' : '▼' }}</span>
               <span class="disclosure-spacer" v-else></span>
 
               <input type="checkbox" class="todo-check" :checked="entry.item.done" @click.stop @change="doneTodo(entry.item.id)">
 
               <span class="row-icon">{{ entry.hasChildren ? '📁' : '📄' }}</span>
 
-              <span class="todo-title" :class="{ done: entry.item.done }">{{ entry.item.title }}</span>
+              <span class="todo-title" :class="{ done: entry.item.done, 'todo-title-parent': entry.hasChildren, 'todo-title-child': entry.depth > 0 }">{{ entry.item.title }}</span>
             </div>
 
             <div class="col-due">
@@ -95,8 +97,15 @@
             </div>
 
             <div class="col-actions">
-              <button class="btn-add-sub" title="Add subtask" @click.stop="addSubtask(entry.item.id)">+</button>
-              <button class="btn-delete-todo-elem" title="Delete" @click.stop="deleteTodo(entry.item.id)">×</button>
+              <div class="row-menu" :class="{ 'menu-open': openMenuId === entry.item.id }">
+                <button class="row-menu-btn" title="More actions" @click.stop="toggleRowMenu(entry.item.id)">⋯</button>
+                <div class="row-menu-dropdown" v-if="openMenuId === entry.item.id" @click.stop>
+                  <button @click="menuAddSubtask(entry.item.id)">Add subtask</button>
+                  <button @click="menuEdit(entry.item.id)">Edit</button>
+                  <button @click="menuMove(entry.item.id)">Move</button>
+                  <button class="row-menu-danger" @click="menuDelete(entry.item.id)">Delete</button>
+                </div>
+              </div>
             </div>
 
             <p class="todo-body" v-if="entry.item.body">{{ entry.item.body }}</p>
@@ -154,7 +163,7 @@
 
         <div class="detail-field">
           <label>📝 Notes</label>
-          <textarea v-model="selectedItem.body" @change="saveTodos" rows="5"></textarea>
+          <textarea v-model="selectedItem.body" @change="saveTodos" rows="3"></textarea>
         </div>
 
         <div class="detail-field">
