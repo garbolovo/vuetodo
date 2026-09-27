@@ -7,7 +7,6 @@ Vue.createApp({
             name: "John Doe",
             nameClicked: false,
             todoList,
-            num: todoList.length,
             filteredTodoList: [],
             filteredOff: true,
             filteredOn: false,
@@ -181,7 +180,6 @@ Vue.createApp({
                     this.selectedId = null;
                 }
                 this.saveTodos();
-                this.num = this.todoList.length;
             }
         },
 
@@ -209,7 +207,6 @@ Vue.createApp({
                 todoItem.collapsed = false;
                 this.todoList.push(todoItem);
                 this.saveTodos();
-                this.num = this.todoList.length;
                 this.showAddForm = false;
             } else {
                 alert('Todo title is empty')
@@ -233,7 +230,6 @@ Vue.createApp({
                     collapsed: false,
                 });
                 this.saveTodos();
-                this.num = this.todoList.length;
             }
         },
 
@@ -415,11 +411,9 @@ Vue.createApp({
                 this.filteredOff = false;
                 this.filteredOn = true;
                 this.filteredTodoList = this.todoList.filter( todo => todo.title.includes(snippet))
-                this.num = this.filteredTodoList.length
             } if(!snippet) {
                 this.filteredOff = true;
                 this.filteredOn = false;
-                this.num = this.todoList.length;
             }
         },
 
