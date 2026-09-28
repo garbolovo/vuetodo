@@ -257,6 +257,43 @@ body {
     font-weight: 600;
 }
 
+/* sidebar tag cloud */
+.tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0 10px;
+}
+
+.tag-cloud-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border: 1px solid #e2e6eb;
+    border-radius: 14px;
+    background: #fff;
+    color: #444;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.tag-cloud-item:hover {
+    background: #f4f6f8;
+}
+
+.tag-cloud-item.active {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: var(--brand-ink);
+}
+
+.tag-cloud-item.active .view-count {
+    background: rgba(0, 0, 0, 0.12);
+    color: var(--brand-ink);
+}
+
 /* todo list — compact outline/tree, MLO-style */
 
 .list-toolbar {

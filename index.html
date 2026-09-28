@@ -43,6 +43,15 @@
           <button class="sidebar-item" v-for="ctx in allContexts" :key="ctx" :class="{ active: activeContext === ctx }" @click="setContext(ctx)">{{ ctx }} <span class="view-count">{{ contextCount(ctx) }}</span></button>
           <button class="sidebar-item" :class="{ active: activeContext === '' }" @click="setContext('')">No context <span class="view-count">{{ noContextCount }}</span></button>
         </div>
+
+        <div class="sidebar-section" v-if="allTags.length">
+          <h4>Tags</h4>
+          <div class="tag-cloud">
+            <button class="tag-cloud-item" v-for="tag in allTags" :key="tag" :class="{ active: activeTag === tag }" @click="setTag(tag)">
+              {{ tag }} <span class="view-count">{{ tagCount(tag) }}</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       <div id="main-column">
