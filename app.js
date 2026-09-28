@@ -388,7 +388,7 @@ Vue.createApp({
         },
 
         selectTodo(id) {
-            this.selectedId = id;
+            this.selectedId = this.selectedId === id ? null : id;
         },
 
         closeDetail() {
