@@ -17,6 +17,7 @@ Vue.createApp({
             activeProject: null,
             showAddForm: false,
             openMenuId: null,
+            menuStyle: {},
             showCompleted: false,
         };
     },
@@ -251,8 +252,38 @@ Vue.createApp({
             item.collapsed = !item.collapsed;
         },
 
-        toggleRowMenu(id) {
-            this.openMenuId = this.openMenuId === id ? null : id;
+        // Positions the dropdown with position:fixed (so it escapes
+        // #todo-list-wrapper's overflow:hidden) anchored to the ⋯ button,
+        // then flips it above the button when there isn't enough room
+        // below, and clamps it horizontally so it never runs off-screen.
+        async toggleRowMenu(id, event) {
+            if (this.openMenuId === id) {
+                this.openMenuId = null;
+                return;
+            }
+            const rect = event.currentTarget.getBoundingClientRect();
+            this.menuStyle = {
+                position: 'fixed',
+                top: (rect.bottom + 4) + 'px',
+                left: Math.max(8, rect.right - 150) + 'px',
+                visibility: 'hidden',
+            };
+            this.openMenuId = id;
+            await this.$nextTick();
+            const dropdown = document.querySelector('.row-menu-dropdown');
+            if (!dropdown) return;
+            const dh = dropdown.offsetHeight;
+            const dw = dropdown.offsetWidth;
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const openUp = spaceBelow < dh + 8 && rect.top > dh + 8;
+            const left = Math.max(8, Math.min(rect.right - dw, window.innerWidth - dw - 8));
+            const top = openUp ? (rect.top - dh - 4) : (rect.bottom + 4);
+            this.menuStyle = {
+                position: 'fixed',
+                top: top + 'px',
+                left: left + 'px',
+                visibility: 'visible',
+            };
         },
 
         // Reparents a task by title lookup, reusing the existing parentId
