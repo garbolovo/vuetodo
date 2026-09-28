@@ -104,7 +104,7 @@
               <span class="disclosure" v-if="entry.hasChildren" @click.stop="toggleCollapse(entry.item.id)">{{ entry.item.collapsed ? '▶' : '▼' }}</span>
               <span class="disclosure-spacer" v-else></span>
 
-              <input type="checkbox" class="todo-check" :checked="entry.item.done" @click.stop @change="doneTodo(entry.item.id)">
+              <input type="checkbox" class="todo-check" :class="{ 'todo-check-overdue': isOverdue(entry.item) }" :checked="entry.item.done" @click.stop @change="doneTodo(entry.item.id)">
 
               <span class="row-icon">{{ entry.hasChildren ? '📁' : '📄' }}</span>
 
@@ -198,7 +198,7 @@
             <div class="detail-subtask-progress-bar" :style="{ width: selectedSubtaskProgressPct + '%' }"></div>
           </div>
           <div class="detail-subtask" v-for="sub in selectedSubtasks" :key="sub.id">
-            <input type="checkbox" class="todo-check" :checked="sub.done" @change="doneTodo(sub.id)">
+            <input type="checkbox" class="todo-check" :class="{ 'todo-check-overdue': isOverdue(sub) }" :checked="sub.done" @change="doneTodo(sub.id)">
             <span :class="{ done: sub.done }" @click="selectTodo(sub.id)">{{ sub.title }}</span>
           </div>
           <button class="detail-add-subtask" @click="addSubtask(selectedItem.id)">+ Add subtask</button>

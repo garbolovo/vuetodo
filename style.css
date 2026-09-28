@@ -526,6 +526,14 @@ body {
     border-color: var(--brand-dark);
 }
 
+.todo-check-overdue {
+    border-color: #e05252;
+}
+
+.todo-check-overdue:hover {
+    border-color: #c73e3e;
+}
+
 .todo-check:checked {
     background: var(--brand);
     border-color: var(--brand);
