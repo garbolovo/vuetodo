@@ -83,6 +83,29 @@ body {
     background: var(--brand-hover);
 }
 
+#add-subtask-btn {
+    flex-shrink: 0;
+    padding: 8px 16px;
+    border: 1.5px solid var(--brand);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--brand-dark);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+#add-subtask-btn:hover:not(:disabled) {
+    background: var(--brand-soft);
+}
+
+#add-subtask-btn:disabled {
+    border-color: #d0d5db;
+    color: #a4acb6;
+    cursor: not-allowed;
+}
+
 .topbar-user {
     flex-shrink: 0;
     width: 34px;
@@ -334,7 +357,7 @@ body {
 .todo-list-header,
 .todo-row {
     display: grid;
-    grid-template-columns: minmax(320px, 1fr) 120px 120px minmax(140px, auto) 72px;
+    grid-template-columns: minmax(320px, 1fr) 120px 120px minmax(140px, auto) 40px;
     align-items: center;
     column-gap: 10px;
 }
@@ -523,25 +546,6 @@ body {
     gap: 4px;
 }
 
-.btn-add-sub {
-    flex-shrink: 0;
-    width: 26px;
-    height: 26px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 1.5px solid var(--brand);
-    border-radius: 7px;
-    background: transparent;
-    color: var(--brand-dark);
-    cursor: pointer;
-    transition: background 0.15s ease;
-}
-
-.btn-add-sub:hover {
-    background: var(--brand-soft);
-}
-
 /* context */
 .context-badge {
     flex-shrink: 0;
@@ -643,9 +647,11 @@ body {
 }
 
 .row-menu-dropdown {
-    position: absolute;
-    right: 0;
-    top: calc(100% + 2px);
+    /* position/top/left are set inline by toggleRowMenu(), which measures
+       available space and flips the menu above the button when it would
+       otherwise overflow the bottom of the viewport. Fixed positioning
+       (rather than absolute) lets it escape #todo-list-wrapper's
+       overflow:hidden instead of being clipped by it. */
     z-index: 20;
     min-width: 150px;
     padding: 4px;

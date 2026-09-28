@@ -19,6 +19,8 @@
 
       <button id="new-task-btn" @click="showAddForm = !showAddForm">+ New Task</button>
 
+      <button id="add-subtask-btn" :disabled="!selectedItem" :title="selectedItem ? ('Add subtask to: ' + selectedItem.title) : 'Select a task first'" @click="addSubtask(selectedItem.id)">+ Subtask</button>
+
       <button class="topbar-user" title="Click to change name" @click="changeName">{{ name.split(' ').map(w => w[0]).join('') }}</button>
     </div>
 
@@ -112,17 +114,9 @@
             </div>
 
             <div class="col-actions">
-              <button class="btn-add-sub" title="Add subtask" @click.stop="addSubtask(entry.item.id)">
-                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
-                  <rect x="3" y="3" width="18" height="18" rx="5"></rect>
-                  <line x1="12" y1="7.5" x2="12" y2="16.5"></line>
-                  <line x1="7.5" y1="12" x2="16.5" y2="12"></line>
-                </svg>
-              </button>
-
               <div class="row-menu" :class="{ 'menu-open': openMenuId === entry.item.id }">
-                <button class="row-menu-btn" title="More actions" @click.stop="toggleRowMenu(entry.item.id)">⋯</button>
-                <div class="row-menu-dropdown" v-if="openMenuId === entry.item.id" @click.stop>
+                <button class="row-menu-btn" title="More actions" @click.stop="toggleRowMenu(entry.item.id, $event)">⋯</button>
+                <div class="row-menu-dropdown" v-if="openMenuId === entry.item.id" :style="menuStyle" @click.stop>
                   <button @click="menuAddSubtask(entry.item.id)">Add subtask</button>
                   <button @click="menuEdit(entry.item.id)">Edit</button>
                   <button @click="menuMove(entry.item.id)">Move</button>
