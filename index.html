@@ -60,6 +60,12 @@
           <button id="todo-btn" @click="regTodo">Add Todo</button>
         </div>
 
+        <div class="list-toolbar" v-if="activeView === 'all'">
+          <button class="show-completed-toggle" :class="{ active: showCompleted }" @click="showCompleted = !showCompleted">
+            {{ showCompleted ? 'Hide Completed' : 'Show Completed' }}
+          </button>
+        </div>
+
         <div id="todo-list-wrapper">
           <div class="todo-list-header">
             <div class="col-title">Task Name</div>
@@ -97,6 +103,14 @@
             </div>
 
             <div class="col-actions">
+              <button class="btn-add-sub" title="Add subtask" @click.stop="addSubtask(entry.item.id)">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+                  <rect x="3" y="3" width="18" height="18" rx="5"></rect>
+                  <line x1="12" y1="7.5" x2="12" y2="16.5"></line>
+                  <line x1="7.5" y1="12" x2="16.5" y2="12"></line>
+                </svg>
+              </button>
+
               <div class="row-menu" :class="{ 'menu-open': openMenuId === entry.item.id }">
                 <button class="row-menu-btn" title="More actions" @click.stop="toggleRowMenu(entry.item.id)">⋯</button>
                 <div class="row-menu-dropdown" v-if="openMenuId === entry.item.id" @click.stop>

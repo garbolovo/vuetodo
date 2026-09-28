@@ -16,6 +16,7 @@ Vue.createApp({
             activeProject: null,
             showAddForm: false,
             openMenuId: null,
+            showCompleted: false,
         };
     },
     mounted() {
@@ -62,7 +63,9 @@ Vue.createApp({
             } else if (this.activeView === 'completed') {
                 list = base.filter(t => t.done);
             } else {
-                list = base;
+                // "all" with a context filter active: still hide completed
+                // tasks by default, same as the tree view does.
+                list = this.showCompleted ? base : base.filter(t => !t.done);
             }
             return list.map(item => ({ item, depth: 0, hasChildren: false }));
         },
@@ -291,7 +294,10 @@ Vue.createApp({
         // rootId is null) in parent-before-children order, skipping the
         // children of any collapsed item.
         buildTree(rootId) {
-            const childrenOf = parentId => this.todoList.filter(t => t.parentId === parentId);
+            // Completed tasks are hidden from the tree by default; "Show
+            // Completed" reveals them again.
+            const source = this.showCompleted ? this.todoList : this.todoList.filter(t => !t.done);
+            const childrenOf = parentId => source.filter(t => t.parentId === parentId);
             const entries = [];
             const walk = (parentId, depth) => {
                 childrenOf(parentId).forEach(item => {
@@ -304,7 +310,7 @@ Vue.createApp({
             };
 
             if (rootId) {
-                const rootItem = this.todoList.find(t => t.id === rootId);
+                const rootItem = source.find(t => t.id === rootId);
                 if (!rootItem) return [];
                 entries.push({ item: rootItem, depth: 0, hasChildren: childrenOf(rootId).length > 0 });
                 if (!rootItem.collapsed) walk(rootId, 1);
