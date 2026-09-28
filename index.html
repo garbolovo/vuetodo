@@ -17,7 +17,7 @@
 
       <input type="text" id="search-todo" @keyup="filterTodo" placeholder="Search tasks... (Ctrl+K)">
 
-      <button id="new-task-btn" @click="showAddForm = !showAddForm">+ New Task</button>
+      <button id="new-task-btn" @click="focusQuickAdd">+ New Task</button>
 
       <button id="add-subtask-btn" :disabled="!selectedItem" :title="selectedItem ? ('Add subtask to: ' + selectedItem.title) : 'Select a task first'" @click="addSubtask(selectedItem.id)">+ Subtask</button>
 
@@ -57,18 +57,29 @@
       </div>
 
       <div id="main-column">
-        <div id="enter-todo" v-if="showAddForm">
-          <label for="todo">Task Title </label><input id="todo" type="text">
-          <label for="todo-body">Task Body </label><textarea id="todo-body" type="text" rows="8"></textarea>
-          <label for="todo-due">Due Date </label><input id="todo-due" type="date">
-          <label for="todo-priority">Priority </label>
-          <select id="todo-priority">
-            <option value="">No priority</option>
-            <option value="high">High</option>
-            <option value="medium">Medium</option>
-            <option value="low">Low</option>
-          </select>
-          <button id="todo-btn" @click="regTodo">Add Todo</button>
+        <div id="quick-add" :class="{ active: quickAddActive }">
+          <input id="todo" ref="quickAddInput" type="text" v-model="newTodo.title" placeholder="Add a task..."
+                 @focus="quickAddActive = true" @keydown.enter="regTodo" @keydown.esc="cancelQuickAdd">
+
+          <div class="quick-add-expanded" v-if="quickAddActive">
+            <textarea id="todo-body" v-model="newTodo.body" placeholder="Description" rows="2"></textarea>
+
+            <div class="quick-add-toolbar">
+              <div class="quick-add-toolbar-left">
+                <input id="todo-due" type="date" v-model="newTodo.dueDate" title="Due date">
+                <select id="todo-priority" v-model="newTodo.priority" title="Priority">
+                  <option value="">Priority</option>
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+              </div>
+              <div class="quick-add-toolbar-right">
+                <button class="quick-add-cancel" @click="cancelQuickAdd">Cancel</button>
+                <button id="todo-btn" :disabled="!newTodo.title.trim()" @click="regTodo">Add Task</button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="list-toolbar" v-if="activeView === 'all'">
