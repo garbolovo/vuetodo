@@ -187,7 +187,7 @@
             <div class="detail-subtask-progress-bar" :style="{ width: selectedSubtaskProgressPct + '%' }"></div>
           </div>
           <div class="detail-subtask" v-for="sub in selectedSubtasks" :key="sub.id">
-            <input type="checkbox" :checked="sub.done" @change="doneTodo(sub.id)">
+            <input type="checkbox" class="todo-check" :checked="sub.done" @change="doneTodo(sub.id)">
             <span :class="{ done: sub.done }" @click="selectTodo(sub.id)">{{ sub.title }}</span>
           </div>
           <button class="detail-add-subtask" @click="addSubtask(selectedItem.id)">+ Add subtask</button>
