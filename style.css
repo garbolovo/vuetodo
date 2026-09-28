@@ -448,12 +448,39 @@ body {
 }
 
 .todo-check {
+    appearance: none;
+    -webkit-appearance: none;
     flex-shrink: 0;
     align-self: center;
-    width: 15px;
-    height: 15px;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    border: 1.5px solid #b0b0b0;
+    border-radius: 3px;
+    background: #fff;
     cursor: pointer;
-    accent-color: var(--brand);
+    position: relative;
+}
+
+.todo-check:hover {
+    border-color: var(--brand-dark);
+}
+
+.todo-check:checked {
+    background: var(--brand);
+    border-color: var(--brand);
+}
+
+.todo-check:checked::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 0px;
+    width: 4px;
+    height: 8px;
+    border: solid var(--brand-ink);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
 }
 
 .todo-title {
