@@ -510,5 +510,9 @@ Vue.createApp({
         priorityClass(priority) {
             return priority ? 'priority-' + priority : '';
         },
+
+        isOverdue(item) {
+            return !item.done && this.dueDateDiffDays(item.dueDate) < 0;
+        },
     }
 }).mount('#app');
