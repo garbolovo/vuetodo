@@ -707,19 +707,26 @@ body {
 }
 
 .detail-close {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     border: none;
-    background: transparent;
-    color: #99a3b0;
-    font-size: 1.1rem;
+    background: #eef0f3;
+    color: #5a6472;
+    font-size: 1.3rem;
+    font-weight: 600;
     line-height: 1;
     cursor: pointer;
-    padding: 2px 6px;
-    border-radius: 4px;
+    border-radius: 50%;
+    transition: background 0.15s ease, color 0.15s ease;
 }
 
 .detail-close:hover {
-    background: #eef0f3;
-    color: #555;
+    background: #e0e3e8;
+    color: #282828;
 }
 
 .detail-title {
