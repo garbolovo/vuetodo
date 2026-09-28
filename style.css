@@ -1,10 +1,10 @@
 :root {
-    --brand: #7CFC00;
-    --brand-hover: #6be000;
-    --brand-dark: #4c9600;
-    --brand-ink: #1b2e00;
-    --brand-soft: #eef9df;
-    --brand-soft-badge: #e3f6c8;
+    --brand: #9EF51A;
+    --brand-hover: #88DC0A;
+    --brand-dark: #6DB008;
+    --brand-ink: #213602;
+    --brand-soft: #F3FEE2;
+    --brand-soft-badge: #E5F7C9;
 }
 
 * {
