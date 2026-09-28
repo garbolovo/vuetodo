@@ -15,7 +15,8 @@ Vue.createApp({
             activeContext: null,
             activeTag: null,
             activeProject: null,
-            showAddForm: false,
+            quickAddActive: false,
+            newTodo: { title: '', body: '', dueDate: '', priority: '' },
             openMenuId: null,
             menuStyle: {},
             showCompleted: false,
@@ -197,35 +198,36 @@ Vue.createApp({
             }
         },
 
-        regTodo(e) {
-            let todoItem = {};
-            const id = uuidv4();
-            let item = e.target.parentElement.children[1].value;
-            let body = e.target.parentElement.children[3].value;
-            let dueDate = e.target.parentElement.children[5].value;
-            let priority = e.target.parentElement.children[7].value;
-            e.target.parentElement.children[1].value = '';
-            e.target.parentElement.children[3].value = '';
-            e.target.parentElement.children[5].value = '';
-            e.target.parentElement.children[7].value = '';
-            if(item) {
-                todoItem.id = id;
-                todoItem.title = item;
-                todoItem.body = body;
-                todoItem.dueDate = dueDate;
-                todoItem.priority = priority;
-                todoItem.tags = [];
-                todoItem.context = '';
-                todoItem.parentId = null;
-                todoItem.done = false;
-                todoItem.collapsed = false;
-                this.todoList.push(todoItem);
-                this.saveTodos();
-                this.showAddForm = false;
-            } else {
-                alert('Todo title is empty')
-            }
+        regTodo() {
+            const title = this.newTodo.title.trim();
+            if (!title) return;
 
+            this.todoList.push({
+                id: uuidv4(),
+                title,
+                body: this.newTodo.body,
+                dueDate: this.newTodo.dueDate,
+                priority: this.newTodo.priority,
+                tags: [],
+                context: '',
+                parentId: null,
+                done: false,
+                collapsed: false,
+            });
+            this.saveTodos();
+            this.cancelQuickAdd();
+        },
+
+        cancelQuickAdd() {
+            this.newTodo = { title: '', body: '', dueDate: '', priority: '' };
+            this.quickAddActive = false;
+            this.$refs.quickAddInput?.blur();
+        },
+
+        async focusQuickAdd() {
+            this.quickAddActive = true;
+            await this.$nextTick();
+            this.$refs.quickAddInput?.focus();
         },
 
         addSubtask(parentId) {
