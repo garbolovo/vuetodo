@@ -13,6 +13,7 @@ Vue.createApp({
             selectedId: null,
             activeView: 'all',
             activeContext: null,
+            activeTag: null,
             activeProject: null,
             showAddForm: false,
             openMenuId: null,
@@ -44,12 +45,13 @@ Vue.createApp({
         viewEntries() {
             const contextMatches = t => this.activeContext === null
                 || (this.activeContext === '' ? !t.context : t.context === this.activeContext);
+            const tagMatches = t => this.activeTag === null || (t.tags && t.tags.includes(this.activeTag));
 
-            if (this.activeView === 'all' && this.activeContext === null) {
+            if (this.activeView === 'all' && this.activeContext === null && this.activeTag === null) {
                 return this.treeEntries;
             }
 
-            let base = this.todoList.filter(contextMatches);
+            let base = this.todoList.filter(t => contextMatches(t) && tagMatches(t));
             if (this.activeProject) {
                 const ids = this.projectDescendantIds(this.activeProject);
                 base = base.filter(t => ids.has(t.id));
@@ -110,6 +112,14 @@ Vue.createApp({
 
         noContextCount() {
             return this.todoList.filter(t => !t.context).length;
+        },
+
+        // Distinct tags already used across all tasks, for the sidebar's
+        // tag cloud.
+        allTags() {
+            const set = new Set();
+            this.todoList.forEach(t => (t.tags || []).forEach(tag => set.add(tag)));
+            return Array.from(set).sort();
         },
 
         selectedItem() {
@@ -401,6 +411,16 @@ Vue.createApp({
 
         contextCount(ctx) {
             return this.todoList.filter(t => t.context === ctx).length;
+        },
+
+        // tag toggles: clicking the active tag again clears the filter.
+        setTag(tag) {
+            this.activeTag = this.activeTag === tag ? null : tag;
+            this.resetSearch();
+        },
+
+        tagCount(tag) {
+            return this.todoList.filter(t => (t.tags || []).includes(tag)).length;
         },
 
         onContextChange() {
