@@ -417,7 +417,7 @@ body {
 .todo-list-header,
 .todo-row {
     display: grid;
-    grid-template-columns: minmax(320px, 1fr) 120px 120px minmax(140px, auto) 40px;
+    grid-template-columns: minmax(320px, 1fr) 120px 120px 200px 40px;
     align-items: center;
     column-gap: 10px;
 }
