@@ -101,7 +101,7 @@ Vue.createApp({
         },
 
         allCount() {
-            return this.todoList.length;
+            return this.todoList.filter(t => !t.done).length;
         },
 
         // Distinct contexts already used across all tasks, for the filter tabs
