@@ -97,10 +97,14 @@
             <div class="col-actions"></div>
           </div>
 
-          <div class="todo-row" v-for="entry in displayEntries" :key="entry.item.id" :class="{ 'todo-row-selected': entry.item.id === selectedId }" @click="selectTodo(entry.item.id)">
+          <div class="todo-row" v-for="entry in displayEntries" :key="entry.item.id"
+               :class="{ 'todo-row-selected': entry.item.id === selectedId, 'todo-row-dragging': entry.item.id === draggedTaskId, 'todo-row-drop-target': entry.item.id === dragOverTaskId }"
+               @click="selectTodo(entry.item.id)" @dragover="setDragOver(entry.item.id, $event)" @drop.prevent.stop="dropTask(entry.item.id)">
             <div class="col-title">
               <span class="tree-guide" v-for="n in entry.depth" :key="n"></span>
 
+              <button class="drag-handle" draggable="true" title="Drag to make a subtask" aria-label="Drag task to a new parent"
+                      @click.stop @dragstart.stop="startDrag(entry.item.id, $event)" @dragend="endDrag">⠿</button>
               <span class="disclosure" v-if="entry.hasChildren" @click.stop="toggleCollapse(entry.item.id)">{{ entry.item.collapsed ? '▶' : '▼' }}</span>
               <span class="disclosure-spacer" v-else></span>
 
@@ -215,6 +219,25 @@
           <button class="detail-delete" title="Delete task" @click="deleteTodo(selectedItem.id)">🗑</button>
         </div>
       </div>
+    </div>
+
+    <div class="modal-backdrop" v-if="moveDialogTask" @click.self="closeMoveDialog">
+      <section class="move-dialog" role="dialog" aria-modal="true" aria-labelledby="move-dialog-title">
+        <div class="move-dialog-header">
+          <h2 id="move-dialog-title">Move task</h2>
+          <button class="move-dialog-close" title="Close" aria-label="Close" @click="closeMoveDialog">×</button>
+        </div>
+        <p>Move <strong>{{ moveDialogTask.title }}</strong> under:</p>
+        <label for="move-target">New parent</label>
+        <select id="move-target" ref="moveTargetSelect" v-model="moveTargetId">
+          <option :value="null">Top level</option>
+          <option v-for="option in moveDestinationOptions" :key="option.id" :value="option.id">{{ option.label }}</option>
+        </select>
+        <div class="move-dialog-actions">
+          <button class="move-dialog-cancel" @click="closeMoveDialog">Cancel</button>
+          <button class="move-dialog-confirm" @click="confirmMove">Move task</button>
+        </div>
+      </section>
     </div>
 
   </div>
