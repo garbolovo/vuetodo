@@ -31,15 +31,17 @@ Vue.createApp({
         });
 
         this.onSearchShortcut = (e) => {
-            if (e.ctrlKey && e.key.toLowerCase() === 'k') {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
                 e.preventDefault();
                 this.$refs.searchInput.focus();
             }
         };
-        document.addEventListener('keydown', this.onSearchShortcut);
+        // Capture the event before a focused control or browser integration
+        // can consume it. Ctrl+K is kept; Cmd+K is the macOS convention.
+        window.addEventListener('keydown', this.onSearchShortcut, true);
     },
     beforeUnmount() {
-        document.removeEventListener('keydown', this.onSearchShortcut);
+        window.removeEventListener('keydown', this.onSearchShortcut, true);
     },
     computed: {
         // The tree rooted at activeProject (or the whole forest if null),
