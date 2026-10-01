@@ -20,6 +20,10 @@ Vue.createApp({
             openMenuId: null,
             menuStyle: {},
             showCompleted: false,
+            draggedTaskId: null,
+            dragOverTaskId: null,
+            moveDialogTaskId: null,
+            moveTargetId: null,
         };
     },
     mounted() {
@@ -30,7 +34,11 @@ Vue.createApp({
             }
         });
 
-        this.onSearchShortcut = (e) => {
+        this.onGlobalKeydown = (e) => {
+            if (e.key === 'Escape' && this.moveDialogTaskId) {
+                this.closeMoveDialog();
+                return;
+            }
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
                 e.preventDefault();
                 this.$refs.searchInput.focus();
@@ -38,10 +46,10 @@ Vue.createApp({
         };
         // Capture the event before a focused control or browser integration
         // can consume it. Ctrl+K is kept; Cmd+K is the macOS convention.
-        window.addEventListener('keydown', this.onSearchShortcut, true);
+        window.addEventListener('keydown', this.onGlobalKeydown, true);
     },
     beforeUnmount() {
-        window.removeEventListener('keydown', this.onSearchShortcut, true);
+        window.removeEventListener('keydown', this.onGlobalKeydown, true);
     },
     computed: {
         // The tree rooted at activeProject (or the whole forest if null),
@@ -164,6 +172,18 @@ Vue.createApp({
                 current = parent;
             }
             return trail;
+        },
+
+        moveDialogTask() {
+            return this.todoList.find(t => t.id === this.moveDialogTaskId) || null;
+        },
+
+        moveDestinationOptions() {
+            if (!this.moveDialogTask) return [];
+            const unavailableIds = this.projectDescendantIds(this.moveDialogTask.id);
+            return this.todoList
+                .filter(t => !unavailableIds.has(t.id))
+                .map(t => ({ id: t.id, label: this.taskPath(t) }));
         },
     },
     methods: {
@@ -301,29 +321,79 @@ Vue.createApp({
             };
         },
 
-        // Reparents a task by title lookup, reusing the existing parentId
-        // field (no new data model needed). Refuses to move a task under
-        // its own descendant, which would create a cycle.
-        moveTask(id) {
-            const item = this.todoList.find(t => t.id === id);
-            const title = prompt('Move under task titled (leave empty to move to top level):', '');
-            if (title === null) return;
-            if (title.trim() === '') {
-                item.parentId = null;
-                this.saveTodos();
-                return;
+        taskPath(task) {
+            const path = [task.title];
+            let current = task;
+            while (current.parentId) {
+                const parent = this.todoList.find(t => t.id === current.parentId);
+                if (!parent) break;
+                path.unshift(parent.title);
+                current = parent;
             }
-            const target = this.todoList.find(t => t.title === title.trim() && t.id !== id);
-            if (!target) {
-                alert('No task found with that title');
-                return;
+            return path.join(' › ');
+        },
+
+        canReparent(taskId, newParentId) {
+            if (!this.todoList.some(t => t.id === taskId)) return false;
+            if (newParentId === null) return true;
+            if (!this.todoList.some(t => t.id === newParentId)) return false;
+            return !this.projectDescendantIds(taskId).has(newParentId);
+        },
+
+        reparentTask(taskId, newParentId) {
+            if (!this.canReparent(taskId, newParentId)) return false;
+            const task = this.todoList.find(t => t.id === taskId);
+            if (task.parentId === newParentId) return true;
+            task.parentId = newParentId;
+            if (newParentId) {
+                const parent = this.todoList.find(t => t.id === newParentId);
+                parent.collapsed = false;
             }
-            if (this.projectDescendantIds(id).has(target.id)) {
-                alert('Cannot move a task under its own subtask');
-                return;
-            }
-            item.parentId = target.id;
             this.saveTodos();
+            return true;
+        },
+
+        openMoveDialog(id) {
+            const task = this.todoList.find(t => t.id === id);
+            if (!task) return;
+            this.moveDialogTaskId = id;
+            this.moveTargetId = task.parentId;
+            this.openMenuId = null;
+            this.$nextTick(() => this.$refs.moveTargetSelect?.focus());
+        },
+
+        closeMoveDialog() {
+            this.moveDialogTaskId = null;
+            this.moveTargetId = null;
+        },
+
+        confirmMove() {
+            if (this.moveDialogTask && this.reparentTask(this.moveDialogTask.id, this.moveTargetId)) {
+                this.closeMoveDialog();
+            }
+        },
+
+        startDrag(id, event) {
+            this.draggedTaskId = id;
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/plain', id);
+        },
+
+        setDragOver(targetId, event) {
+            if (!this.draggedTaskId || !this.canReparent(this.draggedTaskId, targetId)) return;
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'move';
+            this.dragOverTaskId = targetId;
+        },
+
+        dropTask(targetId) {
+            if (this.draggedTaskId) this.reparentTask(this.draggedTaskId, targetId);
+            this.endDrag();
+        },
+
+        endDrag() {
+            this.draggedTaskId = null;
+            this.dragOverTaskId = null;
         },
 
         menuAddSubtask(id) {
@@ -337,8 +407,7 @@ Vue.createApp({
         },
 
         menuMove(id) {
-            this.moveTask(id);
-            this.openMenuId = null;
+            this.openMoveDialog(id);
         },
 
         menuDelete(id) {
