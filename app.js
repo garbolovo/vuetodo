@@ -29,6 +29,17 @@ Vue.createApp({
                 this.openMenuId = null;
             }
         });
+
+        this.onSearchShortcut = (e) => {
+            if (e.ctrlKey && e.key.toLowerCase() === 'k') {
+                e.preventDefault();
+                this.$refs.searchInput.focus();
+            }
+        };
+        document.addEventListener('keydown', this.onSearchShortcut);
+    },
+    beforeUnmount() {
+        document.removeEventListener('keydown', this.onSearchShortcut);
     },
     computed: {
         // The tree rooted at activeProject (or the whole forest if null),
@@ -427,7 +438,7 @@ Vue.createApp({
         resetSearch() {
             this.filteredOn = false;
             this.filteredOff = true;
-            const searchInput = document.getElementById('search-todo');
+            const searchInput = this.$refs.searchInput;
             if (searchInput) searchInput.value = '';
         },
 
@@ -465,14 +476,17 @@ Vue.createApp({
         },
 
         filterTodo(e) {
-            let snippet = e.target.value;
-            if(snippet) {
+            const snippet = e.target.value.trim().toLocaleLowerCase();
+            if (snippet) {
                 this.filteredOff = false;
                 this.filteredOn = true;
-                this.filteredTodoList = this.todoList.filter( todo => todo.title.includes(snippet))
-            } if(!snippet) {
+                this.filteredTodoList = this.todoList.filter(todo =>
+                    todo.title.toLocaleLowerCase().includes(snippet)
+                );
+            } else {
                 this.filteredOff = true;
                 this.filteredOn = false;
+                this.filteredTodoList = [];
             }
         },
 

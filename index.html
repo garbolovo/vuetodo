@@ -15,7 +15,7 @@
         <span class="brand-name">Todo App</span>
       </div>
 
-      <input type="text" id="search-todo" @keyup="filterTodo" placeholder="Search tasks... (Ctrl+K)">
+      <input ref="searchInput" type="text" id="search-todo" @input="filterTodo" placeholder="Search tasks... (Ctrl+K)">
 
       <button id="new-task-btn" @click="focusQuickAdd">+ New Task</button>
 
