@@ -905,7 +905,7 @@ body {
     font-weight: 600;
     line-height: 1;
     cursor: pointer;
-    border-radius: 50%;
+    border-radius: 4px;
     transition: background 0.15s ease, color 0.15s ease;
 }
 
