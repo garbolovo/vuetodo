@@ -1,0 +1,17 @@
+{
+  "name": "vuetodo-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Minimal API that persists the todo list to SQLite instead of browser localStorage.",
+  "main": "server.js",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.0"
+  }
+}
