@@ -31,6 +31,7 @@ const app = express();
 // browser forwards its cached Basic Auth entry on cross-origin requests.
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '2mb' }));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/api/health', (req, res) => {
   res.json({ ok: true });
