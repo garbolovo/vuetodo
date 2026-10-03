@@ -1,3 +1,8 @@
+// Base URL of the persistence API added in server/. Override by setting
+// window.VUETODO_API_BASE before this script runs (e.g. once this is
+// deployed, point it at the VPS instead of localhost).
+const API_BASE = window.VUETODO_API_BASE || 'http://localhost:3001/api';
+
 Vue.createApp({
     data() {
         const stored = localStorage.getItem('todoList');
@@ -47,6 +52,8 @@ Vue.createApp({
         // Capture the event before a focused control or browser integration
         // can consume it. Ctrl+K is kept; Cmd+K is the macOS convention.
         window.addEventListener('keydown', this.onGlobalKeydown, true);
+
+        this.syncWithServer();
     },
     beforeUnmount() {
         window.removeEventListener('keydown', this.onGlobalKeydown, true);
@@ -201,6 +208,35 @@ Vue.createApp({
 
         saveTodos() {
             localStorage.setItem('todoList', JSON.stringify(this.todoList));
+            // Best-effort: localStorage above already kept the change safe
+            // even if the server is unreachable.
+            return fetch(`${API_BASE}/todos`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(this.todoList),
+            }).catch((err) => {
+                console.warn('Could not save todos to server, kept locally only', err);
+            });
+        },
+
+        // Pulls the todo list from the server on startup. If the server
+        // already has data, it wins (it's the shared copy). If the server
+        // is empty but we have a local list (e.g. the first run against a
+        // fresh server, or the server was unreachable before), push the
+        // local list up instead of overwriting it with nothing.
+        async syncWithServer() {
+            try {
+                const res = await fetch(`${API_BASE}/todos`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const serverTodos = await res.json();
+                if (serverTodos.length === 0 && this.todoList.length > 0) {
+                    await this.saveTodos();
+                } else {
+                    this.todoList = serverTodos;
+                }
+            } catch (err) {
+                console.warn('Could not reach server, using local copy', err);
+            }
         },
 
         doneTodo(id) {
