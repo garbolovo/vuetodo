@@ -29,6 +29,7 @@ Vue.createApp({
             dragOverTaskId: null,
             moveDialogTaskId: null,
             moveTargetId: null,
+            sidebarOpen: true,
         };
     },
     mounted() {
