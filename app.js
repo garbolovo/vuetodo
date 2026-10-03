@@ -213,6 +213,7 @@ Vue.createApp({
             return fetch(`${API_BASE}/todos`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify(this.todoList),
             }).catch((err) => {
                 console.warn('Could not save todos to server, kept locally only', err);
@@ -226,7 +227,7 @@ Vue.createApp({
         // local list up instead of overwriting it with nothing.
         async syncWithServer() {
             try {
-                const res = await fetch(`${API_BASE}/todos`);
+                const res = await fetch(`${API_BASE}/todos`, { credentials: 'include' });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const serverTodos = await res.json();
                 if (serverTodos.length === 0 && this.todoList.length > 0) {

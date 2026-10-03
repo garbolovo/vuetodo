@@ -26,7 +26,10 @@ const upsertTodos = db.prepare(`
 `);
 
 const app = express();
-app.use(cors());
+// credentials: true + reflecting the request origin (rather than "*") is
+// required because the frontend sends `credentials: 'include'` so the
+// browser forwards its cached Basic Auth entry on cross-origin requests.
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '2mb' }));
 
 app.get('/api/health', (req, res) => {
