@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Todo App</title>
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261002-1">
+  <link rel="stylesheet" href="style.css?v=20261004-1">
 
 </head>
 <body>
@@ -15,6 +15,14 @@
         <span class="brand-name">Todo App</span>
       </div>
 
+      <button class="sidebar-toggle" :class="{ active: sidebarOpen }" type="button"
+              aria-controls="sidebar" :aria-expanded="sidebarOpen"
+              :aria-label="sidebarOpen ? 'Hide navigation' : 'Show navigation'"
+              :title="sidebarOpen ? 'Hide navigation' : 'Show navigation'"
+              @click="sidebarOpen = !sidebarOpen">
+        <span></span><span></span><span></span>
+      </button>
+
       <input ref="searchInput" type="text" id="search-todo" @input="filterTodo" placeholder="Search tasks... (Ctrl+K)">
 
       <button id="new-task-btn" @click="focusQuickAdd">+ New Task</button>
@@ -24,8 +32,8 @@
       <button class="topbar-user" title="Click to change name" @click="changeName">{{ name.split(' ').map(w => w[0]).join('') }}</button>
     </div>
 
-    <div id="workspace">
-      <div id="sidebar">
+    <div id="workspace" :class="{ 'sidebar-collapsed': !sidebarOpen }">
+      <div id="sidebar" :aria-hidden="!sidebarOpen" :inert="!sidebarOpen">
         <div class="sidebar-section">
           <h4>Views</h4>
           <button class="sidebar-item" :class="{ active: activeView === 'all' }" @click="setView('all')">All <span class="view-count">{{ allCount }}</span></button>
@@ -241,12 +249,12 @@
     </div>
 
   </div>
-  <script src="uuidv4.js?v=20261002-1"></script>
+  <script src="uuidv4.js?v=20261004-1"></script>
   <!-- Sets window.VUETODO_API_BASE to point at a deployed API (see
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261002-1"></script>
+<script src="app.js?v=20261004-1"></script>
 </body>
 </html>
 
