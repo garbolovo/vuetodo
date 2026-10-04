@@ -943,10 +943,6 @@ body {
     .col-title {
         width: 100%;
     }
-
-    .todo-row .todo-body {
-        padding-left: 0;
-    }
 }
 
 .detail-header {
