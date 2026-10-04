@@ -1184,6 +1184,101 @@ body {
 .detail-due-row {
     display: flex;
     gap: 6px;
+    position: relative;
+}
+
+.detail-due-trigger {
+    min-width: 0;
+    flex: 1;
+    height: 34px;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border: 1px solid #e3e6ea;
+    border-radius: 5px;
+    background: #fff;
+    color: #333;
+    font: inherit;
+    font-size: 0.85rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.detail-due-trigger.empty {
+    color: #8a94a1;
+}
+
+.detail-due-trigger:hover,
+.detail-due-trigger:focus-visible {
+    border-color: var(--brand);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--brand-soft);
+}
+
+.detail-due-chevron {
+    color: #8a94a1;
+    font-size: 1rem;
+}
+
+.due-picker-menu {
+    position: absolute;
+    z-index: 40;
+    top: calc(100% + 6px);
+    left: 0;
+    width: min(320px, calc(100vw - 48px));
+    padding: 6px;
+    border: 1px solid #dde1e6;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(31, 38, 46, 0.18);
+}
+
+.due-picker-option {
+    width: 100%;
+    min-height: 38px;
+    padding: 7px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    border: none;
+    border-radius: 5px;
+    background: transparent;
+    color: #2f343a;
+    font: inherit;
+    font-size: 0.88rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.due-picker-option span:last-child {
+    color: #8a94a1;
+}
+
+.due-picker-option:hover,
+.due-picker-option.selected {
+    background: var(--brand-soft);
+}
+
+.due-picker-option.selected {
+    color: var(--brand-dark);
+    font-weight: 600;
+}
+
+.due-picker-custom {
+    margin-top: 5px;
+    padding: 10px;
+    border-top: 1px solid #eef0f3;
+}
+
+.detail-field .due-picker-custom label {
+    margin-bottom: 6px;
+}
+
+.due-picker-custom input {
+    width: 100%;
 }
 
 .detail-due-clear {
