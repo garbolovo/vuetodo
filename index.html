@@ -5,7 +5,7 @@
   <title>Todo App</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261005-1">
+  <link rel="stylesheet" href="style.css?v=20261005-2">
 
 </head>
 <body>
@@ -164,72 +164,84 @@
 
       <div id="detail-panel" v-if="selectedItem">
         <div class="detail-header">
-          <div class="detail-breadcrumb" v-if="selectedBreadcrumb.length">{{ selectedBreadcrumb.join(' / ') }}</div>
-          <button class="detail-close" title="Close" @click="closeDetail">×</button>
-        </div>
-
-        <input class="detail-title" v-model="selectedItem.title" @change="saveTodos">
-
-        <div class="detail-field">
-          <label>📅 Due Date</label>
-          <div class="detail-due-row">
-            <input type="date" v-model="selectedItem.dueDate" @change="saveTodos">
-            <button v-if="selectedItem.dueDate" class="detail-due-clear" title="Clear due date" @click="clearDueDate">×</button>
+          <div class="detail-heading">
+            <div class="detail-breadcrumb" v-if="selectedBreadcrumb.length">{{ selectedBreadcrumb.join(' / ') }}</div>
+            <input class="detail-title" v-model="selectedItem.title" @change="saveTodos" aria-label="Task title">
           </div>
+          <button class="detail-close" title="Close details" aria-label="Close details" @click="closeDetail">×</button>
         </div>
 
-        <div class="detail-field">
-          <label>🚩 Priority</label>
-          <select v-model="selectedItem.priority" @change="saveTodos">
-            <option value="">No priority</option>
-            <option value="high">High</option>
-            <option value="medium">Medium</option>
-            <option value="low">Low</option>
-          </select>
-        </div>
+        <div class="detail-scroll">
+          <section class="detail-section">
+            <h3>Details</h3>
+            <div class="detail-properties">
+              <div class="detail-field">
+                <label>Due date</label>
+                <div class="detail-due-row">
+                  <input type="date" v-model="selectedItem.dueDate" @change="saveTodos">
+                  <button v-if="selectedItem.dueDate" class="detail-due-clear" title="Clear due date" aria-label="Clear due date" @click="clearDueDate">×</button>
+                </div>
+              </div>
 
-        <div class="detail-field">
-          <label>📍 Context</label>
-          <select v-model="selectedItem.context" @change="onContextChange">
-            <option value="">No context</option>
-            <option v-for="ctx in allContexts" :key="ctx" :value="ctx">{{ ctx }}</option>
-            <option value="__new__">+ New context...</option>
-          </select>
-        </div>
+              <div class="detail-field">
+                <label>Priority</label>
+                <select v-model="selectedItem.priority" @change="saveTodos">
+                  <option value="">No priority</option>
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+              </div>
 
-        <div class="detail-field">
-          <label>🏷 Tags</label>
-          <div class="detail-tags">
-            <span class="tag-pill" v-for="tag in (selectedItem.tags || [])" :key="tag">
-              {{ tag }}
-              <button class="tag-remove" title="Remove tag" @click="removeTag(selectedItem.id, tag)">×</button>
-            </span>
-            <button class="tag-add" @click="addTag(selectedItem.id)">+ Add tag</button>
-          </div>
-        </div>
+              <div class="detail-field">
+                <label>Context</label>
+                <select v-model="selectedItem.context" @change="onContextChange">
+                  <option value="">No context</option>
+                  <option v-for="ctx in allContexts" :key="ctx" :value="ctx">{{ ctx }}</option>
+                  <option value="__new__">+ New context...</option>
+                </select>
+              </div>
 
-        <div class="detail-field">
-          <label>📝 Notes</label>
-          <textarea v-model="selectedItem.body" @change="saveTodos" rows="3"></textarea>
-        </div>
+              <div class="detail-field detail-field-wide">
+                <label>Tags</label>
+                <div class="detail-tags">
+                  <span class="tag-pill" v-for="tag in (selectedItem.tags || [])" :key="tag">
+                    {{ tag }}
+                    <button class="tag-remove" title="Remove tag" @click="removeTag(selectedItem.id, tag)">×</button>
+                  </span>
+                  <button class="tag-add" @click="addTag(selectedItem.id)">+ Add tag</button>
+                </div>
+              </div>
+            </div>
+          </section>
 
-        <div class="detail-field">
-          <label>☑ Subtasks ({{ selectedSubtasks.length }})</label>
-          <div class="detail-subtask-progress" v-if="selectedSubtasks.length">
-            <div class="detail-subtask-progress-bar" :style="{ width: selectedSubtaskProgressPct + '%' }"></div>
-          </div>
-          <div class="detail-subtask" v-for="sub in selectedSubtasks" :key="sub.id">
-            <input type="checkbox" class="todo-check" :class="{ 'todo-check-overdue': isOverdue(sub) }" :checked="sub.done" @change="doneTodo(sub.id)">
-            <span :class="{ done: sub.done }" @click="selectTodo(sub.id)">{{ sub.title }}</span>
-          </div>
-          <button class="detail-add-subtask" @click="addSubtask(selectedItem.id)">+ Add subtask</button>
+          <section class="detail-section">
+            <h3>Description</h3>
+            <textarea class="detail-description" v-model="selectedItem.body" @change="saveTodos" rows="5" placeholder="Add a description..."></textarea>
+          </section>
+
+          <section class="detail-section">
+            <div class="detail-section-heading">
+              <h3>Subtasks</h3>
+              <span>{{ selectedSubtaskProgressPct }}%</span>
+            </div>
+            <div class="detail-subtask-progress" v-if="selectedSubtasks.length">
+              <div class="detail-subtask-progress-bar" :style="{ width: selectedSubtaskProgressPct + '%' }"></div>
+            </div>
+            <div class="detail-empty" v-if="!selectedSubtasks.length">No subtasks yet</div>
+            <div class="detail-subtask" v-for="sub in selectedSubtasks" :key="sub.id">
+              <input type="checkbox" class="todo-check" :class="{ 'todo-check-overdue': isOverdue(sub) }" :checked="sub.done" @change="doneTodo(sub.id)">
+              <span :class="{ done: sub.done }" @click="selectTodo(sub.id)">{{ sub.title }}</span>
+            </div>
+            <button class="detail-add-subtask" @click="addSubtask(selectedItem.id)">+ Add subtask</button>
+          </section>
         </div>
 
         <div class="detail-actions">
           <button class="detail-status-btn" :class="{ done: selectedItem.done }" @click="doneTodo(selectedItem.id)">
             {{ selectedItem.done ? '✓ Completed' : 'Mark Complete' }}
           </button>
-          <button class="detail-delete" title="Delete task" @click="deleteTodo(selectedItem.id)">🗑</button>
+          <button class="detail-delete" title="Delete task" aria-label="Delete task" @click="deleteTodo(selectedItem.id)">🗑</button>
         </div>
       </div>
     </div>
