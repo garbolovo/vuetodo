@@ -159,7 +159,7 @@
               </div>
             </div>
 
-            <p class="todo-body" v-if="entry.item.body" :style="{ paddingLeft: (entry.depth * 26 + 60) + 'px' }">{{ entry.item.body }}</p>
+            <p class="todo-body" v-if="entry.item.body" :style="{ paddingLeft: (entry.depth * 26 + 82 + (entry.hasChildren ? 21 : 0)) + 'px' }">{{ entry.item.body }}</p>
           </div>
         </div>
       </div>
