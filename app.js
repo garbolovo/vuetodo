@@ -31,6 +31,8 @@ Vue.createApp({
             moveDialogTaskId: null,
             moveTargetId: null,
             sidebarOpen: true,
+            duePickerOpen: false,
+            customDueDate: '',
         };
     },
     mounted() {
@@ -38,6 +40,9 @@ Vue.createApp({
         document.addEventListener('click', (e) => {
             if (this.openMenuId !== null && !e.target.closest('.row-menu')) {
                 this.openMenuId = null;
+            }
+            if (this.duePickerOpen && !e.target.closest('.detail-due-picker')) {
+                this.duePickerOpen = false;
             }
         });
 
@@ -49,6 +54,10 @@ Vue.createApp({
             if (e.key === 'Escape' && document.activeElement === this.$refs.subtaskInput) {
                 e.preventDefault();
                 this.cancelSubtaskComposer();
+                return;
+            }
+            if (e.key === 'Escape' && this.duePickerOpen) {
+                this.duePickerOpen = false;
                 return;
             }
             if (e.key === 'Escape' && this.selectedId) {
@@ -567,19 +576,68 @@ Vue.createApp({
 
         selectTodo(id) {
             this.newSubtaskTitle = '';
+            this.duePickerOpen = false;
             this.selectedId = this.selectedId === id ? null : id;
         },
 
         closeDetail() {
             this.newSubtaskTitle = '';
+            this.duePickerOpen = false;
             this.selectedId = null;
         },
 
         clearDueDate() {
             if (this.selectedItem) {
                 this.selectedItem.dueDate = '';
+                this.customDueDate = '';
+                this.duePickerOpen = false;
                 this.saveTodos();
             }
+        },
+
+        toggleDuePicker() {
+            this.duePickerOpen = !this.duePickerOpen;
+            if (this.duePickerOpen) {
+                this.customDueDate = this.selectedItem?.dueDate || this.dateFromToday(0);
+            }
+        },
+
+        dateFromToday(days) {
+            const date = new Date();
+            date.setHours(12, 0, 0, 0);
+            date.setDate(date.getDate() + days);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        },
+
+        quickDueDateOptions() {
+            return [
+                { label: 'Today', offset: 0 },
+                { label: 'Tomorrow', offset: 1 },
+                ...[2, 3, 4].map(offset => ({
+                    label: new Date(this.dateFromToday(offset) + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long' }),
+                    offset,
+                })),
+                { label: '1 week', offset: 7 },
+            ].map(option => {
+                const value = this.dateFromToday(option.offset);
+                const date = new Date(value + 'T12:00:00');
+                return {
+                    label: option.label,
+                    value,
+                    dateLabel: date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
+                };
+            });
+        },
+
+        setDueDate(value) {
+            if (!this.selectedItem || !value) return;
+            this.selectedItem.dueDate = value;
+            this.customDueDate = value;
+            this.duePickerOpen = false;
+            this.saveTodos();
         },
 
         addTag(id) {

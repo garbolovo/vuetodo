@@ -5,7 +5,7 @@
   <title>Todo App</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261005-3">
+  <link rel="stylesheet" href="style.css?v=20261005-4">
 
 </head>
 <body>
@@ -175,9 +175,29 @@
             <div class="detail-properties">
               <div class="detail-field">
                 <label>Due date</label>
-                <div class="detail-due-row">
-                  <input type="date" v-model="selectedItem.dueDate" @change="saveTodos">
+                <div class="detail-due-row detail-due-picker">
+                  <button type="button" class="detail-due-trigger" :class="{ empty: !selectedItem.dueDate }"
+                          :aria-expanded="duePickerOpen" @click.stop="toggleDuePicker">
+                    <span>{{ selectedItem.dueDate ? dueDateLabel(selectedItem.dueDate) : 'No due date' }}</span>
+                    <span class="detail-due-chevron">⌄</span>
+                  </button>
                   <button v-if="selectedItem.dueDate" class="detail-due-clear" title="Clear due date" aria-label="Clear due date" @click="clearDueDate">×</button>
+
+                  <div class="due-picker-menu" v-if="duePickerOpen" @click.stop>
+                    <button type="button" class="due-picker-option" v-for="option in quickDueDateOptions()" :key="option.value"
+                            :class="{ selected: selectedItem.dueDate === option.value }" @click="setDueDate(option.value)">
+                      <span>{{ option.label }}</span>
+                      <span>{{ option.dateLabel }}</span>
+                    </button>
+                    <button type="button" class="due-picker-option" :class="{ selected: !selectedItem.dueDate }" @click="clearDueDate">
+                      <span>No due date</span>
+                      <span>Never</span>
+                    </button>
+                    <div class="due-picker-custom">
+                      <label for="custom-due-date">Choose date</label>
+                      <input id="custom-due-date" type="date" v-model="customDueDate" @change="setDueDate(customDueDate)">
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -272,7 +292,7 @@
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261005-3"></script>
+<script src="app.js?v=20261005-4"></script>
 </body>
 </html>
 
