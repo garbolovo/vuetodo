@@ -126,7 +126,7 @@
               <input type="checkbox" class="todo-check" :class="{ 'todo-check-overdue': isOverdue(entry.item) }" :checked="entry.item.done" @click.stop @change="doneTodo(entry.item.id)">
 
               <span class="row-icon" v-if="entry.hasChildren">
-                <svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true">
+                <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
                   <path d="M2 6a2 2 0 012-2h5.172a2 2 0 011.414.586l1.828 1.828A2 2 0 0013.828 7H18a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>
                 </svg>
               </span>
@@ -159,7 +159,7 @@
               </div>
             </div>
 
-            <p class="todo-body" v-if="entry.item.body" :style="{ paddingLeft: (entry.depth * 26 + 82 + (entry.hasChildren ? 21 : 0)) + 'px' }">{{ entry.item.body }}</p>
+            <p class="todo-body" v-if="entry.item.body" :style="{ paddingLeft: (entry.depth * 26 + 82 + (entry.hasChildren ? 24 : 0)) + 'px' }">{{ entry.item.body }}</p>
           </div>
         </div>
       </div>
