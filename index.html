@@ -26,7 +26,7 @@
 
       <input ref="searchInput" type="text" id="search-todo" @input="filterTodo" placeholder="Search tasks... (Ctrl+K)">
 
-      <button id="new-task-btn" @click="focusQuickAdd">+ New Task</button>
+      <button id="new-task-btn" title="Press T" @click="focusQuickAdd">+ New Task</button>
 
       <button id="add-subtask-btn" :disabled="!selectedItem" :title="selectedItem ? ('Add subtask to: ' + selectedItem.title) : 'Select a task first'" @click="addSubtask(selectedItem.id)">+ Subtask</button>
 

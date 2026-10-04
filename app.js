@@ -49,6 +49,14 @@ Vue.createApp({
                 e.preventDefault();
                 this.$refs.searchInput.focus();
             }
+            if (e.key.toLowerCase() === 't' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                const tag = e.target.tagName;
+                const isEditable = tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable;
+                if (!isEditable) {
+                    e.preventDefault();
+                    this.focusQuickAdd();
+                }
+            }
         };
         // Capture the event before a focused control or browser integration
         // can consume it. Ctrl+K is kept; Cmd+K is the macOS convention.
