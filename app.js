@@ -45,6 +45,10 @@ Vue.createApp({
                 this.closeMoveDialog();
                 return;
             }
+            if (e.key === 'Escape' && this.selectedId) {
+                this.closeDetail();
+                return;
+            }
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
                 e.preventDefault();
                 this.$refs.searchInput.focus();
