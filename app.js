@@ -22,6 +22,7 @@ Vue.createApp({
             activeProject: null,
             quickAddActive: false,
             newTodo: { title: '', body: '', dueDate: '', priority: '' },
+            newSubtaskTitle: '',
             openMenuId: null,
             menuStyle: {},
             showCompleted: false,
@@ -43,6 +44,11 @@ Vue.createApp({
         this.onGlobalKeydown = (e) => {
             if (e.key === 'Escape' && this.moveDialogTaskId) {
                 this.closeMoveDialog();
+                return;
+            }
+            if (e.key === 'Escape' && document.activeElement === this.$refs.subtaskInput) {
+                e.preventDefault();
+                this.cancelSubtaskComposer();
                 return;
             }
             if (e.key === 'Escape' && this.selectedId) {
@@ -329,23 +335,40 @@ Vue.createApp({
             this.$refs.quickAddInput?.focus();
         },
 
-        addSubtask(parentId) {
-            const title = prompt('Subtask title');
-            if(title) {
-                this.todoList.push({
-                    id: uuidv4(),
-                    title,
-                    body: '',
-                    dueDate: '',
-                    priority: '',
-                    tags: [],
-                    context: '',
-                    parentId,
-                    done: false,
-                    collapsed: false,
-                });
-                this.saveTodos();
-            }
+        async addSelectedSubtask() {
+            const title = this.newSubtaskTitle.trim();
+            if (!title || !this.selectedItem) return;
+            const parentId = this.selectedItem.id;
+            this.todoList.push({
+                id: uuidv4(),
+                title,
+                body: '',
+                dueDate: '',
+                priority: '',
+                tags: [],
+                context: '',
+                parentId,
+                done: false,
+                collapsed: false,
+            });
+            this.selectedItem.collapsed = false;
+            this.newSubtaskTitle = '';
+            this.saveTodos();
+            await this.$nextTick();
+            this.$refs.subtaskInput?.focus();
+        },
+
+        cancelSubtaskComposer() {
+            this.newSubtaskTitle = '';
+            this.$refs.subtaskInput?.blur();
+        },
+
+        async focusSubtaskComposer(parentId) {
+            if (!this.todoList.some(t => t.id === parentId)) return;
+            this.selectedId = parentId;
+            this.newSubtaskTitle = '';
+            await this.$nextTick();
+            this.$refs.subtaskInput?.focus();
         },
 
         toggleCollapse(id) {
@@ -468,8 +491,8 @@ Vue.createApp({
         },
 
         menuAddSubtask(id) {
-            this.addSubtask(id);
             this.openMenuId = null;
+            this.focusSubtaskComposer(id);
         },
 
         menuEdit(id) {
@@ -543,10 +566,12 @@ Vue.createApp({
         },
 
         selectTodo(id) {
+            this.newSubtaskTitle = '';
             this.selectedId = this.selectedId === id ? null : id;
         },
 
         closeDetail() {
+            this.newSubtaskTitle = '';
             this.selectedId = null;
         },
 
