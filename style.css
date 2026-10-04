@@ -617,6 +617,13 @@ body {
     color: #7d8894;
 }
 
+.collapse-all-btn {
+    border: none;
+    background: transparent;
+    padding: 0;
+    font-family: inherit;
+}
+
 .disclosure-spacer {
     flex-shrink: 0;
     width: 24px;

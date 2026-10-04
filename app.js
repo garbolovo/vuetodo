@@ -76,6 +76,22 @@ Vue.createApp({
             return this.buildTree(this.activeProject);
         },
 
+        // Every task in the current tree's scope that has at least one
+        // child, regardless of its own collapsed state (unlike treeEntries,
+        // this reaches tasks hidden under a collapsed ancestor too, so
+        // "expand all" can actually reach them).
+        collapsibleTasks() {
+            const source = this.showCompleted ? this.todoList : this.todoList.filter(t => !t.done);
+            const scope = this.activeProject
+                ? source.filter(t => this.projectDescendantIds(this.activeProject).has(t.id))
+                : source;
+            return scope.filter(t => source.some(c => c.parentId === t.id));
+        },
+
+        allCollapsed() {
+            return this.collapsibleTasks.length > 0 && this.collapsibleTasks.every(t => t.collapsed);
+        },
+
         // Today/Overdue/Completed and an active context filter cut across
         // the hierarchy (a subtask's due date or context is independent of
         // its parent's), so they show a flat matching list instead of a
@@ -331,6 +347,11 @@ Vue.createApp({
         toggleCollapse(id) {
             const item = this.todoList.find(t => t.id === id);
             item.collapsed = !item.collapsed;
+        },
+
+        toggleCollapseAll() {
+            const collapse = !this.allCollapsed;
+            this.collapsibleTasks.forEach(t => (t.collapsed = collapse));
         },
 
         // Positions the dropdown with position:fixed (so it escapes

@@ -99,7 +99,13 @@
 
         <div id="todo-list-wrapper">
           <div class="todo-list-header">
-            <div class="col-title">Task Name</div>
+            <div class="col-title">
+              <button class="disclosure collapse-all-btn" type="button" v-if="collapsibleTasks.length"
+                      :title="allCollapsed ? 'Expand all' : 'Collapse all'"
+                      :aria-label="allCollapsed ? 'Expand all tasks' : 'Collapse all tasks'"
+                      @click="toggleCollapseAll">{{ allCollapsed ? '▶' : '▼' }}</button>
+              <span>Task Name</span>
+            </div>
             <div class="col-due">Due</div>
             <div class="col-priority">Priority</div>
             <div class="col-tags"></div>
