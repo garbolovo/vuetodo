@@ -5,7 +5,7 @@
   <title>Todo App</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261005-2">
+  <link rel="stylesheet" href="style.css?v=20261005-3">
 
 </head>
 <body>
@@ -27,8 +27,6 @@
       <input ref="searchInput" type="text" id="search-todo" @input="filterTodo" placeholder="Search tasks... (Ctrl+K)">
 
       <button id="new-task-btn" title="Press T" @click="focusQuickAdd">+ New Task</button>
-
-      <button id="add-subtask-btn" :disabled="!selectedItem" :title="selectedItem ? ('Add subtask to: ' + selectedItem.title) : 'Select a task first'" @click="addSubtask(selectedItem.id)">+ Subtask</button>
 
       <button class="topbar-user" title="Click to change name" @click="changeName">{{ name.split(' ').map(w => w[0]).join('') }}</button>
     </div>
@@ -228,12 +226,15 @@
             <div class="detail-subtask-progress" v-if="selectedSubtasks.length">
               <div class="detail-subtask-progress-bar" :style="{ width: selectedSubtaskProgressPct + '%' }"></div>
             </div>
+            <form class="detail-subtask-composer" @submit.prevent="addSelectedSubtask">
+              <input ref="subtaskInput" v-model="newSubtaskTitle" type="text" placeholder="Add a subtask..." aria-label="Subtask title">
+              <button type="submit" :disabled="!newSubtaskTitle.trim()">Add</button>
+            </form>
             <div class="detail-empty" v-if="!selectedSubtasks.length">No subtasks yet</div>
             <div class="detail-subtask" v-for="sub in selectedSubtasks" :key="sub.id">
               <input type="checkbox" class="todo-check" :class="{ 'todo-check-overdue': isOverdue(sub) }" :checked="sub.done" @change="doneTodo(sub.id)">
               <span :class="{ done: sub.done }" @click="selectTodo(sub.id)">{{ sub.title }}</span>
             </div>
-            <button class="detail-add-subtask" @click="addSubtask(selectedItem.id)">+ Add subtask</button>
           </section>
         </div>
 
@@ -271,7 +272,7 @@
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261004-1"></script>
+<script src="app.js?v=20261005-3"></script>
 </body>
 </html>
 

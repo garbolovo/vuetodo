@@ -118,29 +118,6 @@ body {
     background: var(--brand-hover);
 }
 
-#add-subtask-btn {
-    flex-shrink: 0;
-    padding: 8px 16px;
-    border: 1px solid #2b2f24;
-    border-radius: 4px;
-    background: transparent;
-    color: var(--brand-dark);
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: background 0.15s ease, opacity 0.15s ease;
-}
-
-#add-subtask-btn:hover:not(:disabled) {
-    background: var(--brand-soft);
-}
-
-#add-subtask-btn:disabled {
-    border-color: #d0d5db;
-    color: #a4acb6;
-    cursor: not-allowed;
-}
-
 .topbar-user {
     flex-shrink: 0;
     width: 34px;
@@ -1257,24 +1234,55 @@ body {
     text-decoration-line: line-through;
 }
 
-.detail-add-subtask {
-    margin-top: 10px;
-    border: none;
-    background: transparent;
-    color: var(--brand-dark);
-    font-size: 0.85rem;
+.detail-subtask-composer {
+    display: flex;
+    gap: 8px;
+    margin: 12px 0 8px;
+}
+
+.detail-subtask-composer input {
+    flex: 1;
+    min-width: 0;
+    height: 38px;
+    padding: 0 11px;
+    border: 1px solid #d9dde2;
+    border-radius: 6px;
+    background: #fff;
+    color: #333;
+    font: inherit;
+    font-size: 0.88rem;
+}
+
+.detail-subtask-composer input:focus {
+    outline: none;
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px var(--brand-soft);
+}
+
+.detail-subtask-composer button {
+    flex-shrink: 0;
+    padding: 0 15px;
+    border: 1px solid var(--brand);
+    border-radius: 6px;
+    background: var(--brand);
+    color: var(--brand-ink);
+    font: inherit;
+    font-size: 0.84rem;
+    font-weight: 700;
     cursor: pointer;
-    padding: 4px 0;
+}
+
+.detail-subtask-composer button:disabled {
+    border-color: #d9dde2;
+    background: #eef0f3;
+    color: #a0a8b2;
+    cursor: not-allowed;
 }
 
 .detail-empty {
     padding: 8px 0 3px;
     color: #a0a8b2;
     font-size: 0.84rem;
-}
-
-.detail-add-subtask:hover {
-    text-decoration: underline;
 }
 
 .detail-delete {
