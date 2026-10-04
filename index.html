@@ -5,7 +5,7 @@
   <title>Todo App</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261004-1">
+  <link rel="stylesheet" href="style.css?v=20261005-1">
 
 </head>
 <body>
@@ -107,8 +107,6 @@
               <span>Task Name</span>
             </div>
             <div class="col-due">Due</div>
-            <div class="col-priority">Priority</div>
-            <div class="col-tags"></div>
             <div class="col-actions"></div>
           </div>
 
@@ -117,6 +115,11 @@
                @click="selectTodo(entry.item.id)" @dragover="setDragOver(entry.item.id, $event)" @drop.prevent.stop="dropTask(entry.item.id)">
             <div class="col-title">
               <span class="tree-guide" v-for="n in entry.depth" :key="n"></span>
+
+              <span class="priority-rail" :class="entry.item.priority ? ('priority-rail-' + entry.item.priority) : 'priority-rail-none'"
+                    :title="entry.item.priority ? (priorityLabel(entry.item.priority) + ' priority') : ''"
+                    :role="entry.item.priority ? 'img' : null"
+                    :aria-label="entry.item.priority ? (priorityLabel(entry.item.priority) + ' priority') : null"></span>
 
               <button class="drag-handle" draggable="true" title="Drag to make a subtask" aria-label="Drag task to a new parent"
                       @click.stop @dragstart.stop="startDrag(entry.item.id, $event)" @dragend="endDrag">⠿</button>
@@ -132,19 +135,15 @@
               </span>
 
               <span class="todo-title" :class="{ done: entry.item.done, 'todo-title-parent': entry.hasChildren, 'todo-title-child': entry.depth > 0 }">{{ entry.item.title }}</span>
+              <span class="task-inline-meta" v-if="entry.item.context || (entry.item.tags && entry.item.tags.length)">
+                <span class="context-badge" v-if="entry.item.context">{{ entry.item.context }}</span>
+                <span class="tag-pill" v-for="tag in (entry.item.tags || []).slice(0, 3)" :key="tag">{{ tag }}</span>
+                <span class="tag-overflow" v-if="(entry.item.tags || []).length > 3" :title="(entry.item.tags || []).slice(3).join(', ')">+{{ entry.item.tags.length - 3 }}</span>
+              </span>
             </div>
 
             <div class="col-due">
               <span class="due-text" v-bind:class="dueDateClass(entry.item.dueDate)" v-if="entry.item.dueDate">{{ dueDateLabel(entry.item.dueDate) }}</span>
-            </div>
-
-            <div class="col-priority">
-              <span class="priority-badge" v-bind:class="priorityClass(entry.item.priority)" v-if="entry.item.priority">{{ priorityLabel(entry.item.priority) }}</span>
-            </div>
-
-            <div class="col-tags">
-              <span class="context-badge" v-if="entry.item.context">{{ entry.item.context }}</span>
-              <span class="tag-pill" v-for="tag in (entry.item.tags || [])" :key="tag">{{ tag }}</span>
             </div>
 
             <div class="col-actions">
@@ -159,7 +158,6 @@
               </div>
             </div>
 
-            <p class="todo-body" v-if="entry.item.body" :style="{ paddingLeft: (entry.depth * 26 + 82 + (entry.hasChildren ? 24 : 0)) + 'px' }">{{ entry.item.body }}</p>
           </div>
         </div>
       </div>

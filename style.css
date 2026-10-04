@@ -487,7 +487,7 @@ body {
 .todo-list-header,
 .todo-row {
     display: grid;
-    grid-template-columns: minmax(320px, 1fr) 120px 120px 200px 40px;
+    grid-template-columns: minmax(320px, 1fr) 120px 40px;
     align-items: center;
     column-gap: 10px;
 }
@@ -508,10 +508,6 @@ body {
     min-height: 44px;
     border-bottom: 1px solid #eef0f3;
     cursor: pointer;
-}
-
-.todo-row:has(.todo-body) {
-    min-height: 60px;
 }
 
 .todo-row:last-child {
@@ -550,6 +546,30 @@ body {
     flex-shrink: 0;
     width: 20px;
     border-right: 1px solid #e5e8ec;
+}
+
+.priority-rail {
+    flex-shrink: 0;
+    align-self: center;
+    width: 4px;
+    height: 28px;
+    border-radius: 3px;
+}
+
+.priority-rail-high {
+    background: #ef5b3f;
+}
+
+.priority-rail-medium {
+    background: #f4a62a;
+}
+
+.priority-rail-low {
+    background: #3f9cf3;
+}
+
+.priority-rail-none {
+    background: transparent;
 }
 
 .drag-handle {
@@ -676,9 +696,9 @@ body {
 }
 
 .todo-title {
-    flex: 1;
+    flex: 0 1 auto;
     align-self: center;
-    min-width: 0;
+    min-width: 80px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -696,6 +716,27 @@ body {
 
 .todo-title-child {
     color: #5b6472;
+}
+
+.task-inline-meta {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    align-self: center;
+    min-width: 0;
+    max-width: 45%;
+    overflow: hidden;
+}
+
+.tag-overflow {
+    flex-shrink: 0;
+    padding: 1px 6px;
+    border-radius: 10px;
+    background: #e2e6eb;
+    color: #5f6874;
+    font-size: 0.7rem;
+    font-weight: 600;
+    white-space: nowrap;
 }
 
 .col-due {
@@ -747,15 +788,6 @@ body {
 .priority-low {
     background: #e3f3e3;
     color: #2e7d32;
-}
-
-.col-tags {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px;
-    min-width: 0;
-    overflow: hidden;
 }
 
 .col-actions {
@@ -823,15 +855,6 @@ body {
 
 .tag-add:hover {
     text-decoration: underline;
-}
-
-.todo-row .todo-body {
-    grid-column: 1 / -1;
-    margin: 4px 0 0;
-    padding-left: 8px;
-    font-size: 0.8rem;
-    color: #777;
-    cursor: pointer;
 }
 
 /* row overflow menu */
