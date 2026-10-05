@@ -5,7 +5,7 @@
   <title>Todo App</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261005-5">
+  <link rel="stylesheet" href="style.css?v=20261005-6">
 
 </head>
 <body>
@@ -247,9 +247,15 @@
                 <div class="detail-tags">
                   <span class="tag-pill" v-for="tag in (selectedItem.tags || [])" :key="tag">
                     {{ tag }}
-                    <button class="tag-remove" title="Remove tag" @click="removeTag(selectedItem.id, tag)">×</button>
+                    <button class="tag-remove" type="button" title="Remove tag" :aria-label="'Remove tag ' + tag" @click="removeTag(selectedItem.id, tag)">×</button>
                   </span>
-                  <button class="tag-add" @click="addTag(selectedItem.id)">+ Add tag</button>
+                  <button class="tag-add" type="button" v-if="!tagComposerOpen" @click="openTagComposer">+ Add tag</button>
+                  <form class="tag-composer" v-else @submit.prevent="addSelectedTag">
+                    <input ref="tagInput" v-model="newTagName" type="text" placeholder="Tag name" aria-label="Tag name">
+                    <button class="tag-composer-submit" type="submit" :disabled="!newTagName.trim() || tagAlreadyExists">Add</button>
+                    <button class="tag-composer-cancel" type="button" title="Cancel" aria-label="Cancel adding tag" @click="cancelTagComposer">×</button>
+                    <span class="tag-composer-error" v-if="tagAlreadyExists">Already added</span>
+                  </form>
                 </div>
               </div>
             </div>
@@ -314,7 +320,7 @@
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261005-5"></script>
+<script src="app.js?v=20261005-6"></script>
 </body>
 </html>
 
