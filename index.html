@@ -5,7 +5,7 @@
   <title>Todo App</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261005-4">
+  <link rel="stylesheet" href="style.css?v=20261005-5">
 
 </head>
 <body>
@@ -66,14 +66,36 @@
       <div id="main-column">
         <div id="quick-add" :class="{ active: quickAddActive }">
           <input id="todo" ref="quickAddInput" type="text" v-model="newTodo.title" placeholder="Add a task..."
-                 @focus="quickAddActive = true" @keydown.enter="regTodo" @keydown.esc="cancelQuickAdd">
+                 @focus="quickAddActive = true" @keydown.enter="regTodo">
 
           <div class="quick-add-expanded" v-if="quickAddActive">
             <textarea id="todo-body" v-model="newTodo.body" placeholder="Description" rows="2"></textarea>
 
             <div class="quick-add-toolbar">
               <div class="quick-add-toolbar-left">
-                <input id="todo-due" type="date" v-model="newTodo.dueDate" title="Due date">
+                <div class="quick-due-picker">
+                  <button type="button" class="quick-due-trigger" :class="{ selected: newTodo.dueDate }"
+                          :aria-expanded="quickDuePickerOpen" @click.stop="toggleQuickDuePicker">
+                    <span>{{ newTodo.dueDate ? dueDateLabel(newTodo.dueDate) : 'Due date' }}</span>
+                    <span class="detail-due-chevron">⌄</span>
+                  </button>
+
+                  <div class="due-picker-menu" v-if="quickDuePickerOpen" @click.stop>
+                    <button type="button" class="due-picker-option" v-for="option in quickDueDateOptions()" :key="option.value"
+                            :class="{ selected: newTodo.dueDate === option.value }" @click="setQuickDueDate(option.value)">
+                      <span>{{ option.label }}</span>
+                      <span>{{ option.dateLabel }}</span>
+                    </button>
+                    <button type="button" class="due-picker-option" :class="{ selected: !newTodo.dueDate }" @click="clearQuickDueDate">
+                      <span>No due date</span>
+                      <span>Never</span>
+                    </button>
+                    <div class="due-picker-custom">
+                      <label for="quick-custom-due-date">Choose date</label>
+                      <input id="quick-custom-due-date" type="date" v-model="quickCustomDueDate" @change="setQuickDueDate(quickCustomDueDate)">
+                    </div>
+                  </div>
+                </div>
                 <select id="todo-priority" v-model="newTodo.priority" title="Priority">
                   <option value="">Priority</option>
                   <option value="high">High</option>
@@ -292,7 +314,7 @@
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261005-4"></script>
+<script src="app.js?v=20261005-5"></script>
 </body>
 </html>
 

@@ -284,7 +284,6 @@ body {
     gap: 8px;
 }
 
-#app #quick-add #todo-due,
 #app #quick-add #todo-priority {
     padding: 6px 8px;
     border: 1px solid #d0d5db;
@@ -293,6 +292,63 @@ body {
     color: #444;
     font-family: inherit;
     font-size: 0.82rem;
+}
+
+.quick-due-picker {
+    position: relative;
+}
+
+.quick-due-trigger {
+    height: 32px;
+    min-width: 112px;
+    padding: 0 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    border: 1px solid #d0d5db;
+    border-radius: 6px;
+    background: #fff;
+    color: #666;
+    font: inherit;
+    font-size: 0.82rem;
+    cursor: pointer;
+}
+
+.quick-due-trigger.selected {
+    border-color: var(--brand);
+    color: var(--brand-dark);
+    font-weight: 600;
+}
+
+.quick-due-trigger:hover,
+.quick-due-trigger:focus-visible {
+    border-color: var(--brand);
+    outline: none;
+}
+
+.quick-due-picker .due-picker-menu {
+    top: calc(100% + 7px);
+}
+
+#app #quick-add .due-picker-custom label {
+    display: block;
+    margin-bottom: 6px;
+    color: #8a94a1;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+#app #quick-add .due-picker-custom input {
+    width: 100%;
+    height: 34px;
+    padding: 0 8px;
+    border: 1px solid #d0d5db;
+    border-radius: 5px;
+    background: #fff;
+    color: #333;
+    font: inherit;
 }
 
 .quick-add-toolbar-right {
