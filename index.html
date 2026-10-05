@@ -5,7 +5,7 @@
   <title>Todo App</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261005-8">
+  <link rel="stylesheet" href="style.css?v=20261006-1">
 
 </head>
 <body>
@@ -56,8 +56,10 @@
         <div class="sidebar-section" v-if="allTags.length">
           <h4>Tags</h4>
           <div class="tag-cloud">
-            <button class="tag-cloud-item" v-for="tag in allTags" :key="tag" :class="{ active: activeTag === tag }" @click="setTag(tag)">
-              {{ tag }} <span class="view-count">{{ tagCount(tag) }}</span>
+            <button class="tag-cloud-item" v-for="tag in allTags" :key="tag" :style="tagVisualStyle(tag)" :class="{ active: activeTag === tag }" @click="setTag(tag)">
+              <span class="tag-cloud-marker" aria-hidden="true"></span>
+              <span class="tag-cloud-name">{{ tag }}</span>
+              <span class="view-count">{{ tagCount(tag) }}</span>
             </button>
           </div>
         </div>
@@ -157,7 +159,7 @@
               <span class="todo-title" :class="{ done: entry.item.done, 'todo-title-parent': entry.hasChildren, 'todo-title-child': entry.depth > 0 }">{{ entry.item.title }}</span>
               <span class="task-inline-meta" v-if="entry.item.context || (entry.item.tags && entry.item.tags.length)">
                 <span class="context-badge" v-if="entry.item.context">{{ entry.item.context }}</span>
-                <span class="tag-pill" v-for="tag in (entry.item.tags || []).slice(0, 3)" :key="tag">{{ tag }}</span>
+                <span class="tag-pill" v-for="tag in (entry.item.tags || []).slice(0, 3)" :key="tag" :style="tagVisualStyle(tag)">{{ tag }}</span>
                 <span class="tag-overflow" v-if="(entry.item.tags || []).length > 3" :title="(entry.item.tags || []).slice(3).join(', ')">+{{ entry.item.tags.length - 3 }}</span>
               </span>
             </div>
@@ -245,7 +247,7 @@
               <div class="detail-field detail-field-wide">
                 <label>Tags</label>
                 <div class="detail-tags">
-                  <span class="tag-pill" v-for="tag in (selectedItem.tags || [])" :key="tag">
+                  <span class="tag-pill" v-for="tag in (selectedItem.tags || [])" :key="tag" :style="tagVisualStyle(tag)">
                     {{ tag }}
                     <button class="tag-remove" type="button" title="Remove tag" :aria-label="'Remove tag ' + tag" @click="removeTag(selectedItem.id, tag)">×</button>
                   </span>
@@ -259,6 +261,7 @@
                           type="button"
                           v-for="tag in availableTagSuggestions"
                           :key="tag"
+                          :style="tagVisualStyle(tag)"
                           @click="addTagToSelected(tag)"
                         >
                           <span class="tag-picker-dot"></span>{{ tag }}
@@ -341,7 +344,7 @@
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261005-7"></script>
+<script src="app.js?v=20261006-1"></script>
 </body>
 </html>
 
