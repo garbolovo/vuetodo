@@ -5,7 +5,7 @@
   <title>Todo App</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261005-6">
+  <link rel="stylesheet" href="style.css?v=20261005-7">
 
 </head>
 <body>
@@ -251,10 +251,31 @@
                   </span>
                   <button class="tag-add" type="button" v-if="!tagComposerOpen" @click="openTagComposer">+ Add tag</button>
                   <form class="tag-composer" v-else @submit.prevent="addSelectedTag">
-                    <input ref="tagInput" v-model="newTagName" type="text" placeholder="Tag name" aria-label="Tag name">
-                    <button class="tag-composer-submit" type="submit" :disabled="!newTagName.trim() || tagAlreadyExists">Add</button>
+                    <div class="tag-picker">
+                      <input ref="tagInput" v-model="newTagName" type="text" placeholder="Search or create tag" aria-label="Search or create tag" autocomplete="off">
+                      <div class="tag-picker-menu">
+                        <button
+                          class="tag-picker-option"
+                          type="button"
+                          v-for="tag in availableTagSuggestions"
+                          :key="tag"
+                          @click="addTagToSelected(tag)"
+                        >
+                          <span class="tag-picker-dot"></span>{{ tag }}
+                        </button>
+                        <button
+                          class="tag-picker-option tag-picker-create"
+                          type="submit"
+                          v-if="newTagName.trim() && !matchingSavedTag && !tagAlreadyExists"
+                        >
+                          <span>＋</span>Create “{{ newTagName.trim() }}”
+                        </button>
+                        <span class="tag-picker-empty" v-if="!availableTagSuggestions.length && (!newTagName.trim() || tagAlreadyExists)">
+                          {{ tagAlreadyExists ? 'Already added' : 'No more saved tags' }}
+                        </span>
+                      </div>
+                    </div>
                     <button class="tag-composer-cancel" type="button" title="Cancel" aria-label="Cancel adding tag" @click="cancelTagComposer">×</button>
-                    <span class="tag-composer-error" v-if="tagAlreadyExists">Already added</span>
                   </form>
                 </div>
               </div>
@@ -320,7 +341,7 @@
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261005-6"></script>
+<script src="app.js?v=20261005-7"></script>
 </body>
 </html>
 
