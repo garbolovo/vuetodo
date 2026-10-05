@@ -212,9 +212,15 @@ Vue.createApp({
         // Distinct tags already used across all tasks, for the sidebar's
         // tag cloud.
         allTags() {
-            const set = new Set();
-            this.todoList.forEach(t => (t.tags || []).forEach(tag => set.add(tag)));
-            return Array.from(set).sort();
+            const tagsByNormalizedName = new Map();
+            this.todoList.forEach(t => (t.tags || []).forEach(tag => {
+                const cleanTag = tag.trim();
+                const normalized = cleanTag.toLocaleLowerCase();
+                if (cleanTag && !tagsByNormalizedName.has(normalized)) {
+                    tagsByNormalizedName.set(normalized, cleanTag);
+                }
+            }));
+            return Array.from(tagsByNormalizedName.values()).sort((a, b) => a.localeCompare(b));
         },
 
         selectedItem() {
@@ -236,6 +242,22 @@ Vue.createApp({
             const name = this.newTagName.trim().toLocaleLowerCase();
             if (!name || !this.selectedItem) return false;
             return (this.selectedItem.tags || []).some(tag => tag.toLocaleLowerCase() === name);
+        },
+
+        availableTagSuggestions() {
+            if (!this.selectedItem) return [];
+            const assigned = new Set((this.selectedItem.tags || []).map(tag => tag.toLocaleLowerCase()));
+            const query = this.newTagName.trim().toLocaleLowerCase();
+            return this.allTags.filter(tag => {
+                const normalized = tag.toLocaleLowerCase();
+                return !assigned.has(normalized) && (!query || normalized.includes(query));
+            });
+        },
+
+        matchingSavedTag() {
+            const query = this.newTagName.trim().toLocaleLowerCase();
+            if (!query) return null;
+            return this.allTags.find(tag => tag.toLocaleLowerCase() === query) || null;
         },
 
         // Ancestor titles from the root down to (not including) the selected task.
@@ -709,13 +731,25 @@ Vue.createApp({
             this.newTagName = '';
         },
 
-        addSelectedTag() {
-            const tag = this.newTagName.trim();
-            if (!tag || !this.selectedItem || this.tagAlreadyExists) return;
+        async addTagToSelected(tag) {
+            const cleanTag = tag.trim();
+            if (!cleanTag || !this.selectedItem) return;
             if (!this.selectedItem.tags) this.selectedItem.tags = [];
-            this.selectedItem.tags.push(tag);
+            const exists = this.selectedItem.tags.some(existingTag =>
+                existingTag.toLocaleLowerCase() === cleanTag.toLocaleLowerCase()
+            );
+            if (exists) return;
+            this.selectedItem.tags.push(cleanTag);
             this.saveTodos();
-            this.cancelTagComposer();
+            this.newTagName = '';
+            await this.$nextTick();
+            this.$refs.tagInput?.focus();
+        },
+
+        addSelectedTag() {
+            const tag = this.matchingSavedTag || this.newTagName.trim();
+            if (!tag || this.tagAlreadyExists) return;
+            this.addTagToSelected(tag);
         },
 
         removeTag(id, tag) {
