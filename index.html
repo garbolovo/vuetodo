@@ -249,7 +249,7 @@
                     {{ tag }}
                     <button class="tag-remove" type="button" title="Remove tag" :aria-label="'Remove tag ' + tag" @click="removeTag(selectedItem.id, tag)">×</button>
                   </span>
-                  <button class="tag-add" type="button" v-if="!tagComposerOpen" @click="openTagComposer">+ Add tag</button>
+                  <button class="tag-add" type="button" title="Press S" v-if="!tagComposerOpen" @click="openTagComposer">+ Add tag</button>
                   <form class="tag-composer" v-else @submit.prevent="addSelectedTag">
                     <div class="tag-picker">
                       <input ref="tagInput" v-model="newTagName" type="text" placeholder="Search or create tag" aria-label="Search or create tag" autocomplete="off">
