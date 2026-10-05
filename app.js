@@ -23,6 +23,8 @@ Vue.createApp({
             quickAddActive: false,
             newTodo: { title: '', body: '', dueDate: '', priority: '' },
             newSubtaskTitle: '',
+            tagComposerOpen: false,
+            newTagName: '',
             openMenuId: null,
             menuStyle: {},
             showCompleted: false,
@@ -59,6 +61,11 @@ Vue.createApp({
             if (e.key === 'Escape' && document.activeElement === this.$refs.subtaskInput) {
                 e.preventDefault();
                 this.cancelSubtaskComposer();
+                return;
+            }
+            if (e.key === 'Escape' && document.activeElement === this.$refs.tagInput) {
+                e.preventDefault();
+                this.cancelTagComposer();
                 return;
             }
             if (e.key === 'Escape' && this.duePickerOpen) {
@@ -225,6 +232,12 @@ Vue.createApp({
             return Math.round((doneCount / this.selectedSubtasks.length) * 100);
         },
 
+        tagAlreadyExists() {
+            const name = this.newTagName.trim().toLocaleLowerCase();
+            if (!name || !this.selectedItem) return false;
+            return (this.selectedItem.tags || []).some(tag => tag.toLocaleLowerCase() === name);
+        },
+
         // Ancestor titles from the root down to (not including) the selected task.
         selectedBreadcrumb() {
             if (!this.selectedItem) return [];
@@ -321,6 +334,8 @@ Vue.createApp({
                 this.todoList = this.todoList.filter(t => !idsToRemove.has(t.id));
                 if (idsToRemove.has(this.selectedId)) {
                     this.selectedId = null;
+                    this.cancelTagComposer();
+                    this.newSubtaskTitle = '';
                 }
                 this.saveTodos();
             }
@@ -390,6 +405,7 @@ Vue.createApp({
 
         async focusSubtaskComposer(parentId) {
             if (!this.todoList.some(t => t.id === parentId)) return;
+            this.cancelTagComposer();
             this.selectedId = parentId;
             this.newSubtaskTitle = '';
             await this.$nextTick();
@@ -592,12 +608,14 @@ Vue.createApp({
 
         selectTodo(id) {
             this.newSubtaskTitle = '';
+            this.cancelTagComposer();
             this.duePickerOpen = false;
             this.selectedId = this.selectedId === id ? null : id;
         },
 
         closeDetail() {
             this.newSubtaskTitle = '';
+            this.cancelTagComposer();
             this.duePickerOpen = false;
             this.selectedId = null;
         },
@@ -678,16 +696,26 @@ Vue.createApp({
             this.quickDuePickerOpen = false;
         },
 
-        addTag(id) {
-            const tag = prompt('Tag name');
-            if (tag && tag.trim()) {
-                const item = this.todoList.find(t => t.id === id);
-                if (!item.tags) item.tags = [];
-                if (!item.tags.includes(tag.trim())) {
-                    item.tags.push(tag.trim());
-                    this.saveTodos();
-                }
-            }
+        async openTagComposer() {
+            this.duePickerOpen = false;
+            this.tagComposerOpen = true;
+            this.newTagName = '';
+            await this.$nextTick();
+            this.$refs.tagInput?.focus();
+        },
+
+        cancelTagComposer() {
+            this.tagComposerOpen = false;
+            this.newTagName = '';
+        },
+
+        addSelectedTag() {
+            const tag = this.newTagName.trim();
+            if (!tag || !this.selectedItem || this.tagAlreadyExists) return;
+            if (!this.selectedItem.tags) this.selectedItem.tags = [];
+            this.selectedItem.tags.push(tag);
+            this.saveTodos();
+            this.cancelTagComposer();
         },
 
         removeTag(id, tag) {
