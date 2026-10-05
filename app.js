@@ -148,7 +148,9 @@ Vue.createApp({
         viewEntries() {
             const contextMatches = t => this.activeContext === null
                 || (this.activeContext === '' ? !t.context : t.context === this.activeContext);
-            const tagMatches = t => this.activeTag === null || (t.tags && t.tags.includes(this.activeTag));
+            const tagMatches = t => this.activeTag === null || (t.tags || []).some(tag =>
+                tag.toLocaleLowerCase() === this.activeTag.toLocaleLowerCase()
+            );
 
             if (this.activeView === 'all' && this.activeContext === null && this.activeTag === null) {
                 return this.treeEntries;
@@ -295,6 +297,29 @@ Vue.createApp({
         },
     },
     methods: {
+
+        tagVisualStyle(tag) {
+            const palette = [
+                { color: '#2563eb', background: '#dbeafe', text: '#1e40af' },
+                { color: '#7c3aed', background: '#ede9fe', text: '#5b21b6' },
+                { color: '#db2777', background: '#fce7f3', text: '#9d174d' },
+                { color: '#d97706', background: '#fef3c7', text: '#92400e' },
+                { color: '#65a30d', background: '#ecfccb', text: '#3f6212' },
+                { color: '#0891b2', background: '#cffafe', text: '#155e75' },
+                { color: '#059669', background: '#d1fae5', text: '#065f46' },
+                { color: '#64748b', background: '#e2e8f0', text: '#334155' },
+            ];
+            let hash = 0;
+            for (const char of tag.trim().toLocaleLowerCase()) {
+                hash = ((hash * 31) + char.codePointAt(0)) >>> 0;
+            }
+            const colors = palette[hash % palette.length];
+            return {
+                '--tag-color': colors.color,
+                '--tag-background': colors.background,
+                '--tag-text': colors.text,
+            };
+        },
 
         changeName() {
             if(!this.nameClicked) {
@@ -797,7 +822,10 @@ Vue.createApp({
         },
 
         tagCount(tag) {
-            return this.todoList.filter(t => (t.tags || []).includes(tag)).length;
+            const normalizedTag = tag.toLocaleLowerCase();
+            return this.todoList.filter(t => (t.tags || []).some(itemTag =>
+                itemTag.toLocaleLowerCase() === normalizedTag
+            )).length;
         },
 
         onContextChange() {
