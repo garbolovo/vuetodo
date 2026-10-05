@@ -33,6 +33,8 @@ Vue.createApp({
             sidebarOpen: true,
             duePickerOpen: false,
             customDueDate: '',
+            quickDuePickerOpen: false,
+            quickCustomDueDate: '',
         };
     },
     mounted() {
@@ -43,6 +45,9 @@ Vue.createApp({
             }
             if (this.duePickerOpen && !e.target.closest('.detail-due-picker')) {
                 this.duePickerOpen = false;
+            }
+            if (this.quickDuePickerOpen && !e.target.closest('.quick-due-picker')) {
+                this.quickDuePickerOpen = false;
             }
         });
 
@@ -58,6 +63,15 @@ Vue.createApp({
             }
             if (e.key === 'Escape' && this.duePickerOpen) {
                 this.duePickerOpen = false;
+                return;
+            }
+            if (e.key === 'Escape' && this.quickDuePickerOpen) {
+                this.quickDuePickerOpen = false;
+                return;
+            }
+            if (e.key === 'Escape' && this.quickAddActive) {
+                e.preventDefault();
+                this.cancelQuickAdd();
                 return;
             }
             if (e.key === 'Escape' && this.selectedId) {
@@ -334,6 +348,8 @@ Vue.createApp({
 
         cancelQuickAdd() {
             this.newTodo = { title: '', body: '', dueDate: '', priority: '' };
+            this.quickDuePickerOpen = false;
+            this.quickCustomDueDate = '';
             this.quickAddActive = false;
             this.$refs.quickAddInput?.blur();
         },
@@ -596,6 +612,7 @@ Vue.createApp({
         },
 
         toggleDuePicker() {
+            this.quickDuePickerOpen = false;
             this.duePickerOpen = !this.duePickerOpen;
             if (this.duePickerOpen) {
                 this.customDueDate = this.selectedItem?.dueDate || this.dateFromToday(0);
@@ -638,6 +655,27 @@ Vue.createApp({
             this.customDueDate = value;
             this.duePickerOpen = false;
             this.saveTodos();
+        },
+
+        toggleQuickDuePicker() {
+            this.duePickerOpen = false;
+            this.quickDuePickerOpen = !this.quickDuePickerOpen;
+            if (this.quickDuePickerOpen) {
+                this.quickCustomDueDate = this.newTodo.dueDate || this.dateFromToday(0);
+            }
+        },
+
+        setQuickDueDate(value) {
+            if (!value) return;
+            this.newTodo.dueDate = value;
+            this.quickCustomDueDate = value;
+            this.quickDuePickerOpen = false;
+        },
+
+        clearQuickDueDate() {
+            this.newTodo.dueDate = '';
+            this.quickCustomDueDate = '';
+            this.quickDuePickerOpen = false;
         },
 
         addTag(id) {
