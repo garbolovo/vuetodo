@@ -346,16 +346,6 @@ body {
     top: calc(100% + 7px);
 }
 
-.date-range-error {
-    margin: 0;
-    color: #c64242;
-    font-size: 0.76rem;
-    font-weight: 600;
-}
-
-.quick-date-range-error {
-    margin-top: 8px;
-}
 
 #app #quick-add .due-picker-custom label {
     display: block;
@@ -1544,15 +1534,6 @@ body {
     font-weight: 600;
 }
 
-.due-picker-option:disabled {
-    background: transparent;
-    color: #b2b8c0;
-    cursor: not-allowed;
-}
-
-.due-picker-option:disabled span:last-child {
-    color: #c2c7ce;
-}
 
 .due-picker-custom {
     margin-top: 5px;
