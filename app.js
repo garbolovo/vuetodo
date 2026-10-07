@@ -39,7 +39,7 @@ Vue.createApp({
             activeTag: null,
             activeProject: null,
             quickAddActive: false,
-            newTodo: { title: '', body: '', dueDate: '', priority: '' },
+            newTodo: { title: '', body: '', startDate: '', dueDate: '', priority: '' },
             newSubtaskTitle: '',
             tagComposerOpen: false,
             newTagName: '',
@@ -52,10 +52,16 @@ Vue.createApp({
             moveTargetId: null,
             sidebarOpen: true,
             collapsedSidebarSections,
+            startPickerOpen: false,
+            customStartDate: '',
             duePickerOpen: false,
             customDueDate: '',
+            dateRangeError: '',
+            quickStartPickerOpen: false,
+            quickCustomStartDate: '',
             quickDuePickerOpen: false,
             quickCustomDueDate: '',
+            quickDateRangeError: '',
         };
     },
     mounted() {
@@ -67,8 +73,14 @@ Vue.createApp({
             if (this.duePickerOpen && !e.target.closest('.detail-due-picker')) {
                 this.duePickerOpen = false;
             }
+            if (this.startPickerOpen && !e.target.closest('.detail-start-picker')) {
+                this.startPickerOpen = false;
+            }
             if (this.quickDuePickerOpen && !e.target.closest('.quick-due-picker')) {
                 this.quickDuePickerOpen = false;
+            }
+            if (this.quickStartPickerOpen && !e.target.closest('.quick-start-picker')) {
+                this.quickStartPickerOpen = false;
             }
         });
 
@@ -91,8 +103,16 @@ Vue.createApp({
                 this.duePickerOpen = false;
                 return;
             }
+            if (e.key === 'Escape' && this.startPickerOpen) {
+                this.startPickerOpen = false;
+                return;
+            }
             if (e.key === 'Escape' && this.quickDuePickerOpen) {
                 this.quickDuePickerOpen = false;
+                return;
+            }
+            if (e.key === 'Escape' && this.quickStartPickerOpen) {
+                this.quickStartPickerOpen = false;
                 return;
             }
             if (e.key === 'Escape' && this.quickAddActive) {
@@ -426,11 +446,16 @@ Vue.createApp({
         regTodo() {
             const title = this.newTodo.title.trim();
             if (!title) return;
+            if (!this.isValidDateRange(this.newTodo.startDate, this.newTodo.dueDate)) {
+                this.quickDateRangeError = 'Start date cannot be after due date.';
+                return;
+            }
 
             this.todoList.push({
                 id: uuidv4(),
                 title,
                 body: this.newTodo.body,
+                startDate: this.newTodo.startDate,
                 dueDate: this.newTodo.dueDate,
                 priority: this.newTodo.priority,
                 tags: [],
@@ -444,9 +469,12 @@ Vue.createApp({
         },
 
         cancelQuickAdd() {
-            this.newTodo = { title: '', body: '', dueDate: '', priority: '' };
+            this.newTodo = { title: '', body: '', startDate: '', dueDate: '', priority: '' };
+            this.quickStartPickerOpen = false;
+            this.quickCustomStartDate = '';
             this.quickDuePickerOpen = false;
             this.quickCustomDueDate = '';
+            this.quickDateRangeError = '';
             this.quickAddActive = false;
             this.$refs.quickAddInput?.blur();
         },
@@ -465,6 +493,7 @@ Vue.createApp({
                 id: uuidv4(),
                 title,
                 body: '',
+                startDate: '',
                 dueDate: '',
                 priority: '',
                 tags: [],
@@ -691,15 +720,57 @@ Vue.createApp({
         selectTodo(id) {
             this.newSubtaskTitle = '';
             this.cancelTagComposer();
+            this.startPickerOpen = false;
             this.duePickerOpen = false;
+            this.dateRangeError = '';
             this.selectedId = this.selectedId === id ? null : id;
         },
 
         closeDetail() {
             this.newSubtaskTitle = '';
             this.cancelTagComposer();
+            this.startPickerOpen = false;
             this.duePickerOpen = false;
+            this.dateRangeError = '';
             this.selectedId = null;
+        },
+
+        isValidDateRange(startDate, dueDate) {
+            return !startDate || !dueDate || startDate <= dueDate;
+        },
+
+        clearStartDate() {
+            if (this.selectedItem) {
+                this.selectedItem.startDate = '';
+                this.customStartDate = '';
+                this.startPickerOpen = false;
+                this.dateRangeError = '';
+                this.saveTodos();
+            }
+        },
+
+        toggleStartPicker() {
+            this.duePickerOpen = false;
+            this.quickStartPickerOpen = false;
+            this.quickDuePickerOpen = false;
+            this.startPickerOpen = !this.startPickerOpen;
+            this.dateRangeError = '';
+            if (this.startPickerOpen) {
+                this.customStartDate = this.selectedItem?.startDate || this.dateFromToday(0);
+            }
+        },
+
+        setStartDate(value) {
+            if (!this.selectedItem || !value) return;
+            if (!this.isValidDateRange(value, this.selectedItem.dueDate)) {
+                this.dateRangeError = 'Start date cannot be after due date.';
+                return;
+            }
+            this.selectedItem.startDate = value;
+            this.customStartDate = value;
+            this.startPickerOpen = false;
+            this.dateRangeError = '';
+            this.saveTodos();
         },
 
         clearDueDate() {
@@ -707,13 +778,17 @@ Vue.createApp({
                 this.selectedItem.dueDate = '';
                 this.customDueDate = '';
                 this.duePickerOpen = false;
+                this.dateRangeError = '';
                 this.saveTodos();
             }
         },
 
         toggleDuePicker() {
+            this.startPickerOpen = false;
+            this.quickStartPickerOpen = false;
             this.quickDuePickerOpen = false;
             this.duePickerOpen = !this.duePickerOpen;
+            this.dateRangeError = '';
             if (this.duePickerOpen) {
                 this.customDueDate = this.selectedItem?.dueDate || this.dateFromToday(0);
             }
@@ -729,7 +804,7 @@ Vue.createApp({
             return `${year}-${month}-${day}`;
         },
 
-        quickDueDateOptions() {
+        quickDateOptions() {
             return [
                 { label: 'Today', offset: 0 },
                 { label: 'Tomorrow', offset: 1 },
@@ -751,15 +826,53 @@ Vue.createApp({
 
         setDueDate(value) {
             if (!this.selectedItem || !value) return;
+            if (!this.isValidDateRange(this.selectedItem.startDate, value)) {
+                this.dateRangeError = 'Start date cannot be after due date.';
+                return;
+            }
             this.selectedItem.dueDate = value;
             this.customDueDate = value;
             this.duePickerOpen = false;
+            this.dateRangeError = '';
             this.saveTodos();
         },
 
+        toggleQuickStartPicker() {
+            this.startPickerOpen = false;
+            this.duePickerOpen = false;
+            this.quickDuePickerOpen = false;
+            this.quickStartPickerOpen = !this.quickStartPickerOpen;
+            this.quickDateRangeError = '';
+            if (this.quickStartPickerOpen) {
+                this.quickCustomStartDate = this.newTodo.startDate || this.dateFromToday(0);
+            }
+        },
+
+        setQuickStartDate(value) {
+            if (!value) return;
+            if (!this.isValidDateRange(value, this.newTodo.dueDate)) {
+                this.quickDateRangeError = 'Start date cannot be after due date.';
+                return;
+            }
+            this.newTodo.startDate = value;
+            this.quickCustomStartDate = value;
+            this.quickStartPickerOpen = false;
+            this.quickDateRangeError = '';
+        },
+
+        clearQuickStartDate() {
+            this.newTodo.startDate = '';
+            this.quickCustomStartDate = '';
+            this.quickStartPickerOpen = false;
+            this.quickDateRangeError = '';
+        },
+
         toggleQuickDuePicker() {
+            this.quickStartPickerOpen = false;
+            this.startPickerOpen = false;
             this.duePickerOpen = false;
             this.quickDuePickerOpen = !this.quickDuePickerOpen;
+            this.quickDateRangeError = '';
             if (this.quickDuePickerOpen) {
                 this.quickCustomDueDate = this.newTodo.dueDate || this.dateFromToday(0);
             }
@@ -767,18 +880,25 @@ Vue.createApp({
 
         setQuickDueDate(value) {
             if (!value) return;
+            if (!this.isValidDateRange(this.newTodo.startDate, value)) {
+                this.quickDateRangeError = 'Start date cannot be after due date.';
+                return;
+            }
             this.newTodo.dueDate = value;
             this.quickCustomDueDate = value;
             this.quickDuePickerOpen = false;
+            this.quickDateRangeError = '';
         },
 
         clearQuickDueDate() {
             this.newTodo.dueDate = '';
             this.quickCustomDueDate = '';
             this.quickDuePickerOpen = false;
+            this.quickDateRangeError = '';
         },
 
         async openTagComposer() {
+            this.startPickerOpen = false;
             this.duePickerOpen = false;
             this.tagComposerOpen = true;
             this.newTagName = '';

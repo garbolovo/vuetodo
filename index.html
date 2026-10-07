@@ -5,7 +5,7 @@
   <title>Todo App</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261008-1">
+  <link rel="stylesheet" href="style.css?v=20261008-2">
 
 </head>
 <body>
@@ -111,6 +111,29 @@
 
             <div class="quick-add-toolbar">
               <div class="quick-add-toolbar-left">
+                <div class="quick-start-picker">
+                  <button type="button" class="quick-due-trigger" :class="{ selected: newTodo.startDate }"
+                          :aria-expanded="quickStartPickerOpen" @click.stop="toggleQuickStartPicker">
+                    <span>{{ newTodo.startDate ? dueDateLabel(newTodo.startDate) : 'Start date' }}</span>
+                    <span class="detail-due-chevron">⌄</span>
+                  </button>
+
+                  <div class="due-picker-menu" v-if="quickStartPickerOpen" @click.stop>
+                    <button type="button" class="due-picker-option" v-for="option in quickDateOptions()" :key="option.value"
+                            :class="{ selected: newTodo.startDate === option.value }" :disabled="newTodo.dueDate && option.value > newTodo.dueDate" @click="setQuickStartDate(option.value)">
+                      <span>{{ option.label }}</span>
+                      <span>{{ option.dateLabel }}</span>
+                    </button>
+                    <button type="button" class="due-picker-option" :class="{ selected: !newTodo.startDate }" @click="clearQuickStartDate">
+                      <span>No start date</span>
+                      <span>Never</span>
+                    </button>
+                    <div class="due-picker-custom">
+                      <label for="quick-custom-start-date">Choose date</label>
+                      <input id="quick-custom-start-date" type="date" v-model="quickCustomStartDate" :max="newTodo.dueDate || null" @change="setQuickStartDate(quickCustomStartDate)">
+                    </div>
+                  </div>
+                </div>
                 <div class="quick-due-picker">
                   <button type="button" class="quick-due-trigger" :class="{ selected: newTodo.dueDate }"
                           :aria-expanded="quickDuePickerOpen" @click.stop="toggleQuickDuePicker">
@@ -119,8 +142,8 @@
                   </button>
 
                   <div class="due-picker-menu" v-if="quickDuePickerOpen" @click.stop>
-                    <button type="button" class="due-picker-option" v-for="option in quickDueDateOptions()" :key="option.value"
-                            :class="{ selected: newTodo.dueDate === option.value }" @click="setQuickDueDate(option.value)">
+                    <button type="button" class="due-picker-option" v-for="option in quickDateOptions()" :key="option.value"
+                            :class="{ selected: newTodo.dueDate === option.value }" :disabled="newTodo.startDate && option.value < newTodo.startDate" @click="setQuickDueDate(option.value)">
                       <span>{{ option.label }}</span>
                       <span>{{ option.dateLabel }}</span>
                     </button>
@@ -130,7 +153,7 @@
                     </button>
                     <div class="due-picker-custom">
                       <label for="quick-custom-due-date">Choose date</label>
-                      <input id="quick-custom-due-date" type="date" v-model="quickCustomDueDate" @change="setQuickDueDate(quickCustomDueDate)">
+                      <input id="quick-custom-due-date" type="date" v-model="quickCustomDueDate" :min="newTodo.startDate || null" @change="setQuickDueDate(quickCustomDueDate)">
                     </div>
                   </div>
                 </div>
@@ -146,6 +169,7 @@
                 <button id="todo-btn" :disabled="!newTodo.title.trim()" @click="regTodo">Add Task</button>
               </div>
             </div>
+            <p class="date-range-error quick-date-range-error" role="alert" v-if="quickDateRangeError">{{ quickDateRangeError }}</p>
           </div>
         </div>
 
@@ -234,6 +258,34 @@
             <h3>Details</h3>
             <div class="detail-properties">
               <div class="detail-field">
+                <label>Start date</label>
+                <div class="detail-due-row detail-start-picker">
+                  <button type="button" class="detail-due-trigger" :class="{ empty: !selectedItem.startDate }"
+                          :aria-expanded="startPickerOpen" @click.stop="toggleStartPicker">
+                    <span>{{ selectedItem.startDate ? dueDateLabel(selectedItem.startDate) : 'No start date' }}</span>
+                    <span class="detail-due-chevron">⌄</span>
+                  </button>
+                  <button v-if="selectedItem.startDate" class="detail-due-clear" title="Clear start date" aria-label="Clear start date" @click="clearStartDate">×</button>
+
+                  <div class="due-picker-menu" v-if="startPickerOpen" @click.stop>
+                    <button type="button" class="due-picker-option" v-for="option in quickDateOptions()" :key="option.value"
+                            :class="{ selected: selectedItem.startDate === option.value }" :disabled="selectedItem.dueDate && option.value > selectedItem.dueDate" @click="setStartDate(option.value)">
+                      <span>{{ option.label }}</span>
+                      <span>{{ option.dateLabel }}</span>
+                    </button>
+                    <button type="button" class="due-picker-option" :class="{ selected: !selectedItem.startDate }" @click="clearStartDate">
+                      <span>No start date</span>
+                      <span>Never</span>
+                    </button>
+                    <div class="due-picker-custom">
+                      <label for="custom-start-date">Choose date</label>
+                      <input id="custom-start-date" type="date" v-model="customStartDate" :max="selectedItem.dueDate || null" @change="setStartDate(customStartDate)">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="detail-field">
                 <label>Due date</label>
                 <div class="detail-due-row detail-due-picker">
                   <button type="button" class="detail-due-trigger" :class="{ empty: !selectedItem.dueDate }"
@@ -244,8 +296,8 @@
                   <button v-if="selectedItem.dueDate" class="detail-due-clear" title="Clear due date" aria-label="Clear due date" @click="clearDueDate">×</button>
 
                   <div class="due-picker-menu" v-if="duePickerOpen" @click.stop>
-                    <button type="button" class="due-picker-option" v-for="option in quickDueDateOptions()" :key="option.value"
-                            :class="{ selected: selectedItem.dueDate === option.value }" @click="setDueDate(option.value)">
+                    <button type="button" class="due-picker-option" v-for="option in quickDateOptions()" :key="option.value"
+                            :class="{ selected: selectedItem.dueDate === option.value }" :disabled="selectedItem.startDate && option.value < selectedItem.startDate" @click="setDueDate(option.value)">
                       <span>{{ option.label }}</span>
                       <span>{{ option.dateLabel }}</span>
                     </button>
@@ -255,11 +307,13 @@
                     </button>
                     <div class="due-picker-custom">
                       <label for="custom-due-date">Choose date</label>
-                      <input id="custom-due-date" type="date" v-model="customDueDate" @change="setDueDate(customDueDate)">
+                      <input id="custom-due-date" type="date" v-model="customDueDate" :min="selectedItem.startDate || null" @change="setDueDate(customDueDate)">
                     </div>
                   </div>
                 </div>
               </div>
+
+              <p class="date-range-error detail-field-wide" role="alert" v-if="dateRangeError">{{ dateRangeError }}</p>
 
               <div class="detail-field">
                 <label>Priority</label>
@@ -380,7 +434,7 @@
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261008-1"></script>
+<script src="app.js?v=20261008-2"></script>
 </body>
 </html>
 
