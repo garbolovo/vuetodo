@@ -7,6 +7,24 @@ Vue.createApp({
     data() {
         const stored = localStorage.getItem('todoList');
         const todoList = stored ? JSON.parse(stored) : [];
+        const defaultCollapsedSections = {
+            views: false,
+            projects: false,
+            contexts: false,
+            tags: false,
+        };
+        let collapsedSidebarSections = defaultCollapsedSections;
+        try {
+            const storedSections = JSON.parse(localStorage.getItem('collapsedSidebarSections'));
+            if (storedSections && typeof storedSections === 'object') {
+                collapsedSidebarSections = {
+                    ...defaultCollapsedSections,
+                    ...storedSections,
+                };
+            }
+        } catch (err) {
+            console.warn('Could not restore collapsed sidebar sections', err);
+        }
 
         return {
             name: "John Doe",
@@ -33,6 +51,7 @@ Vue.createApp({
             moveDialogTaskId: null,
             moveTargetId: null,
             sidebarOpen: true,
+            collapsedSidebarSections,
             duePickerOpen: false,
             customDueDate: '',
             quickDuePickerOpen: false,
@@ -297,6 +316,14 @@ Vue.createApp({
         },
     },
     methods: {
+
+        toggleSidebarSection(section) {
+            this.collapsedSidebarSections[section] = !this.collapsedSidebarSections[section];
+            localStorage.setItem(
+                'collapsedSidebarSections',
+                JSON.stringify(this.collapsedSidebarSections)
+            );
+        },
 
         tagVisualStyle(tag) {
             const palette = [
