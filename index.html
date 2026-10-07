@@ -44,6 +44,7 @@
             <div class="sidebar-section-content-inner" id="sidebar-views">
               <button class="sidebar-item" :class="{ active: activeView === 'all' }" @click="setView('all')">All <span class="view-count">{{ allCount }}</span></button>
               <button class="sidebar-item" :class="{ active: activeView === 'today' }" @click="setView('today')">Today <span class="view-count">{{ todayCount }}</span></button>
+              <button class="sidebar-item" :class="{ active: activeView === 'next' }" @click="setView('next')">Next <span class="view-count">{{ nextCount }}</span></button>
               <button class="sidebar-item" :class="{ active: activeView === 'overdue' }" @click="setView('overdue')">Overdue <span class="view-count">{{ overdueCount }}</span></button>
               <button class="sidebar-item" :class="{ active: activeView === 'completed' }" @click="setView('completed')">Completed <span class="view-count">{{ completedCount }}</span></button>
             </div>
@@ -431,7 +432,7 @@
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261008-3"></script>
+<script src="app.js?v=20261008-4"></script>
 </body>
 </html>
 
