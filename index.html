@@ -5,7 +5,7 @@
   <title>Todo App</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261009-2">
+  <link rel="stylesheet" href="style.css?v=20261009-3">
 
 </head>
 <body>
@@ -275,8 +275,7 @@
         </div>
 
         <div class="detail-scroll">
-          <section class="detail-section">
-            <h3>Details</h3>
+          <section class="detail-section detail-metadata-section">
             <div class="detail-properties">
               <div class="detail-field">
                 <label>Start date</label>
@@ -353,7 +352,7 @@
                 </select>
               </div>
 
-              <div class="detail-field detail-field-wide">
+              <div class="detail-field detail-tags-field">
                 <label>Tags</label>
                 <div class="detail-tags">
                   <span class="tag-pill" v-for="tag in (selectedItem.tags || [])" :key="tag" :style="tagVisualStyle(tag)">
@@ -394,12 +393,12 @@
             </div>
           </section>
 
-          <section class="detail-section">
+          <section class="detail-section description-section">
             <h3>Description</h3>
-            <textarea class="detail-description" v-model="selectedItem.body" @change="saveTodos" rows="5" placeholder="Add a description..."></textarea>
+            <textarea class="detail-description" :class="{ empty: typeof selectedItem.body !== 'string' || !selectedItem.body.trim() }" v-model="selectedItem.body" @change="saveTodos" rows="3" placeholder="Add a description..."></textarea>
           </section>
 
-          <section class="detail-section">
+          <section class="detail-section subtasks-section">
             <div class="detail-section-heading">
               <h3>Subtasks</h3>
               <span>{{ selectedSubtaskProgressPct }}%</span>
