@@ -41,6 +41,8 @@ Vue.createApp({
             quickAddActive: false,
             newTodo: { title: '', body: '', startDate: '', dueDate: '', priority: '' },
             newSubtaskTitle: '',
+            newCommentText: '',
+            pendingCommentDeleteId: null,
             tagComposerOpen: false,
             newTagName: '',
             openMenuId: null,
@@ -111,6 +113,11 @@ Vue.createApp({
             }
             if (e.key === 'Escape' && this.quickStartPickerOpen) {
                 this.quickStartPickerOpen = false;
+                return;
+            }
+            if (e.key === 'Escape' && this.pendingCommentDeleteId) {
+                e.preventDefault();
+                this.cancelCommentDelete();
                 return;
             }
             if (e.key === 'Escape' && this.quickAddActive) {
@@ -301,6 +308,13 @@ Vue.createApp({
             return Math.round((doneCount / this.selectedSubtasks.length) * 100);
         },
 
+        selectedComments() {
+            if (!this.selectedItem) return [];
+            return [...(this.selectedItem.comments || [])].sort((a, b) =>
+                String(b.createdAt || '').localeCompare(String(a.createdAt || ''))
+            );
+        },
+
         tagAlreadyExists() {
             const name = this.newTagName.trim().toLocaleLowerCase();
             if (!name || !this.selectedItem) return false;
@@ -452,6 +466,8 @@ Vue.createApp({
                     this.selectedId = null;
                     this.cancelTagComposer();
                     this.newSubtaskTitle = '';
+                    this.newCommentText = '';
+                    this.pendingCommentDeleteId = null;
                 }
                 this.saveTodos();
             }
@@ -469,6 +485,7 @@ Vue.createApp({
                 dueDate: this.newTodo.dueDate,
                 priority: this.newTodo.priority,
                 tags: [],
+                comments: [],
                 context: '',
                 parentId: null,
                 done: false,
@@ -506,6 +523,7 @@ Vue.createApp({
                 dueDate: '',
                 priority: '',
                 tags: [],
+                comments: [],
                 context: '',
                 parentId,
                 done: false,
@@ -728,6 +746,8 @@ Vue.createApp({
 
         selectTodo(id) {
             this.newSubtaskTitle = '';
+            this.newCommentText = '';
+            this.pendingCommentDeleteId = null;
             this.cancelTagComposer();
             this.startPickerOpen = false;
             this.duePickerOpen = false;
@@ -736,10 +756,54 @@ Vue.createApp({
 
         closeDetail() {
             this.newSubtaskTitle = '';
+            this.newCommentText = '';
+            this.pendingCommentDeleteId = null;
             this.cancelTagComposer();
             this.startPickerOpen = false;
             this.duePickerOpen = false;
             this.selectedId = null;
+        },
+
+        addComment() {
+            const text = this.newCommentText.trim();
+            if (!text || !this.selectedItem) return;
+            if (!Array.isArray(this.selectedItem.comments)) {
+                this.selectedItem.comments = [];
+            }
+            this.selectedItem.comments.push({
+                id: uuidv4(),
+                text,
+                createdAt: new Date().toISOString(),
+            });
+            this.newCommentText = '';
+            this.saveTodos();
+        },
+
+        requestCommentDelete(commentId) {
+            this.pendingCommentDeleteId = commentId;
+        },
+
+        cancelCommentDelete() {
+            this.pendingCommentDeleteId = null;
+        },
+
+        deleteComment(commentId) {
+            if (!this.selectedItem || !Array.isArray(this.selectedItem.comments)) return;
+            this.selectedItem.comments = this.selectedItem.comments.filter(comment => comment.id !== commentId);
+            this.pendingCommentDeleteId = null;
+            this.saveTodos();
+        },
+
+        commentDateLabel(value) {
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return '';
+            return date.toLocaleString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+            });
         },
 
         clearStartDate() {

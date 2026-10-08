@@ -5,7 +5,7 @@
   <title>Todo App</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261009-1">
+  <link rel="stylesheet" href="style.css?v=20261009-2">
 
 </head>
 <body>
@@ -224,8 +224,19 @@
                       :aria-label="entry.item.title + ' has a description. Open details'"
                       @click.stop="selectTodo(entry.item.id)">
                 <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
+                  <path d="M5 2.5h7l3 3v12H5z"/>
+                  <path d="M12 2.5v3h3M7.5 9h5M7.5 12h5"/>
+                </svg>
+              </button>
+              <button class="task-comment-indicator" type="button"
+                      v-if="Array.isArray(entry.item.comments) && entry.item.comments.length"
+                      :title="entry.item.comments.length + (entry.item.comments.length === 1 ? ' comment — open details' : ' comments — open details')"
+                      :aria-label="entry.item.title + ' has ' + entry.item.comments.length + (entry.item.comments.length === 1 ? ' comment. Open details' : ' comments. Open details')"
+                      @click.stop="selectTodo(entry.item.id)">
+                <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
                   <path d="M5 3.5h10A2.5 2.5 0 0117.5 6v6A2.5 2.5 0 0115 14.5H9l-4.5 3v-3A2.5 2.5 0 012 12V6A2.5 2.5 0 014.5 3.5H5z"/>
                 </svg>
+                <span>{{ entry.item.comments.length }}</span>
               </button>
               <span class="task-inline-meta" v-if="entry.item.context || (entry.item.tags && entry.item.tags.length)">
                 <span class="context-badge" v-if="entry.item.context">{{ entry.item.context }}</span>
@@ -406,6 +417,35 @@
               <span :class="{ done: sub.done }" @click="selectTodo(sub.id)">{{ sub.title }}</span>
             </div>
           </section>
+
+          <section class="detail-section comments-section">
+            <div class="detail-section-heading">
+              <h3>Comments</h3>
+              <span>{{ selectedComments.length }}</span>
+            </div>
+            <form class="comment-composer" @submit.prevent="addComment">
+              <textarea v-model="newCommentText" rows="3" placeholder="Add a comment..." aria-label="New comment"
+                        @keydown.ctrl.enter.prevent="addComment" @keydown.meta.enter.prevent="addComment"></textarea>
+              <div class="comment-composer-actions">
+                <span>Ctrl/⌘ + Enter</span>
+                <button type="submit" :disabled="!newCommentText.trim()">Add comment</button>
+              </div>
+            </form>
+            <div class="detail-empty" v-if="!selectedComments.length">No comments yet</div>
+            <article class="task-comment" v-for="comment in selectedComments" :key="comment.id">
+              <div class="task-comment-header">
+                <time :datetime="comment.createdAt">{{ commentDateLabel(comment.createdAt) }}</time>
+                <button class="task-comment-delete" type="button" v-if="pendingCommentDeleteId !== comment.id"
+                        title="Delete comment" aria-label="Delete comment" @click="requestCommentDelete(comment.id)">×</button>
+              </div>
+              <p>{{ comment.text }}</p>
+              <div class="task-comment-confirm" v-if="pendingCommentDeleteId === comment.id">
+                <span>Delete this comment?</span>
+                <button type="button" @click="cancelCommentDelete">Cancel</button>
+                <button class="danger" type="button" @click="deleteComment(comment.id)">Delete</button>
+              </div>
+            </article>
+          </section>
         </div>
 
         <div class="detail-actions">
@@ -442,7 +482,7 @@
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261009-1"></script>
+<script src="app.js?v=20261009-2"></script>
 </body>
 </html>
 
