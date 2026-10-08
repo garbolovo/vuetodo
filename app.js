@@ -177,7 +177,7 @@ Vue.createApp({
             return this.collapsibleTasks.length > 0 && this.collapsibleTasks.every(t => t.collapsed);
         },
 
-        // Today/Next/Overdue/Completed and an active context filter cut across
+        // Today/Next/Scheduled/Overdue/Completed and an active context filter cut across
         // the hierarchy (a subtask's due date or context is independent of
         // its parent's), so they show a flat matching list instead of a
         // tree. A project selection narrows either mode to that project's
@@ -204,7 +204,10 @@ Vue.createApp({
                 list = base.filter(t => !t.done && this.dueDateDiffDays(t.dueDate) === 0);
             } else if (this.activeView === 'next') {
                 const today = this.dateFromToday(0);
-                list = base.filter(t => !t.done && t.startDate && t.startDate >= today);
+                list = base.filter(t => !t.done && t.startDate && t.startDate <= today);
+            } else if (this.activeView === 'scheduled') {
+                const today = this.dateFromToday(0);
+                list = base.filter(t => !t.done && t.startDate && t.startDate > today);
             } else if (this.activeView === 'overdue') {
                 list = base.filter(t => !t.done && this.dueDateDiffDays(t.dueDate) < 0);
             } else if (this.activeView === 'completed') {
@@ -237,7 +240,12 @@ Vue.createApp({
 
         nextCount() {
             const today = this.dateFromToday(0);
-            return this.todoList.filter(t => !t.done && t.startDate && t.startDate >= today).length;
+            return this.todoList.filter(t => !t.done && t.startDate && t.startDate <= today).length;
+        },
+
+        scheduledCount() {
+            const today = this.dateFromToday(0);
+            return this.todoList.filter(t => !t.done && t.startDate && t.startDate > today).length;
         },
 
         overdueCount() {
