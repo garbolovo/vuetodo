@@ -5,7 +5,7 @@
   <title>Todo App</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261009-3">
+  <link rel="stylesheet" href="style.css?v=20261009-4">
 
 </head>
 <body>
@@ -194,8 +194,14 @@
           </div>
 
           <div class="todo-row" v-for="entry in displayEntries" :key="entry.item.id"
-               :class="{ 'todo-row-selected': entry.item.id === selectedId, 'todo-row-dragging': entry.item.id === draggedTaskId, 'todo-row-drop-target': entry.item.id === dragOverTaskId }"
-               @click="selectTodo(entry.item.id)" @dragover="setDragOver(entry.item.id, $event)" @drop.prevent.stop="dropTask(entry.item.id)">
+               :class="{
+                 'todo-row-selected': entry.item.id === selectedId,
+                 'todo-row-dragging': entry.item.id === draggedTaskId,
+                 'todo-row-drop-target': entry.item.id === dragOverTaskId && dragOverPosition === 'inside',
+                 'todo-row-drop-before': entry.item.id === dragOverTaskId && dragOverPosition === 'before',
+                 'todo-row-drop-after': entry.item.id === dragOverTaskId && dragOverPosition === 'after'
+               }"
+               @click="selectTodo(entry.item.id)" @dragover="setDragOver(entry.item.id, $event)" @drop.prevent.stop="dropTask(entry.item.id, $event)">
             <div class="col-title">
               <span class="tree-guide" v-for="n in entry.depth" :key="n"></span>
 
@@ -204,7 +210,7 @@
                     :role="entry.item.priority ? 'img' : null"
                     :aria-label="entry.item.priority ? (priorityLabel(entry.item.priority) + ' priority') : null"></span>
 
-              <button class="drag-handle" draggable="true" title="Drag to make a subtask" aria-label="Drag task to a new parent"
+              <button class="drag-handle" draggable="true" title="Drag to move task" aria-label="Drag to move task"
                       @click.stop @dragstart.stop="startDrag(entry.item.id, $event)" @dragend="endDrag">⠿</button>
               <span class="disclosure" v-if="entry.hasChildren" @click.stop="toggleCollapse(entry.item.id)">{{ entry.item.collapsed ? '▶' : '▼' }}</span>
               <span class="disclosure-spacer" v-else></span>
@@ -481,7 +487,7 @@
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261009-3"></script>
+<script src="app.js?v=20261009-4"></script>
 </body>
 </html>
 

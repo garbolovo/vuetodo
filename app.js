@@ -50,6 +50,7 @@ Vue.createApp({
             showCompleted: false,
             draggedTaskId: null,
             dragOverTaskId: null,
+            dragOverPosition: null,
             moveDialogTaskId: null,
             moveTargetId: null,
             sidebarOpen: true,
@@ -656,7 +657,10 @@ Vue.createApp({
             if (move.beforeId) {
                 insertionIndex = remainingItems.findIndex(item => item.id === move.beforeId);
             } else if (move.afterId) {
-                insertionIndex = remainingItems.findIndex(item => item.id === move.afterId) + 1;
+                const anchorIds = this.projectDescendantIds(move.afterId);
+                insertionIndex = remainingItems.reduce((lastIndex, item, index) =>
+                    anchorIds.has(item.id) ? index + 1 : lastIndex
+                , remainingItems.findIndex(item => item.id === move.afterId) + 1);
             } else if (move.parentId) {
                 const parentIndex = remainingItems.findIndex(item => item.id === move.parentId);
                 insertionIndex = remainingItems.reduce((lastIndex, item, index) =>
@@ -701,21 +705,66 @@ Vue.createApp({
             event.dataTransfer.setData('text/plain', id);
         },
 
+        dragPositionForRow(event) {
+            const rect = event.currentTarget.getBoundingClientRect();
+            const relativeY = event.clientY - rect.top;
+            if (relativeY < rect.height * 0.25) return 'before';
+            if (relativeY > rect.height * 0.75) return 'after';
+            return 'inside';
+        },
+
+        canReorderInCurrentView() {
+            return this.activeView === 'all'
+                && this.activeContext === null
+                && this.activeTag === null
+                && !this.filteredOn;
+        },
+
+        dragDestination(targetId, position) {
+            if (!this.draggedTaskId) return null;
+            if (position === 'inside') return { parentId: targetId };
+            if (!this.canReorderInCurrentView()) return null;
+
+            const draggedTask = this.todoList.find(t => t.id === this.draggedTaskId);
+            const targetTask = this.todoList.find(t => t.id === targetId);
+            if (!draggedTask || !targetTask) return null;
+
+            const draggedParentId = draggedTask.parentId || null;
+            const targetParentId = targetTask.parentId || null;
+            if (draggedParentId !== targetParentId) return null;
+
+            return position === 'before'
+                ? { parentId: targetParentId, beforeId: targetId }
+                : { parentId: targetParentId, afterId: targetId };
+        },
+
         setDragOver(targetId, event) {
-            if (!this.draggedTaskId || !this.canMoveTask(this.draggedTaskId, { parentId: targetId })) return;
+            const position = this.dragPositionForRow(event);
+            const destination = this.dragDestination(targetId, position);
+            if (!destination || !this.canMoveTask(this.draggedTaskId, destination)) {
+                this.dragOverTaskId = null;
+                this.dragOverPosition = null;
+                return;
+            }
             event.preventDefault();
             event.dataTransfer.dropEffect = 'move';
             this.dragOverTaskId = targetId;
+            this.dragOverPosition = position;
         },
 
-        dropTask(targetId) {
-            if (this.draggedTaskId) this.moveTask(this.draggedTaskId, { parentId: targetId });
+        dropTask(targetId, event) {
+            const position = this.dragOverTaskId === targetId
+                ? this.dragOverPosition
+                : this.dragPositionForRow(event);
+            const destination = this.dragDestination(targetId, position);
+            if (destination && this.draggedTaskId) this.moveTask(this.draggedTaskId, destination);
             this.endDrag();
         },
 
         endDrag() {
             this.draggedTaskId = null;
             this.dragOverTaskId = null;
+            this.dragOverPosition = null;
         },
 
         menuAddSubtask(id) {
