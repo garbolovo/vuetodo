@@ -606,20 +606,69 @@ Vue.createApp({
             return path.join(' › ');
         },
 
-        canReparent(taskId, newParentId) {
-            if (!this.todoList.some(t => t.id === taskId)) return false;
-            if (newParentId === null) return true;
-            if (!this.todoList.some(t => t.id === newParentId)) return false;
-            return !this.projectDescendantIds(taskId).has(newParentId);
+        // Resolves and validates every move variant in one place. The current
+        // UI uses parentId; beforeId/afterId are ready for sibling reordering.
+        resolveMoveDestination(taskId, { parentId, beforeId = null, afterId = null } = {}) {
+            const task = this.todoList.find(t => t.id === taskId);
+            if (!task || (beforeId && afterId)) return null;
+
+            const anchorId = beforeId || afterId;
+            const anchor = anchorId ? this.todoList.find(t => t.id === anchorId) : null;
+            if (anchorId && !anchor) return null;
+
+            const resolvedParentId = anchor
+                ? anchor.parentId
+                : (parentId === undefined ? null : parentId);
+
+            if (anchor && parentId !== undefined && parentId !== anchor.parentId) return null;
+            if (resolvedParentId !== null && !this.todoList.some(t => t.id === resolvedParentId)) return null;
+
+            const movingIds = this.projectDescendantIds(taskId);
+            if ((anchorId && movingIds.has(anchorId)) || (resolvedParentId && movingIds.has(resolvedParentId))) {
+                return null;
+            }
+
+            return {
+                task,
+                parentId: resolvedParentId,
+                beforeId,
+                afterId,
+                movingIds,
+            };
         },
 
-        reparentTask(taskId, newParentId) {
-            if (!this.canReparent(taskId, newParentId)) return false;
-            const task = this.todoList.find(t => t.id === taskId);
-            if (task.parentId === newParentId) return true;
-            task.parentId = newParentId;
-            if (newParentId) {
-                const parent = this.todoList.find(t => t.id === newParentId);
+        canMoveTask(taskId, destination) {
+            return this.resolveMoveDestination(taskId, destination) !== null;
+        },
+
+        moveTask(taskId, destination = {}) {
+            const move = this.resolveMoveDestination(taskId, destination);
+            if (!move) return false;
+
+            const hasAnchor = Boolean(move.beforeId || move.afterId);
+            if (!hasAnchor && move.task.parentId === move.parentId) return true;
+
+            const movingItems = this.todoList.filter(item => move.movingIds.has(item.id));
+            const remainingItems = this.todoList.filter(item => !move.movingIds.has(item.id));
+            move.task.parentId = move.parentId;
+
+            let insertionIndex = remainingItems.length;
+            if (move.beforeId) {
+                insertionIndex = remainingItems.findIndex(item => item.id === move.beforeId);
+            } else if (move.afterId) {
+                insertionIndex = remainingItems.findIndex(item => item.id === move.afterId) + 1;
+            } else if (move.parentId) {
+                const parentIndex = remainingItems.findIndex(item => item.id === move.parentId);
+                insertionIndex = remainingItems.reduce((lastIndex, item, index) =>
+                    item.parentId === move.parentId ? index + 1 : lastIndex
+                , parentIndex + 1);
+            }
+
+            remainingItems.splice(insertionIndex, 0, ...movingItems);
+            this.todoList = remainingItems;
+
+            if (move.parentId) {
+                const parent = this.todoList.find(t => t.id === move.parentId);
                 parent.collapsed = false;
             }
             this.saveTodos();
@@ -641,7 +690,7 @@ Vue.createApp({
         },
 
         confirmMove() {
-            if (this.moveDialogTask && this.reparentTask(this.moveDialogTask.id, this.moveTargetId)) {
+            if (this.moveDialogTask && this.moveTask(this.moveDialogTask.id, { parentId: this.moveTargetId })) {
                 this.closeMoveDialog();
             }
         },
@@ -653,14 +702,14 @@ Vue.createApp({
         },
 
         setDragOver(targetId, event) {
-            if (!this.draggedTaskId || !this.canReparent(this.draggedTaskId, targetId)) return;
+            if (!this.draggedTaskId || !this.canMoveTask(this.draggedTaskId, { parentId: targetId })) return;
             event.preventDefault();
             event.dataTransfer.dropEffect = 'move';
             this.dragOverTaskId = targetId;
         },
 
         dropTask(targetId) {
-            if (this.draggedTaskId) this.reparentTask(this.draggedTaskId, targetId);
+            if (this.draggedTaskId) this.moveTask(this.draggedTaskId, { parentId: targetId });
             this.endDrag();
         },
 
