@@ -1992,3 +1992,18 @@ body {
 .move-dialog-confirm:hover {
     background: var(--brand-hover);
 }
+
+.root-drop-zone {
+    margin: 8px 12px;
+    padding: 12px;
+    border: 2px dashed var(--brand-dark);
+    border-radius: 6px;
+    text-align: center;
+    font-size: 13px;
+    opacity: 0.6;
+}
+
+.root-drop-zone-active {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.05);
+}

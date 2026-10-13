@@ -51,6 +51,7 @@ Vue.createApp({
             draggedTaskId: null,
             dragOverTaskId: null,
             dragOverPosition: null,
+            dragOverRoot: false,
             moveDialogTaskId: null,
             moveTargetId: null,
             sidebarOpen: true,
@@ -725,20 +726,38 @@ Vue.createApp({
             if (position === 'inside') return { parentId: targetId };
             if (!this.canReorderInCurrentView()) return null;
 
-            const draggedTask = this.todoList.find(t => t.id === this.draggedTaskId);
             const targetTask = this.todoList.find(t => t.id === targetId);
-            if (!draggedTask || !targetTask) return null;
+            if (!targetTask) return null;
 
-            const draggedParentId = draggedTask.parentId || null;
             const targetParentId = targetTask.parentId || null;
-            if (draggedParentId !== targetParentId) return null;
 
             return position === 'before'
                 ? { parentId: targetParentId, beforeId: targetId }
                 : { parentId: targetParentId, afterId: targetId };
         },
 
+        canDropToRoot() {
+            if (!this.draggedTaskId || !this.canReorderInCurrentView()) return false;
+            const task = this.todoList.find(t => t.id === this.draggedTaskId);
+            return Boolean(task && task.parentId);
+        },
+
+        setRootDragOver(event) {
+            if (!this.canDropToRoot()) return;
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'move';
+            this.dragOverTaskId = null;
+            this.dragOverPosition = null;
+            this.dragOverRoot = true;
+        },
+
+        dropToRoot() {
+            if (this.canDropToRoot()) this.moveTask(this.draggedTaskId, { parentId: null });
+            this.endDrag();
+        },
+
         setDragOver(targetId, event) {
+            this.dragOverRoot = false;
             const position = this.dragPositionForRow(event);
             const destination = this.dragDestination(targetId, position);
             if (!destination || !this.canMoveTask(this.draggedTaskId, destination)) {
@@ -765,6 +784,7 @@ Vue.createApp({
             this.draggedTaskId = null;
             this.dragOverTaskId = null;
             this.dragOverPosition = null;
+            this.dragOverRoot = false;
         },
 
         menuAddSubtask(id) {
