@@ -5,7 +5,7 @@
   <title>Todo App</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261014-1">
+  <link rel="stylesheet" href="style.css?v=20261014-2">
 
 </head>
 <body>
@@ -197,6 +197,7 @@
                :class="{
                  'todo-row-selected': entry.item.id === selectedId,
                  'todo-row-dragging': entry.item.id === draggedTaskId,
+                 'todo-row-drop-invalid': invalidDropIds.has(entry.item.id),
                  'todo-row-drop-target': entry.item.id === dragOverTaskId && dragOverPosition === 'inside',
                  'todo-row-drop-before': entry.item.id === dragOverTaskId && dragOverPosition === 'before',
                  'todo-row-drop-after': entry.item.id === dragOverTaskId && dragOverPosition === 'after'
@@ -492,7 +493,7 @@
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261014-1"></script>
+<script src="app.js?v=20261014-2"></script>
 </body>
 </html>
 
