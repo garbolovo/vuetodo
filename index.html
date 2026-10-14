@@ -5,7 +5,7 @@
   <title>Todo App</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261014-2">
+  <link rel="stylesheet" href="style.css?v=20261015-1">
 
 </head>
 <body>
@@ -272,7 +272,7 @@
 
           <div class="root-drop-zone" v-if="canDropToRoot()" :class="{ 'root-drop-zone-active': dragOverRoot }"
                @dragover="setRootDragOver($event)" @drop.prevent.stop="dropToRoot">
-            Drop here to move to the top level
+            {{ activeProject ? 'Drop here to move to the project\'s top level' : 'Drop here to move to the top level' }}
           </div>
         </div>
       </div>
@@ -493,7 +493,7 @@
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261014-2"></script>
+<script src="app.js?v=20261015-1"></script>
 </body>
 </html>
 

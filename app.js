@@ -730,6 +730,9 @@ Vue.createApp({
             if (!this.draggedTaskId) return null;
             if (position === 'inside') return { parentId: targetId };
             if (!this.canReorderInCurrentView()) return null;
+            // The project's own row is the view's root: siblings of it would
+            // land outside the project and vanish from this view.
+            if (targetId === this.activeProject) return null;
 
             const targetTask = this.todoList.find(t => t.id === targetId);
             if (!targetTask) return null;
@@ -744,7 +747,7 @@ Vue.createApp({
         canDropToRoot() {
             if (!this.draggedTaskId || !this.canReorderInCurrentView()) return false;
             const task = this.todoList.find(t => t.id === this.draggedTaskId);
-            return Boolean(task && task.parentId);
+            return Boolean(task && task.parentId !== this.activeProject);
         },
 
         setRootDragOver(event) {
@@ -757,7 +760,7 @@ Vue.createApp({
         },
 
         dropToRoot() {
-            if (this.canDropToRoot()) this.moveTask(this.draggedTaskId, { parentId: null });
+            if (this.canDropToRoot()) this.moveTask(this.draggedTaskId, { parentId: this.activeProject });
             this.endDrag();
         },
 
