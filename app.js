@@ -162,6 +162,11 @@ Vue.createApp({
         window.removeEventListener('keydown', this.onGlobalKeydown, true);
     },
     computed: {
+        // Rows that cannot accept the dragged task: itself and its descendants.
+        invalidDropIds() {
+            return this.draggedTaskId ? this.projectDescendantIds(this.draggedTaskId) : new Set();
+        },
+
         // The tree rooted at activeProject (or the whole forest if null),
         // flattened in parent-before-children order with a depth for
         // indentation and hasChildren to show a disclosure arrow. Collapsed
