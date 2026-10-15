@@ -1266,6 +1266,7 @@ body {
     #detail-panel {
         inset: 0;
         width: 100%;
+        align-self: stretch;
         border: none;
         border-radius: 0;
     }
@@ -2012,4 +2013,57 @@ body {
 .todo-row-drop-invalid:hover {
     cursor: not-allowed;
     background: repeating-linear-gradient(135deg, transparent 0 6px, rgba(0, 0, 0, 0.05) 6px 12px);
+}
+
+/* Touch devices have no hover, so controls that only appear on row hover
+   must stay visible, and the HTML5 drag handle (not usable from touch) is
+   hidden. Move stays reachable from the row menu. */
+@media (hover: none) {
+    .row-menu-btn {
+        opacity: 1;
+    }
+
+    .drag-handle {
+        display: none;
+    }
+}
+
+@media (max-width: 760px) {
+    .row-menu-btn {
+        width: 44px;
+        height: 44px;
+    }
+}
+
+/* Small controls keep their look but get a 44px-tall hit area on narrow
+   screens via an invisible pseudo-element. Horizontal growth is kept small
+   so neighbours in the same row don't overlap. */
+@media (max-width: 760px) {
+    .disclosure,
+    .todo-check {
+        position: relative;
+    }
+
+    .disclosure::before,
+    .todo-check::before {
+        content: '';
+        position: absolute;
+        left: -3px;
+        right: -3px;
+    }
+
+    .disclosure::before {
+        top: -10px;
+        bottom: -10px;
+    }
+
+    .todo-check::before {
+        top: -16px;
+        bottom: -16px;
+    }
+
+    .detail-close {
+        width: 44px;
+        height: 44px;
+    }
 }
