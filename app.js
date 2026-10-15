@@ -152,6 +152,7 @@ Vue.createApp({
                     this.openTagComposer();
                 }
             }
+            this.handleTaskShortcut(e);
         };
         // Capture the event before a focused control or browser integration
         // can consume it. Ctrl+K is kept; Cmd+K is the macOS convention.
@@ -864,6 +865,67 @@ Vue.createApp({
         projectIncompleteCount(rootId) {
             const ids = this.projectDescendantIds(rootId);
             return this.todoList.filter(t => ids.has(t.id) && !t.done).length;
+        },
+
+        // RTM-style single-key shortcuts. The selected row doubles as the
+        // cursor: j/k change it, the other keys act on it. Keys are matched by
+        // physical position (e.code) so they work on any keyboard layout.
+        handleTaskShortcut(e) {
+            if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
+            const tag = e.target.tagName;
+            if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target.isContentEditable) return;
+            if (this.moveDialogTaskId || this.pendingCommentDeleteId) return;
+
+            const priorities = { Digit1: 'high', Digit2: 'medium', Digit3: 'low', Digit4: '' };
+            const code = e.code;
+            if (code === 'KeyJ' || code === 'KeyK') {
+                e.preventDefault();
+                this.moveSelection(code === 'KeyJ' ? 1 : -1);
+                return;
+            }
+
+            const item = this.selectedItem;
+            if (!item) return;
+
+            if (code === 'KeyC') {
+                this.doneTodo(item.id);
+            } else if (code === 'Delete') {
+                this.deleteTodo(item.id);
+            } else if (code === 'KeyM') {
+                this.openMoveDialog(item.id);
+            } else if (code === 'KeyD') {
+                this.toggleDuePicker();
+            } else if (code === 'KeyW') {
+                this.toggleStartPicker();
+            } else if (code === 'KeyR') {
+                this.$refs.detailTitle?.focus();
+                this.$refs.detailTitle?.select();
+            } else if (code === 'KeyY') {
+                this.$refs.detailDescription?.focus();
+            } else if (code in priorities) {
+                item.priority = priorities[code];
+                this.saveTodos();
+            } else {
+                return;
+            }
+            e.preventDefault();
+        },
+
+        // Moves the selected row up or down the visible list; with nothing
+        // selected, j picks the first row and k the last.
+        moveSelection(step) {
+            const entries = this.displayEntries;
+            if (!entries.length) return;
+            const index = entries.findIndex(entry => entry.item.id === this.selectedId);
+            const target = index === -1
+                ? (step > 0 ? 0 : entries.length - 1)
+                : Math.max(0, Math.min(entries.length - 1, index + step));
+            const id = entries[target].item.id;
+            if (id === this.selectedId) return;
+            this.selectTodo(id);
+            this.$nextTick(() => {
+                document.querySelector(`.todo-row[data-id="${id}"]`)?.scrollIntoView({ block: 'nearest' });
+            });
         },
 
         // After picking a view/project/context/tag the drawer would cover the list.
