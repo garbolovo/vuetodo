@@ -189,17 +189,31 @@ body {
     align-items: stretch;
 }
 
+.sidebar-backdrop {
+    display: none;
+}
+
+/* On phones the sidebar is an off-canvas drawer that slides in from the
+   left over the list, instead of stacking above it. */
 @media (max-width: 760px) {
     #workspace {
         flex-direction: column;
     }
 
     #sidebar {
-        width: 100%;
-        max-height: 1200px;
-        position: static;
-        transform: translateY(0);
-        transition: max-height 0.3s ease, opacity 0.2s ease, transform 0.3s ease;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        z-index: 40;
+        width: min(300px, 85vw);
+        padding: 20px 16px;
+        overflow-y: auto;
+        background: #f4f6f8;
+        box-shadow: 0 0 40px rgba(24, 30, 38, 0.28);
+        opacity: 1;
+        transform: translateX(0);
+        transition: transform 0.25s ease, visibility 0s;
     }
 
     #sidebar > .sidebar-section {
@@ -208,9 +222,20 @@ body {
     }
 
     #workspace.sidebar-collapsed #sidebar {
-        width: 100%;
-        max-height: 0;
-        transform: translateY(-12px);
+        width: min(300px, 85vw);
+        opacity: 1;
+        transform: translateX(-105%);
+        visibility: hidden;
+        box-shadow: none;
+        transition: transform 0.25s ease, visibility 0s 0.25s;
+    }
+
+    .sidebar-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 35;
+        background: rgba(24, 30, 38, 0.4);
     }
 }
 
@@ -1285,15 +1310,33 @@ body {
         display: none;
     }
 
+    /* Title and due date stack on the left, the row menu sits on the right
+       spanning both lines, so a row stays compact. */
     .todo-row {
-        display: flex;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+            "title actions"
+            "due actions";
         align-items: center;
-        gap: 4px 10px;
+        gap: 0 8px;
+        padding-top: 0;
+        padding-bottom: 0;
     }
 
     .col-title {
-        width: 100%;
+        grid-area: title;
+        min-width: 0;
+        width: auto;
+    }
+
+    .col-due {
+        grid-area: due;
+        padding-left: 6px;
+    }
+
+    .col-actions {
+        grid-area: actions;
     }
 
 }
