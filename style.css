@@ -1266,6 +1266,7 @@ body {
     #detail-panel {
         inset: 0;
         width: 100%;
+        align-self: stretch;
         border: none;
         border-radius: 0;
     }
@@ -2012,4 +2013,24 @@ body {
 .todo-row-drop-invalid:hover {
     cursor: not-allowed;
     background: repeating-linear-gradient(135deg, transparent 0 6px, rgba(0, 0, 0, 0.05) 6px 12px);
+}
+
+/* Touch devices have no hover, so controls that only appear on row hover
+   must stay visible, and the HTML5 drag handle (not usable from touch) is
+   hidden. Move stays reachable from the row menu. */
+@media (hover: none) {
+    .row-menu-btn {
+        opacity: 1;
+    }
+
+    .drag-handle {
+        display: none;
+    }
+}
+
+@media (max-width: 760px) {
+    .row-menu-btn {
+        width: 44px;
+        height: 44px;
+    }
 }
