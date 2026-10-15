@@ -195,7 +195,7 @@
             <div class="col-actions"></div>
           </div>
 
-          <div class="todo-row" v-for="entry in displayEntries" :key="entry.item.id"
+          <div class="todo-row" v-for="entry in displayEntries" :key="entry.item.id" :data-id="entry.item.id"
                :class="{
                  'todo-row-selected': entry.item.id === selectedId,
                  'todo-row-dragging': entry.item.id === draggedTaskId,
@@ -283,7 +283,7 @@
         <div class="detail-header">
           <div class="detail-heading">
             <div class="detail-breadcrumb" v-if="selectedBreadcrumb.length">{{ selectedBreadcrumb.join(' / ') }}</div>
-            <input class="detail-title" v-model="selectedItem.title" @change="saveTodos" aria-label="Task title">
+            <input class="detail-title" ref="detailTitle" v-model="selectedItem.title" @change="saveTodos" aria-label="Task title">
           </div>
           <button class="detail-close" title="Close details" aria-label="Close details" @click="closeDetail">×</button>
         </div>
@@ -409,7 +409,7 @@
 
           <section class="detail-section description-section">
             <h3>Description</h3>
-            <textarea class="detail-description" :class="{ empty: typeof selectedItem.body !== 'string' || !selectedItem.body.trim() }" v-model="selectedItem.body" @change="saveTodos" rows="3" placeholder="Add a description..."></textarea>
+            <textarea class="detail-description" ref="detailDescription" :class="{ empty: typeof selectedItem.body !== 'string' || !selectedItem.body.trim() }" v-model="selectedItem.body" @change="saveTodos" rows="3" placeholder="Add a description..."></textarea>
           </section>
 
           <section class="detail-section subtasks-section">
@@ -495,7 +495,7 @@
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261016-5"></script>
+<script src="app.js?v=20261017-1"></script>
 </body>
 </html>
 
