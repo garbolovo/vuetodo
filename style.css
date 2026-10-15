@@ -2034,3 +2034,36 @@ body {
         height: 44px;
     }
 }
+
+/* Small controls keep their look but get a 44px-tall hit area on narrow
+   screens via an invisible pseudo-element. Horizontal growth is kept small
+   so neighbours in the same row don't overlap. */
+@media (max-width: 760px) {
+    .disclosure,
+    .todo-check {
+        position: relative;
+    }
+
+    .disclosure::before,
+    .todo-check::before {
+        content: '';
+        position: absolute;
+        left: -3px;
+        right: -3px;
+    }
+
+    .disclosure::before {
+        top: -10px;
+        bottom: -10px;
+    }
+
+    .todo-check::before {
+        top: -16px;
+        bottom: -16px;
+    }
+
+    .detail-close {
+        width: 44px;
+        height: 44px;
+    }
+}
