@@ -54,7 +54,8 @@ Vue.createApp({
             dragOverRoot: false,
             moveDialogTaskId: null,
             moveTargetId: null,
-            sidebarOpen: true,
+            // On phones the sidebar is an off-canvas drawer, closed by default.
+            sidebarOpen: !window.matchMedia('(max-width: 760px)').matches,
             collapsedSidebarSections,
             startPickerOpen: false,
             customStartDate: '',
@@ -865,9 +866,15 @@ Vue.createApp({
             return this.todoList.filter(t => ids.has(t.id) && !t.done).length;
         },
 
+        // After picking a view/project/context/tag the drawer would cover the list.
+        closeSidebarOnMobile() {
+            if (window.matchMedia('(max-width: 760px)').matches) this.sidebarOpen = false;
+        },
+
         setProject(id) {
             this.activeProject = this.activeProject === id ? null : id;
             this.resetSearch();
+            this.closeSidebarOnMobile();
         },
 
         selectTodo(id) {
@@ -1131,12 +1138,14 @@ Vue.createApp({
         setView(view) {
             this.activeView = view;
             this.resetSearch();
+            this.closeSidebarOnMobile();
         },
 
         // ctx is null for "all contexts", '' for "no context", or a context string.
         setContext(ctx) {
             this.activeContext = ctx;
             this.resetSearch();
+            this.closeSidebarOnMobile();
         },
 
         contextCount(ctx) {
@@ -1147,6 +1156,7 @@ Vue.createApp({
         setTag(tag) {
             this.activeTag = this.activeTag === tag ? null : tag;
             this.resetSearch();
+            this.closeSidebarOnMobile();
         },
 
         tagCount(tag) {
