@@ -53,6 +53,8 @@ Vue.createApp({
             dragOverPosition: null,
             dragOverRoot: false,
             moveDialogTaskId: null,
+            shortcutsHelpOpen: false,
+            gotoPending: false,
             moveTargetId: null,
             // On phones the sidebar is an off-canvas drawer, closed by default.
             sidebarOpen: !window.matchMedia('(max-width: 760px)').matches,
@@ -88,6 +90,10 @@ Vue.createApp({
         });
 
         this.onGlobalKeydown = (e) => {
+            if (e.key === 'Escape' && this.shortcutsHelpOpen) {
+                this.shortcutsHelpOpen = false;
+                return;
+            }
             if (e.key === 'Escape' && this.moveDialogTaskId) {
                 this.closeMoveDialog();
                 return;
@@ -139,7 +145,7 @@ Vue.createApp({
             if (e.key.toLowerCase() === 't' && !e.ctrlKey && !e.metaKey && !e.altKey) {
                 const tag = e.target.tagName;
                 const isEditable = tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable;
-                if (!isEditable) {
+                if (!isEditable && !this.gotoPending && !this.shortcutsHelpOpen) {
                     e.preventDefault();
                     this.focusQuickAdd();
                 }
@@ -147,7 +153,7 @@ Vue.createApp({
             if (e.key.toLowerCase() === 's' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
                 const tag = e.target.tagName;
                 const isEditable = tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable;
-                if (!isEditable && this.selectedItem && !this.moveDialogTaskId) {
+                if (!isEditable && this.selectedItem && !this.moveDialogTaskId && !this.gotoPending && !this.shortcutsHelpOpen) {
                     e.preventDefault();
                     this.openTagComposer();
                 }
@@ -300,6 +306,38 @@ Vue.createApp({
                 }
             }));
             return Array.from(tagsByNormalizedName.values()).sort((a, b) => a.localeCompare(b));
+        },
+
+        shortcutGroups() {
+            return [
+                { title: 'Go to', items: [
+                    { keys: 'g a', label: 'All' },
+                    { keys: 'g t', label: 'Today' },
+                    { keys: 'g n', label: 'Next' },
+                    { keys: 'g s', label: 'Scheduled' },
+                    { keys: 'g o', label: 'Overdue' },
+                    { keys: 'g c', label: 'Completed' },
+                ] },
+                { title: 'App', items: [
+                    { keys: 't', label: 'New task' },
+                    { keys: '/', label: 'Search' },
+                    { keys: ';', label: 'Show or hide the sidebar' },
+                    { keys: '?', label: 'This help' },
+                ] },
+                { title: 'Tasks', items: [
+                    { keys: 'j', label: 'Next task' },
+                    { keys: 'k', label: 'Previous task' },
+                    { keys: 'c', label: 'Complete or reopen' },
+                    { keys: 'Del', label: 'Delete' },
+                    { keys: 'r', label: 'Rename' },
+                    { keys: 'y', label: 'Description' },
+                    { keys: 'd', label: 'Due date' },
+                    { keys: 'w', label: 'Start date' },
+                    { keys: '1 2 3 4', label: 'Priority high / medium / low / none' },
+                    { keys: 'm', label: 'Move' },
+                    { keys: 's', label: 'Tags' },
+                ] },
+            ];
         },
 
         selectedItem() {
@@ -875,6 +913,41 @@ Vue.createApp({
             const tag = e.target.tagName;
             if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target.isContentEditable) return;
             if (this.moveDialogTaskId || this.pendingCommentDeleteId) return;
+
+            if (e.key === '?' || (e.code === 'Slash' && e.shiftKey)) {
+                e.preventDefault();
+                this.shortcutsHelpOpen = !this.shortcutsHelpOpen;
+                return;
+            }
+            if (this.shortcutsHelpOpen || e.shiftKey) return;
+
+            // "g" then a letter jumps to a view, RTM-style; any other key cancels.
+            if (this.gotoPending) {
+                this.gotoPending = false;
+                clearTimeout(this.gotoTimer);
+                const views = { KeyA: 'all', KeyT: 'today', KeyN: 'next', KeyS: 'scheduled', KeyO: 'overdue', KeyC: 'completed' };
+                if (e.code in views) {
+                    e.preventDefault();
+                    this.setView(views[e.code]);
+                }
+                return;
+            }
+            if (e.code === 'KeyG') {
+                e.preventDefault();
+                this.gotoPending = true;
+                this.gotoTimer = setTimeout(() => { this.gotoPending = false; }, 1500);
+                return;
+            }
+            if (e.code === 'Slash' || e.key === '/') {
+                e.preventDefault();
+                this.$refs.searchInput.focus();
+                return;
+            }
+            if (e.code === 'Semicolon' || e.key === ';') {
+                e.preventDefault();
+                this.sidebarOpen = !this.sidebarOpen;
+                return;
+            }
 
             const priorities = { Digit1: 'high', Digit2: 'medium', Digit3: 'low', Digit4: '' };
             const code = e.code;
