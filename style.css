@@ -2110,3 +2110,48 @@ body {
         height: 44px;
     }
 }
+
+.shortcuts-dialog {
+    width: min(100%, 520px);
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+}
+
+.shortcuts-group h3 {
+    margin: 14px 0 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #8a97a8;
+}
+
+.shortcuts-group dl {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 6px 12px;
+    margin: 0;
+    align-items: center;
+}
+
+.shortcuts-group dt {
+    display: flex;
+    gap: 4px;
+}
+
+.shortcuts-group dd {
+    margin: 0;
+    color: #444;
+}
+
+.shortcuts-group kbd {
+    min-width: 22px;
+    padding: 2px 6px;
+    border: 1px solid #d0d5db;
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    background: #f7f8fa;
+    font-family: inherit;
+    font-size: 0.8rem;
+    text-align: center;
+}
