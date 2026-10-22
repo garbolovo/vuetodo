@@ -1300,6 +1300,13 @@ body {
         flex-wrap: wrap;
     }
 
+    /* Branding and the name-toggle avatar are pure decoration; on a narrow
+       screen that space is worth more as room for search/+New Task. */
+    .topbar-brand,
+    .topbar-user {
+        display: none;
+    }
+
     #search-todo {
         order: 3;
         max-width: none;
