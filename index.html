@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Todo">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261023-2">
+  <link rel="stylesheet" href="style.css?v=20261023-3">
 
 </head>
 <body>
@@ -30,9 +30,14 @@
         <span></span><span></span><span></span>
       </button>
 
+      <div class="topbar-view-label">{{ activeViewLabel }}</div>
+
       <input ref="searchInput" type="text" id="search-todo" @input="filterTodo" placeholder="Search tasks... (Ctrl+K)">
 
-      <button id="new-task-btn" title="Press T" @click="focusQuickAdd">+ New Task</button>
+      <button id="new-task-btn" title="Press T" aria-label="New Task" @click="focusQuickAdd">
+        <span class="new-task-btn-icon" aria-hidden="true">+</span>
+        <span class="new-task-btn-label">New Task</span>
+      </button>
 
       <button class="topbar-user" title="Click to change name" @click="changeName">{{ name.split(' ').map(w => w[0]).join('') }}</button>
     </div>
@@ -544,7 +549,7 @@
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261023-1"></script>
+<script src="app.js?v=20261023-2"></script>
 </body>
 </html>
 

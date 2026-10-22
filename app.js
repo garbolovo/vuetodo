@@ -191,6 +191,20 @@ Vue.createApp({
             return this.draggedTaskId ? this.projectDescendantIds(this.draggedTaskId) : new Set();
         },
 
+        // Human label for the active view, shown in the mobile topbar since
+        // the sidebar (where the view is normally visible as selected) is
+        // tucked behind the hamburger there.
+        activeViewLabel() {
+            return {
+                all: 'All',
+                today: 'Today',
+                next: 'Next',
+                scheduled: 'Scheduled',
+                overdue: 'Overdue',
+                completed: 'Completed',
+            }[this.activeView] || 'All';
+        },
+
         // The tree rooted at activeProject (or the whole forest if null),
         // flattened in parent-before-children order with a depth for
         // indentation and hasChildren to show a disclosure arrow. Collapsed
