@@ -1382,7 +1382,11 @@ body {
 
     .col-due {
         grid-area: due;
-        padding-left: 6px;
+        /* Lines up with where the title text itself starts (past the
+           checkbox/disclosure icons that precede it in .col-title), not
+           the row's bare left edge — otherwise the date reads as
+           disconnected, floating under the icons instead of the title. */
+        padding-left: 72px;
     }
 
     .col-actions {
