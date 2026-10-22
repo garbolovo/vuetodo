@@ -1508,15 +1508,6 @@ body {
     color: #333;
 }
 
-.detail-field select {
-    appearance: none;
-    -webkit-appearance: none;
-    padding-right: 26px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238a94a1' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 9px center;
-    cursor: pointer;
-}
 
 .detail-description {
     display: block;
@@ -1805,6 +1796,35 @@ body {
 }
 
 .due-picker-option.selected {
+    color: var(--brand-dark);
+    font-weight: 600;
+}
+
+/* Priority/Context options carry a single label span (no secondary value
+   column like the date pickers' "Never"/"23 Oct"), so they opt out of the
+   last-child-is-muted rule above and stay full-strength text. */
+.priority-picker-menu .due-picker-option span:last-child,
+.context-picker-menu .due-picker-option span:last-child {
+    color: inherit;
+}
+
+.priority-option-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.priority-option-dot {
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.due-picker-option-create {
+    margin-top: 4px;
+    padding-top: 10px;
+    border-top: 1px solid #eef0f3;
     color: var(--brand-dark);
     font-weight: 600;
 }

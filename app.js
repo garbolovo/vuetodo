@@ -67,6 +67,8 @@ Vue.createApp({
             quickCustomStartDate: '',
             quickDuePickerOpen: false,
             quickCustomDueDate: '',
+            priorityPickerOpen: false,
+            contextPickerOpen: false,
         };
     },
     mounted() {
@@ -86,6 +88,12 @@ Vue.createApp({
             }
             if (this.quickStartPickerOpen && !e.target.closest('.quick-start-picker')) {
                 this.quickStartPickerOpen = false;
+            }
+            if (this.priorityPickerOpen && !e.target.closest('.detail-priority-picker')) {
+                this.priorityPickerOpen = false;
+            }
+            if (this.contextPickerOpen && !e.target.closest('.detail-context-picker')) {
+                this.contextPickerOpen = false;
             }
         });
 
@@ -118,6 +126,14 @@ Vue.createApp({
             }
             if (e.key === 'Escape' && this.quickDuePickerOpen) {
                 this.quickDuePickerOpen = false;
+                return;
+            }
+            if (e.key === 'Escape' && this.priorityPickerOpen) {
+                this.priorityPickerOpen = false;
+                return;
+            }
+            if (e.key === 'Escape' && this.contextPickerOpen) {
+                this.contextPickerOpen = false;
                 return;
             }
             if (e.key === 'Escape' && this.quickStartPickerOpen) {
@@ -1307,6 +1323,39 @@ Vue.createApp({
                 this.selectedItem.context = ctx && ctx.trim() ? ctx.trim() : '';
             }
             this.saveTodos();
+        },
+
+        togglePriorityPicker() {
+            this.contextPickerOpen = false;
+            this.priorityPickerOpen = !this.priorityPickerOpen;
+        },
+
+        setPriority(value) {
+            if (!this.selectedItem) return;
+            this.selectedItem.priority = value;
+            this.priorityPickerOpen = false;
+            this.saveTodos();
+        },
+
+        toggleContextPicker() {
+            this.priorityPickerOpen = false;
+            this.contextPickerOpen = !this.contextPickerOpen;
+        },
+
+        setItemContext(value) {
+            if (!this.selectedItem) return;
+            this.selectedItem.context = value;
+            this.contextPickerOpen = false;
+            this.saveTodos();
+        },
+
+        promptNewItemContext() {
+            const ctx = prompt('New context name (e.g. @computer)');
+            if (ctx && ctx.trim()) {
+                this.setItemContext(ctx.trim());
+            } else {
+                this.contextPickerOpen = false;
+            }
         },
 
         filterTodo(e) {
