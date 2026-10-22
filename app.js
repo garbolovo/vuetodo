@@ -1403,7 +1403,7 @@ Vue.createApp({
             if (diffDays === 0) return { label: 'Today', cls: 'due-today' };
             if (diffDays === 1) return { label: 'Tomorrow', cls: 'due-soon' };
             if (diffDays <= 6) return { label: due.toLocaleDateString('en-US', { weekday: 'long' }), cls: 'due-soon' };
-            return { label: due.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }), cls: 'due-future' };
+            return { label: due.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), cls: 'due-future' };
         },
 
         dueDateLabel(dueDate) {
