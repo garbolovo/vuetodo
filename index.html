@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Todo">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261021-1">
+  <link rel="stylesheet" href="style.css?v=20261023-1">
 
 </head>
 <body>
@@ -354,21 +354,47 @@
 
               <div class="detail-field">
                 <label>Priority</label>
-                <select v-model="selectedItem.priority" @change="saveTodos">
-                  <option value="">No priority</option>
-                  <option value="high">High</option>
-                  <option value="medium">Medium</option>
-                  <option value="low">Low</option>
-                </select>
+                <div class="detail-due-row detail-priority-picker">
+                  <button type="button" class="detail-due-trigger" :class="{ empty: !selectedItem.priority }"
+                          :aria-expanded="priorityPickerOpen" @click.stop="togglePriorityPicker">
+                    <span>{{ selectedItem.priority ? priorityLabel(selectedItem.priority) : 'No priority' }}</span>
+                    <span class="detail-due-chevron">⌄</span>
+                  </button>
+
+                  <div class="due-picker-menu priority-picker-menu" v-if="priorityPickerOpen" @click.stop>
+                    <button type="button" class="due-picker-option" :class="{ selected: !selectedItem.priority }" @click="setPriority('')">
+                      <span>No priority</span>
+                    </button>
+                    <button type="button" class="due-picker-option" v-for="p in ['high', 'medium', 'low']" :key="p"
+                            :class="{ selected: selectedItem.priority === p }" @click="setPriority(p)">
+                      <span class="priority-option-label"><span class="priority-option-dot" :class="'priority-rail-' + p"></span>{{ priorityLabel(p) }}</span>
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div class="detail-field">
                 <label>Context</label>
-                <select v-model="selectedItem.context" @change="onContextChange">
-                  <option value="">No context</option>
-                  <option v-for="ctx in allContexts" :key="ctx" :value="ctx">{{ ctx }}</option>
-                  <option value="__new__">+ New context...</option>
-                </select>
+                <div class="detail-due-row detail-context-picker">
+                  <button type="button" class="detail-due-trigger" :class="{ empty: !selectedItem.context }"
+                          :aria-expanded="contextPickerOpen" @click.stop="toggleContextPicker">
+                    <span>{{ selectedItem.context || 'No context' }}</span>
+                    <span class="detail-due-chevron">⌄</span>
+                  </button>
+
+                  <div class="due-picker-menu context-picker-menu" v-if="contextPickerOpen" @click.stop>
+                    <button type="button" class="due-picker-option" :class="{ selected: !selectedItem.context }" @click="setItemContext('')">
+                      <span>No context</span>
+                    </button>
+                    <button type="button" class="due-picker-option" v-for="ctx in allContexts" :key="ctx"
+                            :class="{ selected: selectedItem.context === ctx }" @click="setItemContext(ctx)">
+                      <span>{{ ctx }}</span>
+                    </button>
+                    <button type="button" class="due-picker-option due-picker-option-create" @click="promptNewItemContext">
+                      <span>+ New context...</span>
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div class="detail-field detail-tags-field">
@@ -518,7 +544,7 @@
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261018-2"></script>
+<script src="app.js?v=20261023-1"></script>
 </body>
 </html>
 
