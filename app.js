@@ -205,6 +205,14 @@ Vue.createApp({
             }[this.activeView] || 'All';
         },
 
+        activeProjectLabel() {
+            return this.todoList.find(task => task.id === this.activeProject)?.title || 'Unknown project';
+        },
+
+        activeContextLabel() {
+            return this.activeContext === '' ? 'No context' : this.activeContext;
+        },
+
         // The tree rooted at activeProject (or the whole forest if null),
         // flattened in parent-before-children order with a depth for
         // indentation and hasChildren to show a disclosure arrow. Collapsed
@@ -1042,6 +1050,11 @@ Vue.createApp({
             this.closeSidebarOnMobile();
         },
 
+        clearProjectFilter() {
+            this.activeProject = null;
+            this.resetSearch();
+        },
+
         selectTodo(id) {
             this.newSubtaskTitle = '';
             this.newCommentText = '';
@@ -1313,6 +1326,11 @@ Vue.createApp({
             this.closeSidebarOnMobile();
         },
 
+        clearContextFilter() {
+            this.activeContext = null;
+            this.resetSearch();
+        },
+
         contextCount(ctx) {
             return this.todoList.filter(t => t.context === ctx).length;
         },
@@ -1322,6 +1340,11 @@ Vue.createApp({
             this.activeTag = this.activeTag === tag ? null : tag;
             this.resetSearch();
             this.closeSidebarOnMobile();
+        },
+
+        clearTagFilter() {
+            this.activeTag = null;
+            this.resetSearch();
         },
 
         tagCount(tag) {

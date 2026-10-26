@@ -614,10 +614,75 @@ body {
 
 /* todo list — compact outline/tree, MLO-style */
 
+.list-heading-row {
+    min-height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.list-context-header {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    color: #68727f;
+    font-size: 0.8rem;
+}
+
+.list-context-view {
+    color: #2f343a;
+    font-size: 0.9rem;
+    font-weight: 650;
+}
+
+.list-context-filter {
+    min-width: 0;
+    max-width: 240px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 7px 4px 9px;
+    border: 1px solid #dce2e8;
+    border-radius: 999px;
+    background: #fff;
+    color: #59636f;
+    font: inherit;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.list-context-filter > span:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.list-context-filter:hover {
+    border-color: #b8c2cc;
+    background: #f8f9fb;
+    color: #2f343a;
+}
+
+.list-context-filter:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+}
+
+.list-context-remove {
+    flex: 0 0 auto;
+    color: #98a1ac;
+    font-size: 1rem;
+    line-height: 0.8;
+}
+
 .list-toolbar {
     display: flex;
     justify-content: flex-end;
-    margin-bottom: 8px;
+    flex: 0 0 auto;
 }
 
 .show-completed-toggle {
