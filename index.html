@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Todo">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261023-4">
+  <link rel="stylesheet" href="style.css?v=20261026-1">
 
 </head>
 <body>
@@ -186,10 +186,28 @@
           </div>
         </div>
 
-        <div class="list-toolbar" v-if="activeView === 'all'">
-          <button class="show-completed-toggle" :class="{ active: showCompleted }" @click="showCompleted = !showCompleted">
-            {{ showCompleted ? 'Hide Completed' : 'Show Completed' }}
-          </button>
+        <div class="list-heading-row">
+          <nav class="list-context-header" aria-label="Current task list">
+            <strong class="list-context-view">{{ activeViewLabel }}</strong>
+            <button class="list-context-filter" type="button" v-if="activeProject"
+                    :aria-label="'Clear project filter ' + activeProjectLabel" @click="clearProjectFilter">
+              <span>Project: {{ activeProjectLabel }}</span><span class="list-context-remove" aria-hidden="true">×</span>
+            </button>
+            <button class="list-context-filter" type="button" v-if="activeContext !== null"
+                    :aria-label="'Clear context filter ' + activeContextLabel" @click="clearContextFilter">
+              <span>Context: {{ activeContextLabel }}</span><span class="list-context-remove" aria-hidden="true">×</span>
+            </button>
+            <button class="list-context-filter" type="button" v-if="activeTag"
+                    :aria-label="'Clear tag filter ' + activeTag" @click="clearTagFilter">
+              <span>Tag: {{ activeTag }}</span><span class="list-context-remove" aria-hidden="true">×</span>
+            </button>
+          </nav>
+
+          <div class="list-toolbar" v-if="activeView === 'all'">
+            <button class="show-completed-toggle" :class="{ active: showCompleted }" @click="showCompleted = !showCompleted">
+              {{ showCompleted ? 'Hide Completed' : 'Show Completed' }}
+            </button>
+          </div>
         </div>
 
         <div id="todo-list-wrapper">
@@ -549,7 +567,7 @@
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261023-3"></script>
+<script src="app.js?v=20261026-1"></script>
 </body>
 </html>
 
