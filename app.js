@@ -542,13 +542,24 @@ Vue.createApp({
             }
         },
 
-        doneTodo(id) {
+        // event is only passed from the checkbox inputs (not the detail
+        // panel's plain "Mark Complete" button). We only preventDefault()
+        // when we're about to show the confirm dialog instead of toggling:
+        // a real (trusted) click already applies the checkbox's native
+        // toggle before this handler runs, and the browser reverts that
+        // toggle after preventDefault() — reliably, but only for trusted
+        // clicks, which is exactly the revert we want in that case. For
+        // the normal direct-toggle path we leave the native toggle alone;
+        // it ends up agreeing with Vue's own reactive update rather than
+        // racing it, which a blanket preventDefault() does not.
+        doneTodo(id, event) {
             const item = this.todoList.find(t => t.id === id);
             if (!item.done) {
                 const descendantIds = this.projectDescendantIds(id);
                 descendantIds.delete(id);
                 const hasIncompleteDescendants = this.todoList.some(t => descendantIds.has(t.id) && !t.done);
                 if (hasIncompleteDescendants) {
+                    if (event) event.preventDefault();
                     this.completeDescendantsDialogTaskId = id;
                     return;
                 }
