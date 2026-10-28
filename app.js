@@ -53,6 +53,7 @@ Vue.createApp({
             dragOverPosition: null,
             dragOverRoot: false,
             moveDialogTaskId: null,
+            completeDescendantsDialogTaskId: null,
             shortcutsHelpOpen: false,
             gotoPending: false,
             moveTargetId: null,
@@ -104,6 +105,10 @@ Vue.createApp({
             }
             if (e.key === 'Escape' && this.moveDialogTaskId) {
                 this.closeMoveDialog();
+                return;
+            }
+            if (e.key === 'Escape' && this.completeDescendantsDialogTaskId) {
+                this.cancelCompleteWithDescendants();
                 return;
             }
             if (e.key === 'Escape' && document.activeElement === this.$refs.subtaskInput) {
@@ -169,7 +174,7 @@ Vue.createApp({
             if (e.key.toLowerCase() === 's' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
                 const tag = e.target.tagName;
                 const isEditable = tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable;
-                if (!isEditable && this.selectedItem && !this.moveDialogTaskId && !this.gotoPending && !this.shortcutsHelpOpen) {
+                if (!isEditable && this.selectedItem && !this.moveDialogTaskId && !this.completeDescendantsDialogTaskId && !this.gotoPending && !this.shortcutsHelpOpen) {
                     e.preventDefault();
                     this.openTagComposer();
                 }
@@ -440,6 +445,17 @@ Vue.createApp({
             return this.todoList.find(t => t.id === this.moveDialogTaskId) || null;
         },
 
+        completeDescendantsDialogTask() {
+            return this.todoList.find(t => t.id === this.completeDescendantsDialogTaskId) || null;
+        },
+
+        completeDescendantsDialogCount() {
+            if (!this.completeDescendantsDialogTask) return 0;
+            const ids = this.projectDescendantIds(this.completeDescendantsDialogTaskId);
+            ids.delete(this.completeDescendantsDialogTaskId);
+            return this.todoList.filter(t => ids.has(t.id) && !t.done).length;
+        },
+
         moveDestinationOptions() {
             if (!this.moveDialogTask) return [];
             const unavailableIds = this.projectDescendantIds(this.moveDialogTask.id);
@@ -528,8 +544,32 @@ Vue.createApp({
 
         doneTodo(id) {
             const item = this.todoList.find(t => t.id === id);
+            if (!item.done) {
+                const descendantIds = this.projectDescendantIds(id);
+                descendantIds.delete(id);
+                const hasIncompleteDescendants = this.todoList.some(t => descendantIds.has(t.id) && !t.done);
+                if (hasIncompleteDescendants) {
+                    this.completeDescendantsDialogTaskId = id;
+                    return;
+                }
+            }
             item.done = !item.done;
             this.saveTodos();
+        },
+
+        confirmCompleteWithDescendants() {
+            const id = this.completeDescendantsDialogTaskId;
+            if (!id) return;
+            const ids = this.projectDescendantIds(id);
+            this.todoList.forEach(t => {
+                if (ids.has(t.id)) t.done = true;
+            });
+            this.completeDescendantsDialogTaskId = null;
+            this.saveTodos();
+        },
+
+        cancelCompleteWithDescendants() {
+            this.completeDescendantsDialogTaskId = null;
         },
 
         deleteTodo(id) {
@@ -950,7 +990,7 @@ Vue.createApp({
             if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
             const tag = e.target.tagName;
             if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target.isContentEditable) return;
-            if (this.moveDialogTaskId || this.pendingCommentDeleteId) return;
+            if (this.moveDialogTaskId || this.pendingCommentDeleteId || this.completeDescendantsDialogTaskId) return;
 
             if (e.key === '?' || (e.code === 'Slash' && e.shiftKey)) {
                 e.preventDefault();
