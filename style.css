@@ -896,11 +896,11 @@ body {
     -webkit-appearance: none;
     flex-shrink: 0;
     align-self: center;
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
     margin: 0;
     border: 1.5px solid #b0b0b0;
-    border-radius: 3px;
+    border-radius: 4px;
     background: #fff;
     cursor: pointer;
     position: relative;
@@ -926,10 +926,10 @@ body {
 .todo-check:checked::after {
     content: '';
     position: absolute;
-    left: 4px;
-    top: 0px;
-    width: 4px;
-    height: 8px;
+    left: 6px;
+    top: 1px;
+    width: 5px;
+    height: 10px;
     border: solid var(--brand-ink);
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
