@@ -480,7 +480,7 @@
             </form>
             <div class="detail-empty" v-if="!selectedSubtasks.length">No subtasks yet</div>
             <div class="detail-subtask" v-for="sub in selectedSubtasks" :key="sub.id">
-              <input type="checkbox" class="todo-check" :class="{ 'todo-check-overdue': isOverdue(sub) }" :checked="sub.done" @click.prevent="doneTodo(sub.id)">
+              <input type="checkbox" class="todo-check" :class="{ 'todo-check-overdue': isOverdue(sub) }" :checked="sub.done" @click.stop.prevent="doneTodo(sub.id)">
               <span :class="{ done: sub.done }" @click="selectTodo(sub.id)">{{ sub.title }}</span>
             </div>
           </section>
