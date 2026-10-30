@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Todo">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261031-1">
+  <link rel="stylesheet" href="style.css?v=20261031-2">
 
 </head>
 <body>
@@ -54,12 +54,12 @@
           </h4>
           <div class="sidebar-section-content" :class="{ collapsed: collapsedSidebarSections.views }" :aria-hidden="collapsedSidebarSections.views" :inert="collapsedSidebarSections.views">
             <div class="sidebar-section-content-inner" id="sidebar-views">
-              <button class="sidebar-item" :class="{ active: activeView === 'all' }" @click="setView('all')">All <span class="view-count">{{ allCount }}</span></button>
-              <button class="sidebar-item" :class="{ active: activeView === 'today' }" @click="setView('today')">Today <span class="view-count">{{ todayCount }}</span></button>
-              <button class="sidebar-item" :class="{ active: activeView === 'next' }" @click="setView('next')">Next <span class="view-count">{{ nextCount }}</span></button>
-              <button class="sidebar-item" :class="{ active: activeView === 'scheduled' }" @click="setView('scheduled')">Scheduled <span class="view-count">{{ scheduledCount }}</span></button>
-              <button class="sidebar-item" :class="{ active: activeView === 'overdue' }" @click="setView('overdue')">Overdue <span class="view-count">{{ overdueCount }}</span></button>
-              <button class="sidebar-item" :class="{ active: activeView === 'completed' }" @click="setView('completed')">Completed <span class="view-count">{{ completedCount }}</span></button>
+              <button class="sidebar-item" v-for="view in sidebarViews" :key="view.id"
+                      :class="{ active: activeView === view.id }" :aria-pressed="activeView === view.id" @click="setView(view.id)">
+                <svg class="sidebar-icon" :style="{ color: view.color }" viewBox="0 0 24 24" aria-hidden="true"><path :d="view.icon"/></svg>
+                <span class="sidebar-item-label">{{ view.label }}</span>
+                <span class="view-count" v-if="view.count">{{ view.count }}</span>
+              </button>
             </div>
           </div>
         </div>
@@ -73,7 +73,10 @@
           </h4>
           <div class="sidebar-section-content" :class="{ collapsed: collapsedSidebarSections.projects }" :aria-hidden="collapsedSidebarSections.projects" :inert="collapsedSidebarSections.projects">
             <div class="sidebar-section-content-inner" id="sidebar-projects">
-              <button class="sidebar-item" v-for="proj in projectList" :key="proj.id" :class="{ active: activeProject === proj.id }" @click="setProject(proj.id)">{{ proj.title }} <span class="view-count">{{ projectIncompleteCount(proj.id) }}</span></button>
+              <button class="sidebar-item" v-for="proj in projectList" :key="proj.id" :class="{ active: activeProject === proj.id }" :aria-pressed="activeProject === proj.id" :title="proj.title" @click="setProject(proj.id)">
+                <svg class="sidebar-icon sidebar-project-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h6l2 3h10v11H3z M3 6V4h7l2 2h8v3"/></svg>
+                <span class="sidebar-item-label">{{ proj.title }}</span><span class="view-count" v-if="projectIncompleteCount(proj.id)">{{ projectIncompleteCount(proj.id) }}</span>
+              </button>
             </div>
           </div>
         </div>
@@ -87,9 +90,9 @@
           </h4>
           <div class="sidebar-section-content" :class="{ collapsed: collapsedSidebarSections.contexts }" :aria-hidden="collapsedSidebarSections.contexts" :inert="collapsedSidebarSections.contexts">
             <div class="sidebar-section-content-inner" id="sidebar-contexts">
-              <button class="sidebar-item" :class="{ active: activeContext === null }" @click="setContext(null)">All contexts</button>
-              <button class="sidebar-item" v-for="ctx in allContexts" :key="ctx" :class="{ active: activeContext === ctx }" @click="setContext(ctx)">{{ ctx }} <span class="view-count">{{ contextCount(ctx) }}</span></button>
-              <button class="sidebar-item" :class="{ active: activeContext === '' }" @click="setContext('')">No context <span class="view-count">{{ noContextCount }}</span></button>
+              <button class="sidebar-item" :class="{ active: activeContext === null }" :aria-pressed="activeContext === null" @click="setContext(null)"><span class="sidebar-context-icon" aria-hidden="true">@</span><span class="sidebar-item-label">All contexts</span></button>
+              <button class="sidebar-item" v-for="ctx in allContexts" :key="ctx" :class="{ active: activeContext === ctx }" :aria-pressed="activeContext === ctx" :title="ctx" @click="setContext(ctx)"><span class="sidebar-context-icon" aria-hidden="true">@</span><span class="sidebar-item-label">{{ ctx }}</span><span class="view-count" v-if="contextCount(ctx)">{{ contextCount(ctx) }}</span></button>
+              <button class="sidebar-item" :class="{ active: activeContext === '' }" :aria-pressed="activeContext === ''" @click="setContext('')"><span class="sidebar-context-icon" aria-hidden="true">−</span><span class="sidebar-item-label">No context</span><span class="view-count" v-if="noContextCount">{{ noContextCount }}</span></button>
             </div>
           </div>
         </div>
@@ -104,7 +107,7 @@
           <div class="sidebar-section-content" :class="{ collapsed: collapsedSidebarSections.tags }" :aria-hidden="collapsedSidebarSections.tags" :inert="collapsedSidebarSections.tags">
             <div class="sidebar-section-content-inner" id="sidebar-tags">
               <div class="tag-cloud">
-                <button class="tag-cloud-item" v-for="tag in allTags" :key="tag" :style="tagVisualStyle(tag)" :class="{ active: activeTag === tag }" @click="setTag(tag)">
+                <button class="tag-cloud-item" v-for="tag in allTags" :key="tag" :style="tagVisualStyle(tag)" :class="{ active: activeTag === tag }" :aria-pressed="activeTag === tag" :title="tag" @click="setTag(tag)">
                   <span class="tag-cloud-marker" aria-hidden="true"></span>
                   <span class="tag-cloud-name">{{ tag }}</span>
                   <span class="view-count">{{ tagCount(tag) }}</span>
@@ -586,7 +589,7 @@
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261031-1"></script>
+<script src="app.js?v=20261031-2"></script>
 </body>
 </html>
 

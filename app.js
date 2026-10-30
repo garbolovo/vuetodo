@@ -210,6 +210,17 @@ Vue.createApp({
             }[this.activeView] || 'All';
         },
 
+        sidebarViews() {
+            return [
+                { id: 'all', label: 'All', count: this.allCount, color: '#c2c5cd', icon: 'M4 4h16v16H4z M4 14h5l2 3h2l2-3h5' },
+                { id: 'today', label: 'Today', count: this.todayCount, color: '#e2c46e', icon: 'M12 8v8 M8 12h8 M12 2v2 M12 20v2 M2 12h2 M20 12h2 M5 5l1.5 1.5 M17.5 17.5L19 19 M5 19l1.5-1.5 M17.5 6.5L19 5' },
+                { id: 'next', label: 'Next', count: this.nextCount, color: '#83afe8', icon: 'M5 5l6 7-6 7 M12 5l6 7-6 7' },
+                { id: 'scheduled', label: 'Scheduled', count: this.scheduledCount, color: '#a1c7b7', icon: 'M5 5h14v15H5z M8 2v5 M16 2v5 M5 10h14 M9 14h3v3H9z' },
+                { id: 'overdue', label: 'Overdue', count: this.overdueCount, color: '#d69cab', icon: 'M12 7v6l4 2 M21 12a9 9 0 1 1-9-9 9 9 0 0 1 9 9' },
+                { id: 'completed', label: 'Completed', count: this.completedCount, color: '#9eb6a0', icon: 'M5 12l4 4L20 5 M20 12v8H4V4h10' },
+            ];
+        },
+
         activeProjectLabel() {
             return this.todoList.find(task => task.id === this.activeProject)?.title || 'Unknown project';
         },
