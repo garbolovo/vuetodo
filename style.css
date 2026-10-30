@@ -956,6 +956,10 @@ body {
     font-weight: 600;
 }
 
+.todo-row-context .todo-title {
+    color: #7b8490;
+}
+
 .todo-title-child {
     color: #5b6472;
 }

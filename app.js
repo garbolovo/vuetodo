@@ -242,7 +242,7 @@ Vue.createApp({
             return this.collapsibleTasks.length > 0 && this.collapsibleTasks.every(t => t.collapsed);
         },
 
-        // Today/Next/Scheduled/Overdue/Completed and an active context filter cut across
+        // Today/Next/Overdue/Completed and an active context filter cut across
         // the hierarchy (a subtask's due date or context is independent of
         // its parent's), so they show a flat matching list instead of a
         // tree. A project selection narrows either mode to that project's
@@ -273,6 +273,7 @@ Vue.createApp({
             } else if (this.activeView === 'scheduled') {
                 const today = this.dateFromToday(0);
                 list = base.filter(t => !t.done && t.startDate && t.startDate > today);
+                return this.buildScheduledTree(list);
             } else if (this.activeView === 'overdue') {
                 list = base.filter(t => !t.done && this.dueDateDiffDays(t.dueDate) < 0);
             } else if (this.activeView === 'completed') {
@@ -941,6 +942,40 @@ Vue.createApp({
         menuDelete(id) {
             this.deleteTodo(id);
             this.openMenuId = null;
+        },
+
+        // Matching Scheduled tasks are roots unless a matching ancestor already
+        // owns their branch. Descendants provide context without changing dates
+        // or counts; a collapsed branch stays hidden rather than reappearing flat.
+        buildScheduledTree(matches) {
+            const matchingIds = new Set(matches.map(task => task.id));
+            const byId = new Map(this.todoList.map(task => [task.id, task]));
+            const children = new Map();
+            this.todoList.filter(task => !task.done).forEach(task => {
+                if (!children.has(task.parentId)) children.set(task.parentId, []);
+                children.get(task.parentId).push(task);
+            });
+            const roots = matches.filter(task => {
+                const visited = new Set([task.id]);
+                let parent = byId.get(task.parentId);
+                while (parent && !parent.done && !visited.has(parent.id)) {
+                    if (matchingIds.has(parent.id)) return false;
+                    visited.add(parent.id);
+                    parent = byId.get(parent.parentId);
+                }
+                return true;
+            });
+            const entries = [];
+            const visited = new Set();
+            const walk = (item, depth) => {
+                if (visited.has(item.id)) return;
+                visited.add(item.id);
+                const descendants = children.get(item.id) || [];
+                entries.push({ item, depth, hasChildren: descendants.length > 0, isContext: !matchingIds.has(item.id) });
+                if (!item.collapsed) descendants.forEach(child => walk(child, depth + 1));
+            };
+            roots.forEach(root => walk(root, 0));
+            return entries;
         },
 
         // Flattens the subtree rooted at rootId (or the whole forest when

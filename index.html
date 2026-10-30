@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Todo">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261029-1">
+  <link rel="stylesheet" href="style.css?v=20261031-1">
 
 </head>
 <body>
@@ -226,6 +226,7 @@
           <div class="todo-row" v-for="entry in displayEntries" :key="entry.item.id" :data-id="entry.item.id"
                :class="{
                  'todo-row-selected': entry.item.id === selectedId,
+                 'todo-row-context': entry.isContext,
                  'todo-row-dragging': entry.item.id === draggedTaskId,
                  'todo-row-drop-invalid': invalidDropIds.has(entry.item.id),
                  'todo-row-drop-target': entry.item.id === dragOverTaskId && dragOverPosition === 'inside',
@@ -254,7 +255,7 @@
                 </svg>
               </span>
 
-              <span class="todo-title" :class="{ done: entry.item.done, 'todo-title-parent': entry.hasChildren, 'todo-title-child': entry.depth > 0 }">{{ entry.item.title }}</span>
+              <span class="todo-title" :title="entry.isContext ? 'Subtask shown for context — does not match the current filters' : null" :class="{ done: entry.item.done, 'todo-title-parent': entry.hasChildren, 'todo-title-child': entry.depth > 0 }">{{ entry.item.title }}</span>
               <button class="task-description-indicator" type="button"
                       v-if="typeof entry.item.body === 'string' && entry.item.body.trim()"
                       title="Has description — open details"
@@ -585,7 +586,7 @@
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261029-2"></script>
+<script src="app.js?v=20261031-1"></script>
 </body>
 </html>
 
