@@ -7,11 +7,11 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-  <meta name="theme-color" content="#84CC16">
+  <meta name="theme-color" content="#5273a6">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Todo">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261031-2">
+  <link rel="stylesheet" href="style.css?v=20261101-1">
 
 </head>
 <body>
@@ -56,7 +56,7 @@
             <div class="sidebar-section-content-inner" id="sidebar-views">
               <button class="sidebar-item" v-for="view in sidebarViews" :key="view.id"
                       :class="{ active: activeView === view.id }" :aria-pressed="activeView === view.id" @click="setView(view.id)">
-                <svg class="sidebar-icon" :style="{ color: view.color }" viewBox="0 0 24 24" aria-hidden="true"><path :d="view.icon"/></svg>
+                <svg class="sidebar-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="view.icon"/></svg>
                 <span class="sidebar-item-label">{{ view.label }}</span>
                 <span class="view-count" v-if="view.count">{{ view.count }}</span>
               </button>
@@ -119,6 +119,36 @@
       </div>
 
       <div id="main-column">
+        <div class="list-heading-row">
+          <div class="list-heading">
+            <p class="list-eyebrow">{{ filteredOn ? 'Across all tasks' : (activeProject ? activeViewLabel + ' / Project' : 'Your workspace') }}</p>
+            <h1 class="list-context-view">{{ filteredOn ? 'Search results' : (activeProject ? activeProjectLabel : activeViewLabel) }}</h1>
+            <nav class="list-context-header" aria-label="Current task list" v-if="!filteredOn && (activeProject || activeContext !== null || activeTag)">
+              <button class="list-context-filter" type="button" v-if="activeProject"
+                      :aria-label="'Clear project filter ' + activeProjectLabel" @click="clearProjectFilter">
+                <span>Project: {{ activeProjectLabel }}</span><span class="list-context-remove" aria-hidden="true">×</span>
+              </button>
+              <button class="list-context-filter" type="button" v-if="activeContext !== null"
+                      :aria-label="'Clear context filter ' + activeContextLabel" @click="clearContextFilter">
+                <span>Context: {{ activeContextLabel }}</span><span class="list-context-remove" aria-hidden="true">×</span>
+              </button>
+              <button class="list-context-filter" type="button" v-if="activeTag"
+                      :aria-label="'Clear tag filter ' + activeTag" @click="clearTagFilter">
+                <span>Tag: {{ activeTag }}</span><span class="list-context-remove" aria-hidden="true">×</span>
+              </button>
+            </nav>
+          </div>
+          <div class="list-toolbar">
+            <button class="list-tree-toggle" type="button" v-if="collapsibleTasks.length && !filteredOn && (activeView === 'all' || activeView === 'scheduled')"
+                    :title="allCollapsed ? 'Expand all' : 'Collapse all'"
+                    :aria-label="allCollapsed ? 'Expand all tasks' : 'Collapse all tasks'" @click="toggleCollapseAll">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path :d="allCollapsed ? 'M8 9l4-4 4 4 M8 15l4 4 4-4' : 'M8 5l4 4 4-4 M8 19l4-4 4 4'"/></svg>
+            </button>
+            <button class="show-completed-toggle" v-if="activeView === 'all'" :class="{ active: showCompleted }" :aria-pressed="showCompleted" @click="showCompleted = !showCompleted">
+              {{ showCompleted ? 'Hide completed' : 'Show completed' }}
+            </button>
+          </div>
+        </div>
         <div id="quick-add" :class="{ active: quickAddActive }">
           <input id="todo" ref="quickAddInput" type="text" v-model="newTodo.title" placeholder="Add a task..."
                  @focus="quickAddActive = true" @keydown.enter="regTodo">
@@ -189,44 +219,14 @@
           </div>
         </div>
 
-        <div class="list-heading-row">
-          <nav class="list-context-header" aria-label="Current task list">
-            <strong class="list-context-view">{{ activeViewLabel }}</strong>
-            <button class="list-context-filter" type="button" v-if="activeProject"
-                    :aria-label="'Clear project filter ' + activeProjectLabel" @click="clearProjectFilter">
-              <span>Project: {{ activeProjectLabel }}</span><span class="list-context-remove" aria-hidden="true">×</span>
-            </button>
-            <button class="list-context-filter" type="button" v-if="activeContext !== null"
-                    :aria-label="'Clear context filter ' + activeContextLabel" @click="clearContextFilter">
-              <span>Context: {{ activeContextLabel }}</span><span class="list-context-remove" aria-hidden="true">×</span>
-            </button>
-            <button class="list-context-filter" type="button" v-if="activeTag"
-                    :aria-label="'Clear tag filter ' + activeTag" @click="clearTagFilter">
-              <span>Tag: {{ activeTag }}</span><span class="list-context-remove" aria-hidden="true">×</span>
-            </button>
-          </nav>
-
-          <div class="list-toolbar" v-if="activeView === 'all'">
-            <button class="show-completed-toggle" :class="{ active: showCompleted }" @click="showCompleted = !showCompleted">
-              {{ showCompleted ? 'Hide Completed' : 'Show Completed' }}
-            </button>
-          </div>
-        </div>
-
         <div id="todo-list-wrapper">
-          <div class="todo-list-header">
-            <div class="col-title">
-              <button class="disclosure collapse-all-btn" type="button" v-if="collapsibleTasks.length"
-                      :title="allCollapsed ? 'Expand all' : 'Collapse all'"
-                      :aria-label="allCollapsed ? 'Expand all tasks' : 'Collapse all tasks'"
-                      @click="toggleCollapseAll">{{ allCollapsed ? '▶' : '▼' }}</button>
-              <span>Task Name</span>
-            </div>
-            <div class="col-due">Due</div>
-            <div class="col-actions"></div>
+          <div class="list-empty" v-if="!displayEntries.length">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v14H5z M5 14h4l2 3h2l2-3h4"/></svg>
+            <strong>No tasks to show</strong>
+            <span>{{ activeView === 'all' && !filteredOn && !activeProject && activeContext === null && !activeTag ? 'Add a task above to get started.' : 'Try another view or adjust your filters.' }}</span>
           </div>
 
-          <div class="todo-row" v-for="entry in displayEntries" :key="entry.item.id" :data-id="entry.item.id"
+          <div class="todo-row" v-for="entry in displayEntries" :key="entry.item.id" :data-id="entry.item.id" :style="{ '--task-depth': entry.depth }"
                :class="{
                  'todo-row-selected': entry.item.id === selectedId,
                  'todo-row-context': entry.isContext,
@@ -247,16 +247,12 @@
 
               <button class="drag-handle" draggable="true" title="Drag to move task" aria-label="Drag to move task"
                       @click.stop @dragstart.stop="startDrag(entry.item.id, $event)" @dragend="endDrag">⠿</button>
-              <span class="disclosure" v-if="entry.hasChildren" @click.stop="toggleCollapse(entry.item.id)">{{ entry.item.collapsed ? '▶' : '▼' }}</span>
+              <button class="disclosure" type="button" v-if="entry.hasChildren" :aria-expanded="!entry.item.collapsed" :aria-label="(entry.item.collapsed ? 'Expand ' : 'Collapse ') + entry.item.title" @click.stop="toggleCollapse(entry.item.id)">
+                <svg viewBox="0 0 16 16" :class="{ collapsed: entry.item.collapsed }" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>
+              </button>
               <span class="disclosure-spacer" v-else></span>
 
               <input type="checkbox" class="todo-check" :class="{ 'todo-check-overdue': isOverdue(entry.item) }" :checked="entry.item.done" @click.stop="doneTodo(entry.item.id, $event)">
-
-              <span class="row-icon" v-if="entry.hasChildren">
-                <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
-                  <path d="M2 6a2 2 0 012-2h5.172a2 2 0 011.414.586l1.828 1.828A2 2 0 0013.828 7H18a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>
-                </svg>
-              </span>
 
               <span class="todo-title" :title="entry.isContext ? 'Subtask shown for context — does not match the current filters' : null" :class="{ done: entry.item.done, 'todo-title-parent': entry.hasChildren, 'todo-title-child': entry.depth > 0 }">{{ entry.item.title }}</span>
               <button class="task-description-indicator" type="button"
@@ -495,7 +491,7 @@
               <span>{{ selectedComments.length }}</span>
             </div>
             <form class="comment-composer" @submit.prevent="addComment">
-              <textarea v-model="newCommentText" rows="3" placeholder="Add a comment..." aria-label="New comment"
+              <textarea v-model="newCommentText" rows="2" placeholder="Add a comment..." aria-label="New comment"
                         @keydown.ctrl.enter.prevent="addComment" @keydown.meta.enter.prevent="addComment"></textarea>
               <div class="comment-composer-actions">
                 <span>Ctrl/⌘ + Enter</span>
@@ -523,7 +519,7 @@
           <button class="detail-status-btn" :class="{ done: selectedItem.done }" @click="doneTodo(selectedItem.id)">
             {{ selectedItem.done ? '✓ Completed' : 'Mark Complete' }}
           </button>
-          <button class="detail-delete" title="Delete task" aria-label="Delete task" @click="deleteTodo(selectedItem.id)">🗑</button>
+          <button class="detail-delete" title="Delete task" aria-label="Delete task" @click="deleteTodo(selectedItem.id)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16 M9 7V4h6v3 M6 7l1 14h10l1-14 M10 11v6 M14 11v6"/></svg></button>
         </div>
       </div>
     </div>
@@ -589,7 +585,7 @@
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261031-2"></script>
+<script src="app.js?v=20261101-1"></script>
 </body>
 </html>
 
