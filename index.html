@@ -11,12 +11,12 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Todo">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261102-1">
+  <link rel="stylesheet" href="style.css?v=20261102-2">
 
 </head>
 <body>
   <div id="app">
-    <div id="topbar">
+    <div id="topbar" :inert="shortcutsHelpOpen">
       <div class="topbar-brand">
         <span class="brand-icon">✓</span>
         <span class="brand-name">Todo App</span>
@@ -39,10 +39,15 @@
         <span class="new-task-btn-label">New Task</span>
       </button>
 
+      <button class="shortcuts-help-button" ref="shortcutsHelpButton" type="button" title="Keyboard shortcuts (?)"
+              aria-label="Keyboard shortcuts" aria-haspopup="dialog" aria-controls="shortcuts-dialog" :aria-expanded="shortcutsHelpOpen" @click="openShortcutsHelp">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4"/><path d="M12 16.5v.5"/></svg>
+      </button>
+
       <button class="topbar-user" title="Click to change name" @click="changeName">{{ name.split(' ').map(w => w[0]).join('') }}</button>
     </div>
 
-    <div id="workspace" :class="{ 'sidebar-collapsed': !sidebarOpen }">
+    <div id="workspace" :class="{ 'sidebar-collapsed': !sidebarOpen }" :inert="shortcutsHelpOpen">
       <div class="sidebar-backdrop" v-if="sidebarOpen" @click="sidebarOpen = false"></div>
       <div id="sidebar" :aria-hidden="!sidebarOpen" :inert="!sidebarOpen">
         <div class="sidebar-section">
@@ -514,12 +519,13 @@
       </div>
     </div>
 
-    <div class="modal-backdrop" v-if="shortcutsHelpOpen" @click.self="shortcutsHelpOpen = false">
-      <section class="move-dialog shortcuts-dialog" role="dialog" aria-modal="true" aria-labelledby="shortcuts-title">
+    <div class="modal-backdrop" v-if="shortcutsHelpOpen" @click.self="closeShortcutsHelp">
+      <section id="shortcuts-dialog" class="move-dialog shortcuts-dialog" role="dialog" aria-modal="true" aria-labelledby="shortcuts-title" aria-describedby="shortcuts-description">
         <div class="move-dialog-header">
           <h2 id="shortcuts-title">Keyboard shortcuts</h2>
-          <button class="move-dialog-close" title="Close" aria-label="Close" @click="shortcutsHelpOpen = false">×</button>
+          <button class="move-dialog-close" ref="shortcutsClose" type="button" title="Close" aria-label="Close keyboard shortcuts" @click="closeShortcutsHelp">×</button>
         </div>
+        <p id="shortcuts-description" class="shortcuts-description">Single-key shortcuts work outside text fields. Task actions apply to the selected task. Use the English keyboard layout for consistent behavior.</p>
         <div class="shortcuts-group" v-for="group in shortcutGroups" :key="group.title">
           <h3>{{ group.title }}</h3>
           <dl>
@@ -529,6 +535,7 @@
             </template>
           </dl>
         </div>
+        <p class="shortcuts-description shortcuts-note">For navigation, press G, release it, then press the second key within 1.5 seconds. On Mac, Delete is usually Fn + ⌫.</p>
       </section>
     </div>
 
@@ -575,7 +582,7 @@
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261102-1"></script>
+<script src="app.js?v=20261102-2"></script>
 </body>
 </html>
 
