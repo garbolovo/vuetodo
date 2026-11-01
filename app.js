@@ -96,6 +96,9 @@ Vue.createApp({
             if (this.contextPickerOpen && !e.target.closest('.detail-context-picker')) {
                 this.contextPickerOpen = false;
             }
+            if (this.tagComposerOpen && !e.target.closest('.detail-tag-picker')) {
+                this.cancelTagComposer();
+            }
         });
 
         this.onGlobalKeydown = (e) => {
@@ -116,9 +119,9 @@ Vue.createApp({
                 this.cancelSubtaskComposer();
                 return;
             }
-            if (e.key === 'Escape' && document.activeElement === this.$refs.tagInput) {
+            if (e.key === 'Escape' && this.tagComposerOpen) {
                 e.preventDefault();
-                this.cancelTagComposer();
+                this.closeTagPicker();
                 return;
             }
             if (e.key === 'Escape' && this.duePickerOpen) {
@@ -423,14 +426,10 @@ Vue.createApp({
             return (this.selectedItem.tags || []).some(tag => tag.toLocaleLowerCase() === name);
         },
 
-        availableTagSuggestions() {
+        tagPickerOptions() {
             if (!this.selectedItem) return [];
-            const assigned = new Set((this.selectedItem.tags || []).map(tag => tag.toLocaleLowerCase()));
             const query = this.newTagName.trim().toLocaleLowerCase();
-            return this.allTags.filter(tag => {
-                const normalized = tag.toLocaleLowerCase();
-                return !assigned.has(normalized) && (!query || normalized.includes(query));
-            });
+            return this.allTags.filter(tag => !query || tag.toLocaleLowerCase().includes(query));
         },
 
         matchingSavedTag() {
@@ -1156,9 +1155,7 @@ Vue.createApp({
             this.newSubtaskTitle = '';
             this.newCommentText = '';
             this.pendingCommentDeleteId = null;
-            this.cancelTagComposer();
-            this.startPickerOpen = false;
-            this.duePickerOpen = false;
+            this.closeDetailPickers();
             this.selectedId = this.selectedId === id ? null : id;
         },
 
@@ -1166,9 +1163,7 @@ Vue.createApp({
             this.newSubtaskTitle = '';
             this.newCommentText = '';
             this.pendingCommentDeleteId = null;
-            this.cancelTagComposer();
-            this.startPickerOpen = false;
-            this.duePickerOpen = false;
+            this.closeDetailPickers();
             this.selectedId = null;
         },
 
@@ -1224,7 +1219,7 @@ Vue.createApp({
         },
 
         toggleStartPicker() {
-            this.duePickerOpen = false;
+            this.closeDetailPickers('startPickerOpen');
             this.quickStartPickerOpen = false;
             this.quickDuePickerOpen = false;
             this.startPickerOpen = !this.startPickerOpen;
@@ -1255,7 +1250,7 @@ Vue.createApp({
         },
 
         toggleDuePicker() {
-            this.startPickerOpen = false;
+            this.closeDetailPickers('duePickerOpen');
             this.quickStartPickerOpen = false;
             this.quickDuePickerOpen = false;
             this.duePickerOpen = !this.duePickerOpen;
@@ -1360,9 +1355,16 @@ Vue.createApp({
             this.quickDuePickerOpen = false;
         },
 
+        closeDetailPickers(except = null) {
+            for (const name of ['startPickerOpen', 'duePickerOpen', 'priorityPickerOpen', 'contextPickerOpen']) {
+                if (name !== except) this[name] = false;
+            }
+            if (except !== 'tagComposerOpen') this.cancelTagComposer();
+        },
+
         async openTagComposer() {
-            this.startPickerOpen = false;
-            this.duePickerOpen = false;
+            if (!this.selectedItem) return;
+            this.closeDetailPickers('tagComposerOpen');
             this.tagComposerOpen = true;
             this.newTagName = '';
             await this.$nextTick();
@@ -1374,7 +1376,31 @@ Vue.createApp({
             this.newTagName = '';
         },
 
-        async addTagToSelected(tag) {
+        toggleTagPicker() {
+            if (this.tagComposerOpen) this.closeTagPicker();
+            else this.openTagComposer();
+        },
+
+        closeTagPicker() {
+            this.cancelTagComposer();
+            this.$nextTick(() => this.$refs.tagTrigger?.focus());
+        },
+
+        isTagSelected(tag) {
+            return (this.selectedItem?.tags || []).some(value => value.toLocaleLowerCase() === tag.toLocaleLowerCase());
+        },
+
+        toggleSelectedTag(tag) {
+            if (!this.selectedItem) return;
+            if (this.isTagSelected(tag)) {
+                const assigned = this.selectedItem.tags.find(value => value.toLocaleLowerCase() === tag.toLocaleLowerCase());
+                this.removeTag(this.selectedItem.id, assigned);
+            } else {
+                this.addTagToSelected(tag, false);
+            }
+        },
+
+        async addTagToSelected(tag, focusSearch = true) {
             const cleanTag = tag.trim();
             if (!cleanTag || !this.selectedItem) return;
             if (!this.selectedItem.tags) this.selectedItem.tags = [];
@@ -1384,9 +1410,11 @@ Vue.createApp({
             if (exists) return;
             this.selectedItem.tags.push(cleanTag);
             this.saveTodos();
-            this.newTagName = '';
-            await this.$nextTick();
-            this.$refs.tagInput?.focus();
+            if (focusSearch) {
+                this.newTagName = '';
+                await this.$nextTick();
+                this.$refs.tagInput?.focus();
+            }
         },
 
         addSelectedTag() {
@@ -1460,7 +1488,7 @@ Vue.createApp({
         },
 
         togglePriorityPicker() {
-            this.contextPickerOpen = false;
+            this.closeDetailPickers('priorityPickerOpen');
             this.priorityPickerOpen = !this.priorityPickerOpen;
         },
 
@@ -1472,7 +1500,7 @@ Vue.createApp({
         },
 
         toggleContextPicker() {
-            this.priorityPickerOpen = false;
+            this.closeDetailPickers('contextPickerOpen');
             this.contextPickerOpen = !this.contextPickerOpen;
         },
 

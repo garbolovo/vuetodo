@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Todo">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261101-1">
+  <link rel="stylesheet" href="style.css?v=20261102-1">
 
 </head>
 <body>
@@ -320,16 +320,15 @@
           <section class="detail-section detail-metadata-section">
             <div class="detail-properties">
               <div class="detail-field">
-                <label>Start date</label>
+                <label for="detail-start-trigger">Start</label>
                 <div class="detail-due-row detail-start-picker">
-                  <button type="button" class="detail-due-trigger" :class="{ empty: !selectedItem.startDate }"
+                  <button id="detail-start-trigger" type="button" class="detail-due-trigger" :class="{ empty: !selectedItem.startDate }"
+                          :aria-label="'Start date: ' + (selectedItem.startDate ? dueDateLabel(selectedItem.startDate) : 'No start date')" aria-controls="detail-start-menu"
                           :aria-expanded="startPickerOpen" @click.stop="toggleStartPicker">
                     <span>{{ selectedItem.startDate ? dueDateLabel(selectedItem.startDate) : 'No start date' }}</span>
                     <span class="detail-due-chevron">⌄</span>
                   </button>
-                  <button v-if="selectedItem.startDate" class="detail-due-clear" title="Clear start date" aria-label="Clear start date" @click="clearStartDate">×</button>
-
-                  <div class="due-picker-menu" v-if="startPickerOpen" @click.stop>
+                  <div id="detail-start-menu" class="due-picker-menu" v-if="startPickerOpen" @click.stop>
                     <button type="button" class="due-picker-option" v-for="option in quickDateOptions()" :key="option.value"
                             :class="{ selected: selectedItem.startDate === option.value }" @click="setStartDate(option.value)">
                       <span>{{ option.label }}</span>
@@ -348,16 +347,15 @@
               </div>
 
               <div class="detail-field">
-                <label>Due date</label>
+                <label for="detail-due-trigger">Due</label>
                 <div class="detail-due-row detail-due-picker">
-                  <button type="button" class="detail-due-trigger" :class="{ empty: !selectedItem.dueDate }"
+                  <button id="detail-due-trigger" type="button" class="detail-due-trigger" :class="{ empty: !selectedItem.dueDate }"
+                          :aria-label="'Due date: ' + (selectedItem.dueDate ? dueDateLabel(selectedItem.dueDate) : 'No due date')" aria-controls="detail-due-menu"
                           :aria-expanded="duePickerOpen" @click.stop="toggleDuePicker">
                     <span>{{ selectedItem.dueDate ? dueDateLabel(selectedItem.dueDate) : 'No due date' }}</span>
                     <span class="detail-due-chevron">⌄</span>
                   </button>
-                  <button v-if="selectedItem.dueDate" class="detail-due-clear" title="Clear due date" aria-label="Clear due date" @click="clearDueDate">×</button>
-
-                  <div class="due-picker-menu" v-if="duePickerOpen" @click.stop>
+                  <div id="detail-due-menu" class="due-picker-menu" v-if="duePickerOpen" @click.stop>
                     <button type="button" class="due-picker-option" v-for="option in quickDateOptions()" :key="option.value"
                             :class="{ selected: selectedItem.dueDate === option.value }" @click="setDueDate(option.value)">
                       <span>{{ option.label }}</span>
@@ -376,15 +374,16 @@
               </div>
 
               <div class="detail-field">
-                <label>Priority</label>
+                <label for="detail-priority-trigger">Priority</label>
                 <div class="detail-due-row detail-priority-picker">
-                  <button type="button" class="detail-due-trigger" :class="{ empty: !selectedItem.priority }"
+                  <button id="detail-priority-trigger" type="button" class="detail-due-trigger" :class="{ empty: !selectedItem.priority }"
+                          :aria-label="'Priority: ' + (selectedItem.priority ? priorityLabel(selectedItem.priority) : 'No priority')" aria-controls="detail-priority-menu"
                           :aria-expanded="priorityPickerOpen" @click.stop="togglePriorityPicker">
                     <span>{{ selectedItem.priority ? priorityLabel(selectedItem.priority) : 'No priority' }}</span>
                     <span class="detail-due-chevron">⌄</span>
                   </button>
 
-                  <div class="due-picker-menu priority-picker-menu" v-if="priorityPickerOpen" @click.stop>
+                  <div id="detail-priority-menu" class="due-picker-menu priority-picker-menu" v-if="priorityPickerOpen" @click.stop>
                     <button type="button" class="due-picker-option" :class="{ selected: !selectedItem.priority }" @click="setPriority('')">
                       <span>No priority</span>
                     </button>
@@ -397,15 +396,16 @@
               </div>
 
               <div class="detail-field">
-                <label>Context</label>
+                <label for="detail-context-trigger">Context</label>
                 <div class="detail-due-row detail-context-picker">
-                  <button type="button" class="detail-due-trigger" :class="{ empty: !selectedItem.context }"
+                  <button id="detail-context-trigger" type="button" class="detail-due-trigger" :class="{ empty: !selectedItem.context }"
+                          :aria-label="'Context: ' + (selectedItem.context || 'No context')" aria-controls="detail-context-menu"
                           :aria-expanded="contextPickerOpen" @click.stop="toggleContextPicker">
                     <span>{{ selectedItem.context || 'No context' }}</span>
                     <span class="detail-due-chevron">⌄</span>
                   </button>
 
-                  <div class="due-picker-menu context-picker-menu" v-if="contextPickerOpen" @click.stop>
+                  <div id="detail-context-menu" class="due-picker-menu context-picker-menu" v-if="contextPickerOpen" @click.stop>
                     <button type="button" class="due-picker-option" :class="{ selected: !selectedItem.context }" @click="setItemContext('')">
                       <span>No context</span>
                     </button>
@@ -421,41 +421,31 @@
               </div>
 
               <div class="detail-field detail-tags-field">
-                <label>Tags</label>
-                <div class="detail-tags">
-                  <span class="tag-pill" v-for="tag in (selectedItem.tags || [])" :key="tag" :style="tagVisualStyle(tag)">
-                    {{ tag }}
-                    <button class="tag-remove" type="button" title="Remove tag" :aria-label="'Remove tag ' + tag" @click="removeTag(selectedItem.id, tag)">×</button>
-                  </span>
-                  <button class="tag-add" type="button" title="Press S" v-if="!tagComposerOpen" @click="openTagComposer">+ Add tag</button>
-                  <form class="tag-composer" v-else @submit.prevent="addSelectedTag">
-                    <div class="tag-picker">
-                      <input ref="tagInput" v-model="newTagName" type="text" placeholder="Search or create tag" aria-label="Search or create tag" autocomplete="off">
-                      <div class="tag-picker-menu">
-                        <button
-                          class="tag-picker-option"
-                          type="button"
-                          v-for="tag in availableTagSuggestions"
-                          :key="tag"
-                          :style="tagVisualStyle(tag)"
-                          @click="addTagToSelected(tag)"
-                        >
-                          <span class="tag-picker-dot"></span>{{ tag }}
+                <label for="detail-tags-trigger">Tags</label>
+                <div class="detail-due-row detail-tag-picker">
+                  <button id="detail-tags-trigger" ref="tagTrigger" type="button" class="detail-due-trigger" :class="{ empty: !(selectedItem.tags || []).length }"
+                          :aria-label="'Tags: ' + ((selectedItem.tags || []).length ? selectedItem.tags.join(', ') : 'No tags')"
+                          :title="(selectedItem.tags || []).length ? selectedItem.tags.join(', ') : 'Choose tags (S)'"
+                          :aria-expanded="tagComposerOpen" aria-controls="detail-tags-menu" @click.stop="toggleTagPicker">
+                    <span>{{ (selectedItem.tags || []).length ? selectedItem.tags.join(', ') : 'No tags' }}</span>
+                    <span class="detail-due-chevron" aria-hidden="true">⌄</span>
+                  </button>
+                  <div id="detail-tags-menu" class="due-picker-menu detail-tag-menu" v-if="tagComposerOpen" @click.stop>
+                    <form class="tag-picker-search" @submit.prevent="addSelectedTag">
+                      <input ref="tagInput" v-model="newTagName" type="text" placeholder="Find or create a tag..." aria-label="Find or create a tag" autocomplete="off">
+                      <div class="tag-picker-options">
+                        <label class="tag-picker-option" v-for="tag in tagPickerOptions" :key="tag" :class="{ selected: isTagSelected(tag) }" :style="tagVisualStyle(tag)">
+                          <input type="checkbox" :checked="isTagSelected(tag)" @change="toggleSelectedTag(tag)">
+                          <span class="tag-picker-dot" aria-hidden="true"></span><span class="tag-picker-name">{{ tag }}</span>
+                        </label>
+                        <button class="tag-picker-option tag-picker-create" type="submit" v-if="newTagName.trim() && !matchingSavedTag && !tagAlreadyExists">
+                          <span aria-hidden="true">＋</span><span class="tag-picker-name">Create “{{ newTagName.trim() }}”</span>
                         </button>
-                        <button
-                          class="tag-picker-option tag-picker-create"
-                          type="submit"
-                          v-if="newTagName.trim() && !matchingSavedTag && !tagAlreadyExists"
-                        >
-                          <span>＋</span>Create “{{ newTagName.trim() }}”
-                        </button>
-                        <span class="tag-picker-empty" v-if="!availableTagSuggestions.length && (!newTagName.trim() || tagAlreadyExists)">
-                          {{ tagAlreadyExists ? 'Already added' : 'No more saved tags' }}
-                        </span>
+                        <span class="tag-picker-empty" v-if="!tagPickerOptions.length && !newTagName.trim()">No tags yet. Type a name to create one.</span>
                       </div>
-                    </div>
-                    <button class="tag-composer-cancel" type="button" title="Cancel" aria-label="Cancel adding tag" @click="cancelTagComposer">×</button>
-                  </form>
+                    </form>
+                    <div class="tag-picker-footer"><span>Select multiple tags</span><button type="button" @click="closeTagPicker">Done</button></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -585,7 +575,7 @@
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261101-1"></script>
+<script src="app.js?v=20261102-1"></script>
 </body>
 </html>
 
