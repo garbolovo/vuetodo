@@ -147,6 +147,44 @@ body {
     display: none;
 }
 
+.shortcuts-help-button {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.shortcuts-help-button:hover,
+.shortcuts-help-button:focus-visible {
+    background: var(--brand-soft);
+    color: var(--brand-dark);
+}
+
+.shortcuts-help-button svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+@media (pointer: coarse) {
+    .shortcuts-help-button {
+        width: 44px;
+        height: 44px;
+    }
+}
+
 .topbar-user {
     flex-shrink: 0;
     width: 34px;
@@ -2458,6 +2496,18 @@ button:focus-visible {
     overflow-y: auto;
 }
 
+.shortcuts-dialog .shortcuts-description {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.shortcuts-note {
+    margin: 20px 0 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
 .shortcuts-group h3 {
     margin: 14px 0 6px;
     font-size: 0.75rem;
@@ -2469,7 +2519,7 @@ button:focus-visible {
 
 .shortcuts-group dl {
     display: grid;
-    grid-template-columns: 110px 1fr;
+    grid-template-columns: max-content minmax(0, 1fr);
     gap: 6px 12px;
     margin: 0;
     align-items: center;

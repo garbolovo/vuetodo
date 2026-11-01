@@ -102,8 +102,15 @@ Vue.createApp({
         });
 
         this.onGlobalKeydown = (e) => {
-            if (e.key === 'Escape' && this.shortcutsHelpOpen) {
-                this.shortcutsHelpOpen = false;
+            if (this.shortcutsHelpOpen) {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    this.closeShortcutsHelp();
+                } else if (e.key === 'Tab') {
+                    // The help contains one focusable control: its close button.
+                    e.preventDefault();
+                    this.$refs.shortcutsClose?.focus();
+                }
                 return;
             }
             if (e.key === 'Escape' && this.moveDialogTaskId) {
@@ -378,9 +385,11 @@ Vue.createApp({
                 ] },
                 { title: 'App', items: [
                     { keys: 't', label: 'New task' },
+                    { keys: 'Ctrl/⌘+K', label: 'Search' },
                     { keys: '/', label: 'Search' },
                     { keys: ';', label: 'Show or hide the sidebar' },
                     { keys: '?', label: 'This help' },
+                    { keys: 'Esc', label: 'Close a dialog or picker, cancel input, or close details' },
                 ] },
                 { title: 'Tasks', items: [
                     { keys: 'j', label: 'Next task' },
@@ -394,6 +403,10 @@ Vue.createApp({
                     { keys: '1 2 3 4', label: 'Priority high / medium / low / none' },
                     { keys: 'm', label: 'Move' },
                     { keys: 's', label: 'Tags' },
+                ] },
+                { title: 'While editing', items: [
+                    { keys: 'Enter', label: 'Add a task, subtask, or tag in its input' },
+                    { keys: 'Ctrl/⌘+Enter', label: 'Post a comment' },
                 ] },
             ];
         },
@@ -1039,18 +1052,37 @@ Vue.createApp({
             return this.todoList.filter(t => ids.has(t.id) && !t.done).length;
         },
 
+        openShortcutsHelp() {
+            this.shortcutsReturnFocus = document.activeElement;
+            this.gotoPending = false;
+            clearTimeout(this.gotoTimer);
+            this.closeDetailPickers();
+            this.shortcutsHelpOpen = true;
+            this.$nextTick(() => this.$refs.shortcutsClose?.focus());
+        },
+
+        closeShortcutsHelp() {
+            this.shortcutsHelpOpen = false;
+            const previous = this.shortcutsReturnFocus;
+            this.shortcutsReturnFocus = null;
+            this.$nextTick(() => {
+                if (previous?.isConnected) previous.focus();
+                else this.$refs.shortcutsHelpButton?.focus();
+            });
+        },
+
         // RTM-style single-key shortcuts. The selected row doubles as the
         // cursor: j/k change it, the other keys act on it. Keys are matched by
         // physical position (e.code) so they work on any keyboard layout.
         handleTaskShortcut(e) {
-            if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
             const tag = e.target.tagName;
             if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target.isContentEditable) return;
             if (this.moveDialogTaskId || this.pendingCommentDeleteId || this.completeDescendantsDialogTaskId) return;
 
             if (e.key === '?' || (e.code === 'Slash' && e.shiftKey)) {
                 e.preventDefault();
-                this.shortcutsHelpOpen = !this.shortcutsHelpOpen;
+                this.openShortcutsHelp();
                 return;
             }
             if (this.shortcutsHelpOpen || e.shiftKey) return;
