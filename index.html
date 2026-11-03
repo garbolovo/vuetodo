@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Todo">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261102-2">
+  <link rel="stylesheet" href="style.css?v=20261103-1">
 
 </head>
 <body>
@@ -111,12 +111,19 @@
           </h4>
           <div class="sidebar-section-content" :class="{ collapsed: collapsedSidebarSections.tags }" :aria-hidden="collapsedSidebarSections.tags" :inert="collapsedSidebarSections.tags">
             <div class="sidebar-section-content-inner" id="sidebar-tags">
-              <div class="tag-cloud">
-                <button class="tag-cloud-item" v-for="tag in allTags" :key="tag" :style="tagVisualStyle(tag)" :class="{ active: activeTag === tag }" :aria-pressed="activeTag === tag" :title="tag" @click="setTag(tag)">
-                  <span class="tag-cloud-marker" aria-hidden="true"></span>
-                  <span class="tag-cloud-name">{{ tag }}</span>
-                  <span class="view-count">{{ tagCount(tag) }}</span>
-                </button>
+              <div class="tag-cloud" ref="tagCloud">
+                <div class="tag-cloud-row" v-for="tag in allTags" :key="tag" :style="tagVisualStyle(tag)" :class="{ active: activeTag === tag }">
+                  <button class="tag-cloud-item" type="button" :aria-pressed="activeTag === tag" :title="tag" @click="setTag(tag)">
+                    <span class="tag-cloud-marker" aria-hidden="true"></span>
+                    <span class="tag-cloud-name">{{ tag }}</span>
+                    <span class="view-count">{{ tagCount(tag) }}</span>
+                  </button>
+                  <button class="tag-cloud-delete" type="button" :data-tag="tag"
+                          :aria-label="'Delete tag ' + tag" :title="'Delete tag ' + tag"
+                          @click.stop="requestTagDelete(tag)">
+                    <span aria-hidden="true">×</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -576,13 +583,32 @@
       </section>
     </div>
 
+    <div class="modal-backdrop" v-if="tagDeleteName" @click.self="cancelTagDelete">
+      <section class="move-dialog" role="dialog" aria-modal="true" aria-labelledby="tag-delete-title">
+        <div class="move-dialog-header">
+          <h2 id="tag-delete-title">Delete tag?</h2>
+          <button class="move-dialog-close" title="Close" aria-label="Close" @click="cancelTagDelete">×</button>
+        </div>
+        <p>
+          <strong>{{ tagDeleteName }}</strong> is used by
+          {{ tagDeleteCount }} {{ tagDeleteCount === 1 ? 'task' : 'tasks' }}.
+          Deleting it removes the tag from {{ tagDeleteCount === 1 ? 'that task' : 'all of them' }}.
+          This cannot be undone.
+        </p>
+        <div class="move-dialog-actions">
+          <button class="move-dialog-cancel" ref="tagDeleteCancel" @click="cancelTagDelete">Cancel</button>
+          <button class="move-dialog-confirm move-dialog-danger" @click="confirmTagDelete">Delete tag</button>
+        </div>
+      </section>
+    </div>
+
   </div>
   <script src="uuidv4.js?v=20261004-1"></script>
   <!-- Sets window.VUETODO_API_BASE to point at a deployed API (see
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261102-2"></script>
+<script src="app.js?v=20261103-1"></script>
 </body>
 </html>
 

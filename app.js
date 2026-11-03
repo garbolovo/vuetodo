@@ -54,6 +54,8 @@ Vue.createApp({
             dragOverRoot: false,
             moveDialogTaskId: null,
             completeDescendantsDialogTaskId: null,
+            tagDeleteName: null,
+            tagDeleteReturnFocus: null,
             shortcutsHelpOpen: false,
             gotoPending: false,
             moveTargetId: null,
@@ -121,6 +123,10 @@ Vue.createApp({
                 this.cancelCompleteWithDescendants();
                 return;
             }
+            if (e.key === 'Escape' && this.tagDeleteName) {
+                this.cancelTagDelete();
+                return;
+            }
             if (e.key === 'Escape' && document.activeElement === this.$refs.subtaskInput) {
                 e.preventDefault();
                 this.cancelSubtaskComposer();
@@ -184,7 +190,7 @@ Vue.createApp({
             if (e.key.toLowerCase() === 's' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
                 const tag = e.target.tagName;
                 const isEditable = tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable;
-                if (!isEditable && this.selectedItem && !this.moveDialogTaskId && !this.completeDescendantsDialogTaskId && !this.gotoPending && !this.shortcutsHelpOpen) {
+                if (!isEditable && this.selectedItem && !this.moveDialogTaskId && !this.completeDescendantsDialogTaskId && !this.tagDeleteName && !this.gotoPending && !this.shortcutsHelpOpen) {
                     e.preventDefault();
                     this.openTagComposer();
                 }
@@ -478,6 +484,10 @@ Vue.createApp({
             const ids = this.projectDescendantIds(this.completeDescendantsDialogTaskId);
             ids.delete(this.completeDescendantsDialogTaskId);
             return this.todoList.filter(t => ids.has(t.id) && !t.done).length;
+        },
+
+        tagDeleteCount() {
+            return this.tagDeleteName ? this.tagCount(this.tagDeleteName) : 0;
         },
 
         moveDestinationOptions() {
@@ -1078,7 +1088,7 @@ Vue.createApp({
             if (e.ctrlKey || e.metaKey || e.altKey) return;
             const tag = e.target.tagName;
             if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target.isContentEditable) return;
-            if (this.moveDialogTaskId || this.pendingCommentDeleteId || this.completeDescendantsDialogTaskId) return;
+            if (this.moveDialogTaskId || this.pendingCommentDeleteId || this.completeDescendantsDialogTaskId || this.tagDeleteName) return;
 
             if (e.key === '?' || (e.code === 'Slash' && e.shiftKey)) {
                 e.preventDefault();
@@ -1461,6 +1471,45 @@ Vue.createApp({
                 item.tags = item.tags.filter(t => t !== tag);
                 this.saveTodos();
             }
+        },
+
+        // Tags are not stored on their own: they only exist on tasks, so
+        // deleting one means removing it from every task that has it.
+        requestTagDelete(tag) {
+            if (!tag) return;
+            this.tagDeleteReturnFocus = document.activeElement;
+            this.tagDeleteName = tag;
+            this.$nextTick(() => this.$refs.tagDeleteCancel?.focus());
+        },
+
+        cancelTagDelete() {
+            this.closeTagDelete();
+        },
+
+        closeTagDelete() {
+            this.tagDeleteName = null;
+            const previous = this.tagDeleteReturnFocus;
+            this.tagDeleteReturnFocus = null;
+            this.$nextTick(() => {
+                if (previous?.isConnected) previous.focus();
+                else this.$refs.tagCloud?.querySelector('.tag-cloud-item')?.focus();
+            });
+        },
+
+        confirmTagDelete() {
+            const name = this.tagDeleteName;
+            if (!name) return;
+            const normalized = name.trim().toLocaleLowerCase();
+            this.todoList.forEach(item => {
+                if (!Array.isArray(item.tags)) return;
+                const remaining = item.tags.filter(tag => tag.trim().toLocaleLowerCase() !== normalized);
+                if (remaining.length !== item.tags.length) item.tags = remaining;
+            });
+            if (this.activeTag && this.activeTag.toLocaleLowerCase() === normalized) {
+                this.activeTag = null;
+            }
+            this.closeTagDelete();
+            this.saveTodos();
         },
 
         resetSearch() {
