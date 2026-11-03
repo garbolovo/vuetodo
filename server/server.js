@@ -18,10 +18,22 @@ db.exec(`
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
   )
 `);
+db.exec(`
+  CREATE TABLE IF NOT EXISTS tags (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    data TEXT NOT NULL,
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )
+`);
 
 const getTodos = db.prepare('SELECT data FROM todos WHERE id = 1');
 const upsertTodos = db.prepare(`
   INSERT INTO todos (id, data, updated_at) VALUES (1, ?, datetime('now'))
+  ON CONFLICT (id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at
+`);
+const getTags = db.prepare('SELECT data FROM tags WHERE id = 1');
+const upsertTags = db.prepare(`
+  INSERT INTO tags (id, data, updated_at) VALUES (1, ?, datetime('now'))
   ON CONFLICT (id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at
 `);
 
@@ -47,6 +59,19 @@ app.put('/api/todos', (req, res) => {
     return res.status(400).json({ error: 'Body must be a JSON array of todos.' });
   }
   upsertTodos.run(JSON.stringify(req.body));
+  res.status(204).end();
+});
+
+app.get('/api/tags', (req, res) => {
+  const row = getTags.get();
+  res.json(row ? JSON.parse(row.data) : []);
+});
+
+app.put('/api/tags', (req, res) => {
+  if (!Array.isArray(req.body) || !req.body.every((tag) => typeof tag === 'string')) {
+    return res.status(400).json({ error: 'Body must be a JSON array of tag names.' });
+  }
+  upsertTags.run(JSON.stringify(req.body));
   res.status(204).end();
 });
 
