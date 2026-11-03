@@ -664,7 +664,7 @@ body {
 .tag-cloud {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1px;
     padding: 0;
 }
 
@@ -697,10 +697,10 @@ body {
     display: flex;
     flex: 1 1 auto;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     min-width: 0;
-    min-height: 44px;
-    padding: 9px 12px;
+    min-height: 36px;
+    padding: 5px 10px;
     border: none;
     border-radius: 6px;
     background: transparent;
@@ -716,15 +716,15 @@ body {
    visual flow so the tag name and count still line up like other rows. */
 .tag-cloud-delete {
     flex: 0 0 auto;
-    width: 28px;
-    height: 28px;
-    margin-right: 6px;
+    width: 24px;
+    height: 24px;
+    margin-right: 4px;
     padding: 0;
     border: none;
     border-radius: 50%;
     background: transparent;
     color: #8294ad;
-    font-size: 18px;
+    font-size: 16px;
     line-height: 1;
     cursor: pointer;
     opacity: 0;
@@ -751,12 +751,12 @@ body {
 }
 
 .tag-cloud-marker {
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
     flex: 0 0 auto;
     border-radius: 3px;
     background: var(--tag-color);
-    margin: 0 3px;
+    margin: 0 2px;
 }
 
 .tag-cloud-name {
@@ -1863,6 +1863,18 @@ body {
     .detail-metadata-section .detail-due-trigger,
     .tag-picker-option {
         min-height: 44px;
+    }
+
+    /* Keep comfortable tap targets even though the list is denser on desktop. */
+    .tag-cloud-item {
+        min-height: 44px;
+        padding: 9px 12px;
+    }
+
+    .tag-cloud-delete {
+        width: 32px;
+        height: 32px;
+        font-size: 18px;
     }
 }
 
