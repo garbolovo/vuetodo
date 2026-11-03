@@ -7,6 +7,14 @@ Vue.createApp({
     data() {
         const stored = localStorage.getItem('todoList');
         const todoList = stored ? JSON.parse(stored) : [];
+        const storedTags = localStorage.getItem('tagRegistry');
+        let tagRegistry = [];
+        try {
+            const parsedTags = storedTags ? JSON.parse(storedTags) : [];
+            if (Array.isArray(parsedTags)) tagRegistry = parsedTags.filter(tag => typeof tag === 'string');
+        } catch (err) {
+            console.warn('Could not restore saved tags', err);
+        }
         const defaultCollapsedSections = {
             views: false,
             projects: false,
@@ -30,6 +38,7 @@ Vue.createApp({
             name: "John Doe",
             nameClicked: false,
             todoList,
+            tagRegistry,
             filteredTodoList: [],
             filteredOff: true,
             filteredOn: false,
@@ -56,6 +65,9 @@ Vue.createApp({
             completeDescendantsDialogTaskId: null,
             tagDeleteName: null,
             tagDeleteReturnFocus: null,
+            tagAddOpen: false,
+            addTagName: '',
+            addTagError: '',
             shortcutsHelpOpen: false,
             gotoPending: false,
             moveTargetId: null,
@@ -127,6 +139,10 @@ Vue.createApp({
                 this.cancelTagDelete();
                 return;
             }
+            if (e.key === 'Escape' && this.tagAddOpen) {
+                this.closeTagAddDialog();
+                return;
+            }
             if (e.key === 'Escape' && document.activeElement === this.$refs.subtaskInput) {
                 e.preventDefault();
                 this.cancelSubtaskComposer();
@@ -190,7 +206,7 @@ Vue.createApp({
             if (e.key.toLowerCase() === 's' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
                 const tag = e.target.tagName;
                 const isEditable = tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable;
-                if (!isEditable && this.selectedItem && !this.moveDialogTaskId && !this.completeDescendantsDialogTaskId && !this.tagDeleteName && !this.gotoPending && !this.shortcutsHelpOpen) {
+                if (!isEditable && this.selectedItem && !this.moveDialogTaskId && !this.completeDescendantsDialogTaskId && !this.tagDeleteName && !this.tagAddOpen && !this.gotoPending && !this.shortcutsHelpOpen) {
                     e.preventDefault();
                     this.openTagComposer();
                 }
@@ -369,13 +385,15 @@ Vue.createApp({
         // tag cloud.
         allTags() {
             const tagsByNormalizedName = new Map();
-            this.todoList.forEach(t => (t.tags || []).forEach(tag => {
-                const cleanTag = tag.trim();
+            const collect = tag => {
+                const cleanTag = String(tag).trim();
                 const normalized = cleanTag.toLocaleLowerCase();
                 if (cleanTag && !tagsByNormalizedName.has(normalized)) {
                     tagsByNormalizedName.set(normalized, cleanTag);
                 }
-            }));
+            };
+            this.tagRegistry.forEach(collect);
+            this.todoList.forEach(t => (t.tags || []).forEach(collect));
             return Array.from(tagsByNormalizedName.values()).sort((a, b) => a.localeCompare(b));
         },
 
@@ -556,6 +574,18 @@ Vue.createApp({
             });
         },
 
+        saveTagRegistry() {
+            localStorage.setItem('tagRegistry', JSON.stringify(this.tagRegistry));
+            return fetch(`${API_BASE}/tags`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(this.tagRegistry),
+            }).catch((err) => {
+                console.warn('Could not save tags to server, kept locally only', err);
+            });
+        },
+
         // Pulls the todo list from the server on startup. If the server
         // already has data, it wins (it's the shared copy). If the server
         // is empty but we have a local list (e.g. the first run against a
@@ -573,6 +603,22 @@ Vue.createApp({
                 }
             } catch (err) {
                 console.warn('Could not reach server, using local copy', err);
+            }
+
+            // Tags also live outside tasks (a tag can be created before it
+            // is assigned), so they have their own small registry.
+            try {
+                const res = await fetch(`${API_BASE}/tags`, { credentials: 'include' });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const serverTags = await res.json();
+                if (!Array.isArray(serverTags)) throw new Error('Invalid tags payload');
+                if (serverTags.length === 0 && this.tagRegistry.length > 0) {
+                    await this.saveTagRegistry();
+                } else {
+                    this.tagRegistry = serverTags.filter(tag => typeof tag === 'string');
+                }
+            } catch (err) {
+                console.warn('Could not sync tags with server, using local copy', err);
             }
         },
 
@@ -1088,7 +1134,7 @@ Vue.createApp({
             if (e.ctrlKey || e.metaKey || e.altKey) return;
             const tag = e.target.tagName;
             if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target.isContentEditable) return;
-            if (this.moveDialogTaskId || this.pendingCommentDeleteId || this.completeDescendantsDialogTaskId || this.tagDeleteName) return;
+            if (this.moveDialogTaskId || this.pendingCommentDeleteId || this.completeDescendantsDialogTaskId || this.tagDeleteName || this.tagAddOpen) return;
 
             if (e.key === '?' || (e.code === 'Slash' && e.shiftKey)) {
                 e.preventDefault();
@@ -1473,6 +1519,41 @@ Vue.createApp({
             }
         },
 
+        // Tags have their own registry, so a tag can exist before it is
+        // assigned to any task. The tag cloud merges that registry with the
+        // tags found on tasks.
+        openTagAddDialog() {
+            this.addTagName = '';
+            this.addTagError = '';
+            this.tagAddOpen = true;
+            this.$nextTick(() => this.$refs.addTagInput?.focus());
+        },
+
+        closeTagAddDialog() {
+            this.tagAddOpen = false;
+            this.addTagName = '';
+            this.addTagError = '';
+            this.$nextTick(() => this.$refs.addTagTrigger?.focus());
+        },
+
+        addTagFromDialog() {
+            const name = this.addTagName.trim();
+            if (!name) {
+                this.addTagError = 'Please enter a tag name.';
+                this.$nextTick(() => this.$refs.addTagInput?.focus());
+                return;
+            }
+            const exists = this.allTags.some(tag => tag.toLocaleLowerCase() === name.toLocaleLowerCase());
+            if (exists) {
+                this.addTagError = `A tag named “${name}” already exists.`;
+                this.$nextTick(() => this.$refs.addTagInput?.focus());
+                return;
+            }
+            this.tagRegistry.push(name);
+            this.saveTagRegistry();
+            this.closeTagAddDialog();
+        },
+
         // Tags are not stored on their own: they only exist on tasks, so
         // deleting one means removing it from every task that has it.
         requestTagDelete(tag) {
@@ -1507,6 +1588,11 @@ Vue.createApp({
             });
             if (this.activeTag && this.activeTag.toLocaleLowerCase() === normalized) {
                 this.activeTag = null;
+            }
+            const registryIndex = this.tagRegistry.findIndex(tag => tag.trim().toLocaleLowerCase() === normalized);
+            if (registryIndex !== -1) {
+                this.tagRegistry.splice(registryIndex, 1);
+                this.saveTagRegistry();
             }
             this.closeTagDelete();
             this.saveTodos();

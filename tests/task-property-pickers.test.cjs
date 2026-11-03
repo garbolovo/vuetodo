@@ -12,6 +12,7 @@ vm.runInNewContext(fs.readFileSync(require.resolve('../app.js'), 'utf8'), {
 function state() {
     const s = {
         todoList: [{ id: 'a', tags: ['Work'] }, { id: 'b', tags: ['Home', 'work'] }],
+        tagRegistry: [],
         selectedId: 'a', newTagName: '', tagComposerOpen: false,
         startPickerOpen: false, duePickerOpen: false, priorityPickerOpen: false, contextPickerOpen: false,
         saves: 0, searchFocus: 0, triggerFocus: 0,

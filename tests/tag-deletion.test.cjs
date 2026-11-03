@@ -29,7 +29,8 @@ function state() {
         activeTag: null,
         tagDeleteName: null,
         tagDeleteReturnFocus: null,
-        saves: 0, cancelFocus: 0, restoreFocus: 0,
+        tagRegistry: ['Work', 'Home', 'Urgent', 'Someday'],
+        saves: 0, tagSaves: 0, cancelFocus: 0, restoreFocus: 0,
         $nextTick: callback => { if (callback) callback(); },
     };
     s.$refs = {
@@ -39,6 +40,7 @@ function state() {
     for (const [name, fn] of Object.entries(app.methods)) s[name] = fn.bind(s);
     for (const [name, fn] of Object.entries(app.computed)) Object.defineProperty(s, name, { get: () => fn.call(s) });
     s.saveTodos = () => { s.saves++; };
+    s.saveTagRegistry = () => { s.tagSaves++; };
     s.syncWithServer = () => {};
     return s;
 }
@@ -67,6 +69,8 @@ test('Confirming removes the tag from every task and saves once', () => {
     assert.notEqual(JSON.stringify(s.todoList), original);
     assert.equal(s.tagDeleteName, null);
     assert.equal(s.saves, 1);
+    assert.deepEqual(Array.from(s.tagRegistry), ['Home', 'Urgent', 'Someday']);
+    assert.equal(s.tagSaves, 1, 'the tag is also removed from the registry');
 });
 
 test('Deleting the active tag clears its filter, other filters stay put', () => {
