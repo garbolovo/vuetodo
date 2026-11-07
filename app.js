@@ -712,19 +712,20 @@ Vue.createApp({
         },
 
         regTodo() {
-            const title = this.newTodo.title.trim();
+            const smart = this.parseSmartAdd(this.newTodo.title);
+            const title = smart.title;
             if (!title) return;
 
             this.todoList.push({
                 id: uuidv4(),
                 title,
                 body: this.newTodo.body,
-                startDate: this.newTodo.startDate,
-                dueDate: this.newTodo.dueDate,
-                priority: this.newTodo.priority,
-                tags: [],
+                startDate: smart.startDate || this.newTodo.startDate,
+                dueDate: smart.dueDate || this.newTodo.dueDate,
+                priority: smart.priority || this.newTodo.priority,
+                tags: smart.tags,
                 comments: [],
-                context: '',
+                context: smart.context,
                 parentId: null,
                 done: false,
                 collapsed: false,
@@ -1377,6 +1378,108 @@ Vue.createApp({
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
+        },
+
+        formatDateValue(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        },
+
+        // Smart Add dates: today, tomorrow, YYYY-MM-DD, or DMMM / DMMMYYYY
+        // (e.g. 25jul, 14jun2026). Without a year, pick the next occurrence.
+        parseSmartDate(raw, baseDate = new Date()) {
+            const value = String(raw || '').trim().toLocaleLowerCase();
+            if (!value) return null;
+
+            const base = new Date(baseDate);
+            base.setHours(0, 0, 0, 0);
+            if (value === 'today') return this.formatDateValue(base);
+            if (value === 'tomorrow') {
+                base.setDate(base.getDate() + 1);
+                return this.formatDateValue(base);
+            }
+
+            const iso = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (iso) {
+                const year = Number(iso[1]);
+                const month = Number(iso[2]) - 1;
+                const day = Number(iso[3]);
+                const date = new Date(year, month, day);
+                if (date.getFullYear() !== year || date.getMonth() !== month || date.getDate() !== day) return null;
+                return this.formatDateValue(date);
+            }
+
+            const months = {
+                jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+                jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
+            };
+            const match = value.match(/^(\d{1,2})([a-z]{3,9})(\d{4})?$/);
+            if (!match) return null;
+            const day = Number(match[1]);
+            const month = months[match[2].slice(0, 3)];
+            if (!Number.isInteger(month)) return null;
+
+            let year = match[3] ? Number(match[3]) : base.getFullYear();
+            let date = new Date(year, month, day);
+            if (date.getFullYear() !== year || date.getMonth() !== month || date.getDate() !== day) return null;
+            if (!match[3] && date < base) {
+                year += 1;
+                date = new Date(year, month, day);
+            }
+            return this.formatDateValue(date);
+        },
+
+        // Smart Add for the quick-add field:
+        //   !1..3 priority, #tag, ^due date, ~start date, @context.
+        // Recognised tokens are removed from the title; invalid ones stay.
+        parseSmartAdd(text, baseDate = new Date()) {
+            const parsed = { title: '', priority: '', tags: [], context: '', startDate: '', dueDate: '' };
+            const kept = [];
+            for (const word of String(text || '').trim().split(/\s+/).filter(Boolean)) {
+                const token = word.replace(/[.,;:!?]+$/, '');
+
+                const priority = token.match(/^!([1-3])$/);
+                if (priority) {
+                    parsed.priority = { 1: 'high', 2: 'medium', 3: 'low' }[priority[1]];
+                    continue;
+                }
+
+                const tag = token.match(/^#([\p{L}\p{N}_-]+)$/u);
+                if (tag) {
+                    if (!parsed.tags.some(existing => existing.toLocaleLowerCase() === tag[1].toLocaleLowerCase())) {
+                        parsed.tags.push(tag[1]);
+                    }
+                    continue;
+                }
+
+                const context = token.match(/^@([\p{L}\p{N}_-]+)$/u);
+                if (context) {
+                    parsed.context = `@${context[1]}`;
+                    continue;
+                }
+
+                if (token.startsWith('^')) {
+                    const dueDate = this.parseSmartDate(token.slice(1), baseDate);
+                    if (dueDate) {
+                        parsed.dueDate = dueDate;
+                        continue;
+                    }
+                }
+
+                if (token.startsWith('~')) {
+                    const startDate = this.parseSmartDate(token.slice(1), baseDate);
+                    if (startDate) {
+                        parsed.startDate = startDate;
+                        continue;
+                    }
+                }
+
+                kept.push(word);
+            }
+            parsed.title = kept.join(' ').replace(/\s+/g, ' ').trim();
+            return parsed;
         },
 
         hasDateValue(value) {

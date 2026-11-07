@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Todo">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261104-2">
+  <link rel="stylesheet" href="style.css?v=20261108-1">
 
 </head>
 <body>
@@ -172,6 +172,9 @@
 
           <div class="quick-add-expanded" v-if="quickAddActive">
             <textarea id="todo-body" v-model="newTodo.body" placeholder="Description" rows="2"></textarea>
+            <p class="quick-add-hint">
+              Smart Add: <code>!1</code> priority · <code>#tag</code> · <code>^25jul</code> due · <code>~14jun</code> start · <code>@home</code> context
+            </p>
 
             <div class="quick-add-toolbar">
               <div class="quick-add-toolbar-left">
@@ -636,7 +639,7 @@
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261107-1"></script>
+<script src="app.js?v=20261108-1"></script>
 </body>
 </html>
 
