@@ -233,6 +233,7 @@ Vue.createApp({
         // tucked behind the hamburger there.
         activeViewLabel() {
             return {
+                inbox: 'Inbox',
                 all: 'All',
                 today: 'Today',
                 next: 'Next',
@@ -244,6 +245,7 @@ Vue.createApp({
 
         sidebarViews() {
             return [
+                { id: 'inbox', label: 'Inbox', count: this.inboxCount, color: '#c4b5fd', icon: 'M12 3v9 M8 8l4 4 4-4 M4 14v6h16v-6' },
                 { id: 'all', label: 'All', count: this.allCount, color: '#c2c5cd', icon: 'M4 4h16v16H4z M4 14h5l2 3h2l2-3h5' },
                 { id: 'today', label: 'Today', count: this.todayCount, color: '#e2c46e', icon: 'M12 8v8 M8 12h8 M12 2v2 M12 20v2 M2 12h2 M20 12h2 M5 5l1.5 1.5 M17.5 17.5L19 19 M5 19l1.5-1.5 M17.5 6.5L19 5' },
                 { id: 'next', label: 'Next', count: this.nextCount, color: '#83afe8', icon: 'M5 5l6 7-6 7 M12 5l6 7-6 7' },
@@ -285,11 +287,11 @@ Vue.createApp({
             return this.collapsibleTasks.length > 0 && this.collapsibleTasks.every(t => t.collapsed);
         },
 
-        // Today/Next/Overdue/Completed and an active context filter cut across
-        // the hierarchy (a subtask's due date or context is independent of
-        // its parent's), so they show a flat matching list instead of a
-        // tree. A project selection narrows either mode to that project's
-        // own descendants.
+        // Today/Next/Inbox/Overdue/Completed and an active context filter cut
+        // across the hierarchy (a subtask's due date, start date or context is
+        // independent of its parent's), so they show a flat matching list
+        // instead of a tree. A project selection narrows either mode to that
+        // project's own descendants.
         viewEntries() {
             const contextMatches = t => this.activeContext === null
                 || (this.activeContext === '' ? !t.context : t.context === this.activeContext);
@@ -308,7 +310,10 @@ Vue.createApp({
             }
 
             let list;
-            if (this.activeView === 'today') {
+            if (this.activeView === 'inbox') {
+                // GTD inbox: active tasks that have neither a start nor a due date.
+                list = base.filter(t => !t.done && !this.hasDateValue(t.startDate) && !this.hasDateValue(t.dueDate));
+            } else if (this.activeView === 'today') {
                 list = base.filter(t => !t.done && this.dueDateDiffDays(t.dueDate) === 0);
             } else if (this.activeView === 'next') {
                 const today = this.dateFromToday(0);
@@ -347,6 +352,12 @@ Vue.createApp({
             return this.todoList.filter(t => !t.done && this.dueDateDiffDays(t.dueDate) === 0).length;
         },
 
+        inboxCount() {
+            return this.todoList.filter(t =>
+                !t.done && !this.hasDateValue(t.startDate) && !this.hasDateValue(t.dueDate)
+            ).length;
+        },
+
         nextCount() {
             const today = this.dateFromToday(0);
             return this.todoList.filter(t => !t.done && t.startDate && t.startDate <= today).length;
@@ -363,6 +374,16 @@ Vue.createApp({
 
         completedCount() {
             return this.todoList.filter(t => t.done).length;
+        },
+
+        emptyStateMessage() {
+            if (this.activeView === 'inbox' && !this.filteredOn && !this.activeProject && this.activeContext === null && !this.activeTag) {
+                return 'Tasks without start or due dates will appear here.';
+            }
+            if (this.activeView === 'all' && !this.filteredOn && !this.activeProject && this.activeContext === null && !this.activeTag) {
+                return 'Add a task above to get started.';
+            }
+            return 'Try another view or adjust your filters.';
         },
 
         allCount() {
@@ -400,6 +421,7 @@ Vue.createApp({
         shortcutGroups() {
             return [
                 { title: 'Go to', items: [
+                    { keys: 'g i', label: 'Inbox' },
                     { keys: 'g a', label: 'All' },
                     { keys: 'g t', label: 'Today' },
                     { keys: 'g n', label: 'Next' },
@@ -1147,7 +1169,7 @@ Vue.createApp({
             if (this.gotoPending) {
                 this.gotoPending = false;
                 clearTimeout(this.gotoTimer);
-                const views = { KeyA: 'all', KeyT: 'today', KeyN: 'next', KeyS: 'scheduled', KeyO: 'overdue', KeyC: 'completed' };
+                const views = { KeyI: 'inbox', KeyA: 'all', KeyT: 'today', KeyN: 'next', KeyS: 'scheduled', KeyO: 'overdue', KeyC: 'completed' };
                 if (e.code in views) {
                     e.preventDefault();
                     this.setView(views[e.code]);
@@ -1355,6 +1377,10 @@ Vue.createApp({
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
+        },
+
+        hasDateValue(value) {
+            return Boolean(value && String(value).trim());
         },
 
         quickDateOptions() {
