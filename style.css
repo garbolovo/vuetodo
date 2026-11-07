@@ -344,6 +344,53 @@ body {
     box-shadow: 0 0 0 3px var(--brand-soft);
 }
 
+.quick-add-input-wrap {
+    position: relative;
+}
+
+.quick-add-suggestions {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 10px;
+    right: 10px;
+    z-index: 45;
+    max-height: 260px;
+    padding: 4px;
+    overflow-y: auto;
+    border: 1px solid #d8dde8;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 10px 26px rgba(30, 41, 59, 0.18);
+}
+
+.quick-add-suggestion {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 5px;
+    background: transparent;
+    color: #30363d;
+    font: inherit;
+    font-size: 0.86rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.quick-add-suggestion.active,
+.quick-add-suggestion:hover {
+    background: #eef2ff;
+}
+
+.quick-add-suggestion-detail {
+    flex: 0 0 auto;
+    color: #8a94a3;
+    font-size: 0.74rem;
+}
+
 #app #quick-add #todo {
     display: block;
     width: 100%;
