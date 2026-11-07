@@ -85,6 +85,8 @@ Vue.createApp({
             quickCustomStartDate: '',
             quickDuePickerOpen: false,
             quickCustomDueDate: '',
+            datePickerQuery: '',
+            datePickerIndex: 0,
             priorityPickerOpen: false,
             contextPickerOpen: false,
         };
@@ -1476,6 +1478,7 @@ Vue.createApp({
             this.startPickerOpen = !this.startPickerOpen;
             if (this.startPickerOpen) {
                 this.customStartDate = this.selectedItem?.startDate || this.dateFromToday(0);
+                this.prepareDatePicker('detailStartDateInput');
             }
         },
 
@@ -1507,6 +1510,7 @@ Vue.createApp({
             this.duePickerOpen = !this.duePickerOpen;
             if (this.duePickerOpen) {
                 this.customDueDate = this.selectedItem?.dueDate || this.dateFromToday(0);
+                this.prepareDatePicker('detailDueDateInput');
             }
         },
 
@@ -1646,6 +1650,115 @@ Vue.createApp({
             });
         },
 
+        prepareDatePicker(refName) {
+            this.datePickerQuery = '';
+            this.datePickerIndex = 0;
+            this.$nextTick(() => this.$refs[refName]?.focus());
+        },
+
+        datePickerOptions(kind) {
+            const query = this.datePickerQuery.trim().toLocaleLowerCase();
+            const options = this.quickDateOptions()
+                .filter(option => !query
+                    || option.label.toLocaleLowerCase().includes(query)
+                    || option.dateLabel.toLocaleLowerCase().includes(query)
+                    || option.value.includes(query))
+                .map(option => ({ ...option, key: option.value }));
+            options.push({
+                key: 'none',
+                label: kind.includes('start') ? 'No start date' : 'No due date',
+                dateLabel: 'Never',
+                value: '',
+            });
+            return options;
+        },
+
+        selectDatePickerOption(kind, option) {
+            if (!option) return;
+            if (option.value) this.applyDate(kind, option.value);
+            else this.clearDate(kind);
+        },
+
+        applyDate(kind, value) {
+            if (kind === 'quick-start') this.setQuickStartDate(value);
+            else if (kind === 'quick-due') this.setQuickDueDate(value);
+            else if (kind === 'detail-start') this.setStartDate(value);
+            else if (kind === 'detail-due') this.setDueDate(value);
+        },
+
+        clearDate(kind) {
+            if (kind === 'quick-start') this.clearQuickStartDate();
+            else if (kind === 'quick-due') this.clearQuickDueDate();
+            else if (kind === 'detail-start') this.clearStartDate();
+            else if (kind === 'detail-due') this.clearDueDate();
+        },
+
+        closeDatePicker(kind) {
+            if (kind === 'quick-start') this.quickStartPickerOpen = false;
+            else if (kind === 'quick-due') this.quickDuePickerOpen = false;
+            else if (kind === 'detail-start') this.startPickerOpen = false;
+            else if (kind === 'detail-due') this.duePickerOpen = false;
+        },
+
+        // Accept Smart Add date syntax plus a bare day number. A bare day
+        // means the next occurrence of that day (this month or next).
+        parseDatePickerValue(raw, baseDate = new Date()) {
+            const value = String(raw || '').trim();
+            if (!value) return null;
+            const smart = this.parseSmartDate(value, baseDate);
+            if (smart) return smart;
+            if (!/^\d{1,2}$/.test(value)) return null;
+
+            const day = Number(value);
+            if (day < 1 || day > 31) return null;
+            const base = new Date(baseDate);
+            base.setHours(0, 0, 0, 0);
+            let year = base.getFullYear();
+            let month = base.getMonth();
+            const build = (y, m) => new Date(y, m, day);
+            let date = build(year, month);
+            if (date.getMonth() !== month || date.getDate() !== day) return null;
+            if (date < base) {
+                month += 1;
+                if (month > 11) {
+                    month = 0;
+                    year += 1;
+                }
+                date = build(year, month);
+                if (date.getMonth() !== month || date.getDate() !== day) return null;
+            }
+            return this.formatDateValue(date);
+        },
+
+        datePickerKeydown(event, kind) {
+            const options = this.datePickerOptions(kind);
+            if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                event.preventDefault();
+                const delta = event.key === 'ArrowDown' ? 1 : -1;
+                this.datePickerIndex = (this.datePickerIndex + delta + options.length) % options.length;
+                return;
+            }
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                const query = this.datePickerQuery.trim();
+                if (query) {
+                    const parsed = this.parseDatePickerValue(query);
+                    if (parsed) {
+                        this.applyDate(kind, parsed);
+                        return;
+                    }
+                    if (!options.some(option => option.value)) return;
+                }
+                const option = options[this.datePickerIndex];
+                if (option) this.selectDatePickerOption(kind, option);
+                return;
+            }
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                this.closeDatePicker(kind);
+            }
+        },
+
         setDueDate(value) {
             if (!this.selectedItem || !value) return;
             this.selectedItem.dueDate = value;
@@ -1665,6 +1778,7 @@ Vue.createApp({
             this.quickStartPickerOpen = !this.quickStartPickerOpen;
             if (this.quickStartPickerOpen) {
                 this.quickCustomStartDate = this.newTodo.startDate || this.dateFromToday(0);
+                this.prepareDatePicker('quickStartDateInput');
             }
         },
 
@@ -1692,6 +1806,7 @@ Vue.createApp({
             this.quickDuePickerOpen = !this.quickDuePickerOpen;
             if (this.quickDuePickerOpen) {
                 this.quickCustomDueDate = this.newTodo.dueDate || this.dateFromToday(0);
+                this.prepareDatePicker('quickDueDateInput');
             }
         },
 

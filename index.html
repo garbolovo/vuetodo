@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Todo">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261108-2">
+  <link rel="stylesheet" href="style.css?v=20261108-3">
 
 </head>
 <body>
@@ -205,17 +205,22 @@
                   </button>
 
                   <div class="due-picker-menu" v-if="quickStartPickerOpen" @click.stop>
-                    <button type="button" class="due-picker-option" v-for="option in quickDateOptions()" :key="option.value"
-                            :class="{ selected: newTodo.startDate === option.value }" @click="setQuickStartDate(option.value)">
+                    <div class="due-picker-search">
+                      <input ref="quickStartDateInput" v-model="datePickerQuery" type="text" placeholder="Type a date..."
+                             aria-label="Type a start date" autocomplete="off"
+                             @input="datePickerIndex = 0"
+                             @keydown="datePickerKeydown($event, 'quick-start')">
+                    </div>
+                    <button type="button" class="due-picker-option"
+                            v-for="(option, index) in datePickerOptions('quick-start')" :key="option.key"
+                            :class="{ selected: option.value ? newTodo.startDate === option.value : !newTodo.startDate, active: index === datePickerIndex }"
+                            @mouseenter="datePickerIndex = index"
+                            @click="selectDatePickerOption('quick-start', option)">
                       <span>{{ option.label }}</span>
                       <span>{{ option.dateLabel }}</span>
                     </button>
-                    <button type="button" class="due-picker-option" :class="{ selected: !newTodo.startDate }" @click="clearQuickStartDate">
-                      <span>No start date</span>
-                      <span>Never</span>
-                    </button>
                     <div class="due-picker-custom">
-                      <label for="quick-custom-start-date">Choose date</label>
+                      <label for="quick-custom-start-date">Calendar picker</label>
                       <input id="quick-custom-start-date" type="date" v-model="quickCustomStartDate" @change="setQuickStartDate(quickCustomStartDate)">
                     </div>
                   </div>
@@ -228,17 +233,22 @@
                   </button>
 
                   <div class="due-picker-menu" v-if="quickDuePickerOpen" @click.stop>
-                    <button type="button" class="due-picker-option" v-for="option in quickDateOptions()" :key="option.value"
-                            :class="{ selected: newTodo.dueDate === option.value }" @click="setQuickDueDate(option.value)">
+                    <div class="due-picker-search">
+                      <input ref="quickDueDateInput" v-model="datePickerQuery" type="text" placeholder="Type a date..."
+                             aria-label="Type a due date" autocomplete="off"
+                             @input="datePickerIndex = 0"
+                             @keydown="datePickerKeydown($event, 'quick-due')">
+                    </div>
+                    <button type="button" class="due-picker-option"
+                            v-for="(option, index) in datePickerOptions('quick-due')" :key="option.key"
+                            :class="{ selected: option.value ? newTodo.dueDate === option.value : !newTodo.dueDate, active: index === datePickerIndex }"
+                            @mouseenter="datePickerIndex = index"
+                            @click="selectDatePickerOption('quick-due', option)">
                       <span>{{ option.label }}</span>
                       <span>{{ option.dateLabel }}</span>
                     </button>
-                    <button type="button" class="due-picker-option" :class="{ selected: !newTodo.dueDate }" @click="clearQuickDueDate">
-                      <span>No due date</span>
-                      <span>Never</span>
-                    </button>
                     <div class="due-picker-custom">
-                      <label for="quick-custom-due-date">Choose date</label>
+                      <label for="quick-custom-due-date">Calendar picker</label>
                       <input id="quick-custom-due-date" type="date" v-model="quickCustomDueDate" @change="setQuickDueDate(quickCustomDueDate)">
                     </div>
                   </div>
@@ -368,17 +378,22 @@
                     <span class="detail-due-chevron">⌄</span>
                   </button>
                   <div id="detail-start-menu" class="due-picker-menu" v-if="startPickerOpen" @click.stop>
-                    <button type="button" class="due-picker-option" v-for="option in quickDateOptions()" :key="option.value"
-                            :class="{ selected: selectedItem.startDate === option.value }" @click="setStartDate(option.value)">
+                    <div class="due-picker-search">
+                      <input ref="detailStartDateInput" v-model="datePickerQuery" type="text" placeholder="Type a date..."
+                             aria-label="Type a start date" autocomplete="off"
+                             @input="datePickerIndex = 0"
+                             @keydown="datePickerKeydown($event, 'detail-start')">
+                    </div>
+                    <button type="button" class="due-picker-option"
+                            v-for="(option, index) in datePickerOptions('detail-start')" :key="option.key"
+                            :class="{ selected: option.value ? selectedItem.startDate === option.value : !selectedItem.startDate, active: index === datePickerIndex }"
+                            @mouseenter="datePickerIndex = index"
+                            @click="selectDatePickerOption('detail-start', option)">
                       <span>{{ option.label }}</span>
                       <span>{{ option.dateLabel }}</span>
                     </button>
-                    <button type="button" class="due-picker-option" :class="{ selected: !selectedItem.startDate }" @click="clearStartDate">
-                      <span>No start date</span>
-                      <span>Never</span>
-                    </button>
                     <div class="due-picker-custom">
-                      <label for="custom-start-date">Choose date</label>
+                      <label for="custom-start-date">Calendar picker</label>
                       <input id="custom-start-date" type="date" v-model="customStartDate" @change="setStartDate(customStartDate)">
                     </div>
                   </div>
@@ -395,17 +410,22 @@
                     <span class="detail-due-chevron">⌄</span>
                   </button>
                   <div id="detail-due-menu" class="due-picker-menu" v-if="duePickerOpen" @click.stop>
-                    <button type="button" class="due-picker-option" v-for="option in quickDateOptions()" :key="option.value"
-                            :class="{ selected: selectedItem.dueDate === option.value }" @click="setDueDate(option.value)">
+                    <div class="due-picker-search">
+                      <input ref="detailDueDateInput" v-model="datePickerQuery" type="text" placeholder="Type a date..."
+                             aria-label="Type a due date" autocomplete="off"
+                             @input="datePickerIndex = 0"
+                             @keydown="datePickerKeydown($event, 'detail-due')">
+                    </div>
+                    <button type="button" class="due-picker-option"
+                            v-for="(option, index) in datePickerOptions('detail-due')" :key="option.key"
+                            :class="{ selected: option.value ? selectedItem.dueDate === option.value : !selectedItem.dueDate, active: index === datePickerIndex }"
+                            @mouseenter="datePickerIndex = index"
+                            @click="selectDatePickerOption('detail-due', option)">
                       <span>{{ option.label }}</span>
                       <span>{{ option.dateLabel }}</span>
                     </button>
-                    <button type="button" class="due-picker-option" :class="{ selected: !selectedItem.dueDate }" @click="clearDueDate">
-                      <span>No due date</span>
-                      <span>Never</span>
-                    </button>
                     <div class="due-picker-custom">
-                      <label for="custom-due-date">Choose date</label>
+                      <label for="custom-due-date">Calendar picker</label>
                       <input id="custom-due-date" type="date" v-model="customDueDate" @change="setDueDate(customDueDate)">
                     </div>
                   </div>
@@ -658,7 +678,7 @@
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261108-2"></script>
+<script src="app.js?v=20261108-3"></script>
 </body>
 </html>
 
