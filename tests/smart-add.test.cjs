@@ -15,6 +15,20 @@ function state(overrides = {}) {
     const s = {
         todoList: [],
         newTodo: { title: '', body: '', startDate: '', dueDate: '', priority: '' },
+        quickAddActive: true,
+        quickAddSuggestions: [],
+        quickAddSuggestionIndex: 0,
+        quickAddSuggestionToken: null,
+        allTags: ['Work', 'Home'],
+        allContexts: ['@computer', '@shop'],
+        $refs: {
+            quickAddInput: {
+                selectionStart: 0,
+                focus() {},
+                setSelectionRange() {},
+            },
+        },
+        $nextTick: callback => { if (callback) callback(); },
         saves: 0,
         cancels: 0,
         ...overrides,
@@ -113,4 +127,56 @@ test('A title made only of tokens does not create an empty task', () => {
     assert.equal(s.todoList.length, 0);
     assert.equal(s.saves, 0);
     assert.equal(s.cancels, 0);
+});
+
+function type(s, text) {
+    s.newTodo.title = text;
+    s.$refs.quickAddInput.selectionStart = text.length;
+    s.updateQuickAddSuggestions();
+}
+
+test('Typing ! opens priority suggestions, including No Priority', () => {
+    const s = state();
+    type(s, 'milk !');
+    assert.deepEqual(Array.from(s.quickAddSuggestions.map(item => item.label)), ['Priority 1', 'Priority 2', 'Priority 3', 'No Priority']);
+    assert.equal(s.quickAddSuggestions[3].insert, '!0');
+
+    s.selectQuickAddSuggestion(s.quickAddSuggestions[3]);
+    assert.equal(s.newTodo.title, 'milk !0 ');
+    assert.equal(s.parseSmartAdd(s.newTodo.title, NOV_8).priority, '');
+});
+
+test('Tag and context suggestions filter by the typed query', () => {
+    const s = state();
+    type(s, 'buy #Wo');
+    assert.deepEqual(Array.from(s.quickAddSuggestions.map(item => item.label)), ['Work']);
+    s.selectQuickAddSuggestion(s.quickAddSuggestions[0]);
+    assert.equal(s.newTodo.title, 'buy #Work ');
+
+    type(s, 'call @sh');
+    assert.deepEqual(Array.from(s.quickAddSuggestions.map(item => item.label)), ['@shop']);
+    s.selectQuickAddSuggestion(s.quickAddSuggestions[0]);
+    assert.equal(s.newTodo.title, 'call @shop ');
+});
+
+test('Date tokens suggest Today, Tomorrow and In a week', () => {
+    const s = state();
+    type(s, 'task ^');
+    assert.deepEqual(Array.from(s.quickAddSuggestions.map(item => item.label)), ['Today', 'Tomorrow', 'In a week']);
+    s.selectQuickAddSuggestion(s.quickAddSuggestions[0]);
+    assert.equal(s.newTodo.title, 'task ^today ');
+
+    type(s, 'start ~');
+    assert.deepEqual(Array.from(s.quickAddSuggestions.map(item => item.label)), ['Today', 'Tomorrow', 'In a week']);
+    s.selectQuickAddSuggestion(s.quickAddSuggestions[1]);
+    assert.equal(s.newTodo.title, 'start ~tomorrow ');
+});
+
+test('Arrow keys move the suggestion and Enter selects it', () => {
+    const s = state();
+    type(s, 'milk !');
+    s.quickAddKeydown({ key: 'ArrowDown', preventDefault() {} });
+    assert.equal(s.quickAddSuggestionIndex, 1);
+    s.quickAddKeydown({ key: 'Enter', preventDefault() {} });
+    assert.equal(s.newTodo.title, 'milk !2 ');
 });

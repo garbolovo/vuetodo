@@ -48,6 +48,9 @@ Vue.createApp({
             activeTag: null,
             activeProject: null,
             quickAddActive: false,
+            quickAddSuggestions: [],
+            quickAddSuggestionIndex: 0,
+            quickAddSuggestionToken: null,
             newTodo: { title: '', body: '', startDate: '', dueDate: '', priority: '' },
             newSubtaskTitle: '',
             newCommentText: '',
@@ -180,6 +183,11 @@ Vue.createApp({
             if (e.key === 'Escape' && this.pendingCommentDeleteId) {
                 e.preventDefault();
                 this.cancelCommentDelete();
+                return;
+            }
+            if (e.key === 'Escape' && this.quickAddSuggestions.length) {
+                e.preventDefault();
+                this.closeQuickAddSuggestions();
                 return;
             }
             if (e.key === 'Escape' && this.quickAddActive) {
@@ -712,6 +720,7 @@ Vue.createApp({
         },
 
         regTodo() {
+            this.closeQuickAddSuggestions();
             const smart = this.parseSmartAdd(this.newTodo.title);
             const title = smart.title;
             if (!title) return;
@@ -735,6 +744,7 @@ Vue.createApp({
         },
 
         cancelQuickAdd() {
+            this.closeQuickAddSuggestions();
             this.newTodo = { title: '', body: '', startDate: '', dueDate: '', priority: '' };
             this.quickStartPickerOpen = false;
             this.quickCustomStartDate = '';
@@ -748,6 +758,136 @@ Vue.createApp({
             this.quickAddActive = true;
             await this.$nextTick();
             this.$refs.quickAddInput?.focus();
+        },
+
+        onQuickAddFocus() {
+            this.quickAddActive = true;
+            this.updateQuickAddSuggestions();
+        },
+
+        // Find the smart-add token around the caret, e.g. "milk !" -> prefix
+        // "!" and query "". The whole token is replaced on selection, even if
+        // the caret is in the middle of it.
+        quickAddTokenAtCursor() {
+            const input = this.$refs.quickAddInput;
+            const text = String(this.newTodo.title || '');
+            const caret = input && typeof input.selectionStart === 'number' ? input.selectionStart : text.length;
+            const before = text.slice(0, caret);
+            const match = before.match(/(^|\s)([!#@^~])([^\s]*)$/);
+            if (!match) return null;
+            const tail = (text.slice(caret).match(/^[^\s]*/) || [''])[0];
+            return {
+                prefix: match[2],
+                query: match[3] + tail,
+                start: caret - match[2].length - match[3].length,
+                end: caret + tail.length,
+            };
+        },
+
+        quickAddSuggestionItems(token) {
+            const query = token.query.toLocaleLowerCase();
+            const matches = value => value.toLocaleLowerCase().includes(query);
+            if (token.prefix === '!') {
+                return [
+                    { label: 'Priority 1', detail: 'High', insert: '!1' },
+                    { label: 'Priority 2', detail: 'Medium', insert: '!2' },
+                    { label: 'Priority 3', detail: 'Low', insert: '!3' },
+                    { label: 'No Priority', detail: 'Clear', insert: '!0' },
+                ].filter(item => !query || matches(item.label) || matches(item.insert));
+            }
+            if (token.prefix === '#') {
+                return this.allTags
+                    .filter(matches)
+                    .slice(0, 10)
+                    .map(tag => ({ label: tag, detail: 'Tag', insert: `#${tag}` }));
+            }
+            if (token.prefix === '@') {
+                return this.allContexts
+                    .filter(matches)
+                    .slice(0, 10)
+                    .map(context => ({
+                        label: context,
+                        detail: 'Context',
+                        insert: context.startsWith('@') ? context : `@${context}`,
+                    }));
+            }
+            return [
+                { label: 'Today', detail: 'Date', insert: `${token.prefix}today` },
+                { label: 'Tomorrow', detail: 'Date', insert: `${token.prefix}tomorrow` },
+                { label: 'In a week', detail: 'Date', insert: `${token.prefix}${this.dateFromToday(7)}` },
+            ].filter(item => !query || matches(item.label));
+        },
+
+        updateQuickAddSuggestions() {
+            if (!this.quickAddActive) {
+                this.closeQuickAddSuggestions();
+                return;
+            }
+            const token = this.quickAddTokenAtCursor();
+            if (!token) {
+                this.closeQuickAddSuggestions();
+                return;
+            }
+            const items = this.quickAddSuggestionItems(token);
+            if (!items.length) {
+                this.closeQuickAddSuggestions();
+                return;
+            }
+            this.quickAddSuggestionToken = token;
+            this.quickAddSuggestions = items;
+            this.quickAddSuggestionIndex = Math.min(this.quickAddSuggestionIndex, items.length - 1);
+        },
+
+        closeQuickAddSuggestions() {
+            this.quickAddSuggestions = [];
+            this.quickAddSuggestionIndex = 0;
+            this.quickAddSuggestionToken = null;
+        },
+
+        moveQuickAddSuggestion(delta) {
+            if (!this.quickAddSuggestions.length) return;
+            const count = this.quickAddSuggestions.length;
+            this.quickAddSuggestionIndex = (this.quickAddSuggestionIndex + delta + count) % count;
+        },
+
+        selectQuickAddSuggestion(item) {
+            const token = this.quickAddSuggestionToken;
+            if (!token || !item) return;
+            const text = String(this.newTodo.title || '');
+            const insertion = `${item.insert} `;
+            this.newTodo.title = text.slice(0, token.start) + insertion + text.slice(token.end);
+            const caret = token.start + insertion.length;
+            this.closeQuickAddSuggestions();
+            this.$nextTick(() => {
+                const input = this.$refs.quickAddInput;
+                if (!input) return;
+                input.focus();
+                if (typeof input.setSelectionRange === 'function') input.setSelectionRange(caret, caret);
+            });
+        },
+
+        quickAddKeydown(event) {
+            if (this.quickAddSuggestions.length) {
+                if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                    event.preventDefault();
+                    this.moveQuickAddSuggestion(event.key === 'ArrowDown' ? 1 : -1);
+                    return;
+                }
+                if (event.key === 'Enter' || event.key === 'Tab') {
+                    event.preventDefault();
+                    this.selectQuickAddSuggestion(this.quickAddSuggestions[this.quickAddSuggestionIndex]);
+                    return;
+                }
+                if (event.key === 'Escape') {
+                    event.preventDefault();
+                    this.closeQuickAddSuggestions();
+                    return;
+                }
+            }
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                this.regTodo();
+            }
         },
 
         async addSelectedSubtask() {
@@ -1440,9 +1580,9 @@ Vue.createApp({
             for (const word of String(text || '').trim().split(/\s+/).filter(Boolean)) {
                 const token = word.replace(/[.,;:!?]+$/, '');
 
-                const priority = token.match(/^!([1-3])$/);
+                const priority = token.match(/^!([0-3])$/);
                 if (priority) {
-                    parsed.priority = { 1: 'high', 2: 'medium', 3: 'low' }[priority[1]];
+                    parsed.priority = { 0: '', 1: 'high', 2: 'medium', 3: 'low' }[priority[1]];
                     continue;
                 }
 

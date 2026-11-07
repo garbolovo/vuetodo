@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Todo">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261108-1">
+  <link rel="stylesheet" href="style.css?v=20261108-2">
 
 </head>
 <body>
@@ -167,8 +167,27 @@
           </div>
         </div>
         <div id="quick-add" :class="{ active: quickAddActive }">
-          <input id="todo" ref="quickAddInput" type="text" v-model="newTodo.title" placeholder="Add a task..."
-                 @focus="quickAddActive = true" @keydown.enter="regTodo">
+          <div class="quick-add-input-wrap">
+            <input id="todo" ref="quickAddInput" type="text" v-model="newTodo.title" placeholder="Add a task..."
+                   role="combobox" aria-autocomplete="list"
+                   :aria-expanded="quickAddSuggestions.length > 0"
+                   aria-controls="quick-add-suggestions"
+                   :aria-activedescendant="quickAddSuggestions.length ? ('quick-add-suggestion-' + quickAddSuggestionIndex) : null"
+                   @focus="onQuickAddFocus" @input="updateQuickAddSuggestions"
+                   @click="updateQuickAddSuggestions" @keydown="quickAddKeydown"
+                   @blur="closeQuickAddSuggestions">
+
+            <div id="quick-add-suggestions" class="quick-add-suggestions" v-if="quickAddSuggestions.length" role="listbox">
+              <button type="button" class="quick-add-suggestion" v-for="(item, index) in quickAddSuggestions" :key="item.insert"
+                      :id="'quick-add-suggestion-' + index" role="option" :aria-selected="index === quickAddSuggestionIndex"
+                      :class="{ active: index === quickAddSuggestionIndex }"
+                      @mouseenter="quickAddSuggestionIndex = index"
+                      @mousedown.prevent="selectQuickAddSuggestion(item)">
+                <span class="quick-add-suggestion-label">{{ item.label }}</span>
+                <span class="quick-add-suggestion-detail" v-if="item.detail">{{ item.detail }}</span>
+              </button>
+            </div>
+          </div>
 
           <div class="quick-add-expanded" v-if="quickAddActive">
             <textarea id="todo-body" v-model="newTodo.body" placeholder="Description" rows="2"></textarea>
@@ -639,7 +658,7 @@
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261108-1"></script>
+<script src="app.js?v=20261108-2"></script>
 </body>
 </html>
 
