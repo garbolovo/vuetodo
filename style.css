@@ -382,6 +382,21 @@ body {
     color: #b0b6bd;
 }
 
+.quick-add-hint {
+    margin: 0 0 9px;
+    color: #8a94a3;
+    font-size: 0.72rem;
+    line-height: 1.4;
+}
+
+.quick-add-hint code {
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #5f6b7d;
+    font-size: 0.72rem;
+}
+
 .quick-add-toolbar {
     display: flex;
     flex-wrap: wrap;
