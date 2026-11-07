@@ -240,7 +240,7 @@
           <div class="list-empty" v-if="!displayEntries.length">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v14H5z M5 14h4l2 3h2l2-3h4"/></svg>
             <strong>No tasks to show</strong>
-            <span>{{ activeView === 'all' && !filteredOn && !activeProject && activeContext === null && !activeTag ? 'Add a task above to get started.' : 'Try another view or adjust your filters.' }}</span>
+            <span>{{ emptyStateMessage }}</span>
           </div>
 
           <div class="todo-row" v-for="entry in displayEntries" :key="entry.item.id" :data-id="entry.item.id" :style="{ '--task-depth': entry.depth }"
@@ -636,7 +636,7 @@
        config.example.js). Gitignored since it's environment-specific;
        without it, app.js falls back to http://localhost:3001/api. -->
   <script src="config.js"></script>
-<script src="app.js?v=20261104-2"></script>
+<script src="app.js?v=20261107-1"></script>
 </body>
 </html>
 
