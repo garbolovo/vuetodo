@@ -1564,11 +1564,14 @@ body {
 
 .todo-row:hover .row-menu-btn,
 .todo-row-selected .row-menu-btn,
-.row-menu.menu-open .row-menu-btn {
+.row-menu.menu-open .row-menu-btn,
+.row-menu:focus-within .row-menu-btn,
+.row-menu-btn:focus-visible {
     opacity: 1;
 }
 
-.row-menu-btn:hover {
+.row-menu-btn:hover,
+.row-menu-btn:focus-visible {
     background: #e5e9ee;
     color: #444;
 }
