@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Todo">
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
-  <link rel="stylesheet" href="style.css?v=20261108-3">
+  <link rel="stylesheet" href="style.css?v=20261109-1">
 
 </head>
 <body>
@@ -337,7 +337,9 @@
 
             <div class="col-actions">
               <div class="row-menu" :class="{ 'menu-open': openMenuId === entry.item.id }">
-                <button class="row-menu-btn" title="More actions" @click.stop="toggleRowMenu(entry.item.id, $event)">⋯</button>
+                <button class="row-menu-btn" type="button" title="More actions"
+                        :aria-label="'More actions for ' + entry.item.title" :aria-expanded="openMenuId === entry.item.id"
+                        @click.stop="toggleRowMenu(entry.item.id, $event)">⋯</button>
                 <div class="row-menu-dropdown" v-if="openMenuId === entry.item.id" :style="menuStyle" @click.stop>
                   <button @click="menuAddSubtask(entry.item.id)">Add subtask</button>
                   <button @click="menuEdit(entry.item.id)">Edit</button>
