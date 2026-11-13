@@ -37,6 +37,7 @@ When a UI check needs data, block `**/api/**` and seed `localStorage` instead.
 - Create a branch from `master` for each change.
 - Open a PR; do not merge it yourself unless explicitly asked.
 - Deploy only after the user confirms.
+- Never delete the `legacy` branch, locally or on `origin`; it is intentionally kept.
 
 ## Deploy
 
