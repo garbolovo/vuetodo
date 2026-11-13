@@ -41,8 +41,11 @@ const NOV_8 = new Date(2026, 10, 8);
 test('Date picker options include quick dates and the matching clear option', () => {
     const s = state();
     const due = s.datePickerOptions('quick-due');
+    const weekdays = [2, 3, 4].map(offset =>
+        new Date(s.dateFromToday(offset) + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long' })
+    );
     assert.deepEqual(Array.from(due.map(option => option.label)),
-        ['Today', 'Tomorrow', 'Tuesday', 'Wednesday', 'Thursday', '1 week', 'No due date']);
+        ['Today', 'Tomorrow', ...weekdays, '1 week', 'No due date']);
     assert.equal(due[due.length - 1].value, '');
 
     const start = s.datePickerOptions('detail-start');
